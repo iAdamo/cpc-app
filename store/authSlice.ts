@@ -33,7 +33,6 @@ export const authSlice: StateCreator<
         await sendCode({ email: userData.email });
         set({
           user: response,
-          token: response.token,
           isAuthenticated: true,
           isLoading: false,
         });
@@ -51,7 +50,6 @@ export const authSlice: StateCreator<
       if (response) {
         set({
           user: response,
-          token: response.token,
           isAuthenticated: true,
           isLoading: false,
         });
@@ -128,7 +126,7 @@ export const authSlice: StateCreator<
   },
 
   logout: async () => {
-    set({ user: null, token: null, isAuthenticated: false, error: null });
+    set({ user: null, isAuthenticated: false, error: null });
     await SecureStore.deleteItemAsync("accessToken");
   },
 

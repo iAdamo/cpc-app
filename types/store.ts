@@ -1,9 +1,18 @@
 import { SignUpData, LoginData } from "./auth";
 import { UserData } from "./user";
+import { OnboardingData } from "./onboarding";
+
+
+export type PersistedAppState = {
+  user: UserData | null;
+  isAuthenticated: boolean;
+};
 
 export interface GlobalState {
   isLoading: boolean;
   error: string | null;
+  success: string | null;
+  setSuccess: (success: string | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 }
@@ -25,4 +34,15 @@ export interface AuthState {
   clearError: () => void;
 }
 
-export type GlobalStore = AuthState & GlobalState;
+export interface OnboardingState {
+  currentStep: number;
+  totalSteps: number;
+  isOnboardingComplete: boolean;
+  userProfile: OnboardingData;
+  setCurrentStep: (step: number) => void;
+  updateProfile: (updates: Partial<OnboardingData>) => void;
+  completeOnboarding: () => void;
+  resetOnboarding: () => void;
+}
+
+export type GlobalStore = AuthState & GlobalState & OnboardingState;

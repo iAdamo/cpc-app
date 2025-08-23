@@ -81,11 +81,11 @@ const SignInScreen = () => {
     } catch (error) {
       setValidated({ emailValid: false, passwordValid: false });
       toast.show({
-        placement: "top",
+        placement: "bottom",
         duration: 5000,
         render: ({ id }: RenderProps) => {
           return (
-            <Toast nativeID={id} variant="outline" action="error">
+            <Toast nativeID={id} variant="solid" action="error">
               <ToastTitle>
                 {(error as any).response?.data?.message ||
                   "An unexpected error occurred"}
@@ -109,7 +109,7 @@ const SignInScreen = () => {
     handleSubmit(onSubmit)();
   };
   return (
-    <VStack className="h-full w-full justify-between p-4">
+    <VStack className="bg-white w-full p-4">
       <VStack className="h-3/5 justify-end">
         <Card className="shadow-xl gap-8">
           <Heading size="xl" className="text-brand-primary">
@@ -205,11 +205,11 @@ const SignInScreen = () => {
             </FormControl>
             <VStack className="gap-2 w-full">
               <Button
-                variant="link"
+                variant="outline"
                 onPress={() => setShowForgotPasswordModal(true)}
-                className="self-end"
+                className="border-0 self-end"
               >
-                <ButtonText className="text-text-secondary text-end underline hover:text-brand-primary">
+                <ButtonText className="text-text-secondary hover:text-brand-primary">
                   Forget Password
                 </ButtonText>
               </Button>

@@ -3,29 +3,29 @@ import { Text } from "@/components/ui/text";
 import { Center } from "@/components/ui/center";
 import { VStack } from "@/components/ui/vstack";
 import { router } from "expo-router";
-import { StatusBar } from "react-native";
+import OnboardingFlow from "@/screens/onboarding";
+import useGlobalStore from "@/store/globalStore";
 
-const Index = () => {
-  // set timeout and push to login screen
+export default function App() {
+  const { isAuthenticated, isOnboardingComplete } = useGlobalStore();
   useEffect(() => {
-    setTimeout(() => {
-      router.replace("auth/signin" as any);
-    }, 10000);
-  }, []);
+    if (!isAuthenticated) {
+      router.replace("/auth/signin");
+    } else if (isAuthenticated && !isOnboardingComplete) {
+      router.replace("/onboarding");
+    } else if (isAuthenticated && isOnboardingComplete) {
+      router.replace("/");
+    }
+  }, [isAuthenticated, isOnboardingComplete]);
 
   return (
     <VStack className="flex-1 bg-brand-primary">
-      <StatusBar
-        barStyle="dark-content"
-        translucent={true}
-        backgroundColor={"#CD5C5C"}
-      />
       <VStack className="items-center mt-80 flex-1 gap-2">
         <Text className="text-white" size="6xl">
           Safety Pro
         </Text>
         <Text className="text-white" size="xl">
-         Companies Center
+          Companies Center
         </Text>
       </VStack>
       <Center className="mb-4">
@@ -38,6 +38,4 @@ const Index = () => {
       </Center>
     </VStack>
   );
-};
-
-export default Index;
+}

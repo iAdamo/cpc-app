@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "miauto",
+    "name": "",
     "slug": "miauto",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -32,7 +32,10 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-font",
+      "expo-web-browser",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true

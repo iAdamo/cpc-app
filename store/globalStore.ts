@@ -5,8 +5,9 @@ import { authSlice } from "./authSlice";
 import { globalSlice } from "./globalSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createJSONStorage } from "zustand/middleware";
-import { AuthState, GlobalStore } from "@/types";
+import { GlobalStore } from "@/types";
 import { StateCreator } from "zustand";
+import { onboardingSlice } from "./onboardingSlice";
 
 type MyStateCreator = StateCreator<
   GlobalStore,
@@ -26,6 +27,7 @@ const useGlobalStore = create<GlobalStore>()(
         ((...a) => ({
           ...globalSlice(...a),
           ...authSlice(...a),
+          ...onboardingSlice(...a),
         })) as MyStateCreator,
         {
           name: "app-storage",

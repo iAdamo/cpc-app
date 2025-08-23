@@ -14,7 +14,7 @@ export interface UserData {
   purchasedServices: any[];
   admins: any[];
   createdAt: string;
-  activeRoleId?: CompanyData;
+  activeRoleId?: Partial<CompanyData>;
   verified: boolean;
   isEmailVerified: boolean;
   isPhoneVerified: boolean;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Keyboard } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,6 +24,7 @@ import { Card } from "@/components/ui/card";
 import VerifyCodeModal from "@/screens/auth/VerifyCodeModal";
 import { Spinner } from "@/components/ui/spinner";
 import useGlobalStore from "@/store/globalStore";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type ControllerRenderType = {
   field: {
@@ -43,12 +44,11 @@ interface RenderProps {
 }
 
 const SignUpScreen = () => {
-  // const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showVerifyEmailModal, setShowVerifyEmailModal] = useState(false);
 
-  const { signUp, isLoading } = useGlobalStore();
+  const { signUp, isLoading, setError } = useGlobalStore();
 
   const router = useRouter();
 
@@ -57,6 +57,20 @@ const SignUpScreen = () => {
   };
   const toast = useToast();
 
+  const showToast = useCallback(
+    (message: string, type: "error" | "success") => {
+      toast.show({
+        placement: "bottom",
+        duration: 3000,
+        render: ({ id }) => (
+          <Toast nativeID={id} variant="solid" action={type}>
+            <ToastTitle>{message}</ToastTitle>
+          </Toast>
+        ),
+      });
+    },
+    [toast]
+  );
   // Define a type that matches the schema after omitting "code"
   type SignUpFormType = z.infer<
     ReturnType<typeof FormSchema.omit<{ code: true }>>
@@ -82,49 +96,21 @@ const SignUpScreen = () => {
   const onSubmit = async (data: SignUpFormType) => {
     Keyboard.dismiss();
     if (data.password !== data.confirmPassword) {
-      toast.show({
-        placement: "top",
-        duration: 1000,
-        render: ({ id }: { id: string }) => {
-          return (
-            <Toast nativeID={id} variant="outline" action="error">
-              <ToastTitle>Passwords do not match</ToastTitle>
-            </Toast>
-          );
-        },
-      });
+      setError("Passwords do not match");
+      showToast("Passwords do not match", "error");
       return;
     } else {
       try {
         await signUp(data);
         setShowVerifyEmailModal(true);
-        toast.show({
-          placement: "top",
-          duration: 3000,
-          render: ({ id }: { id: string }) => {
-            return (
-              <Toast nativeID={id} variant="outline" action="success">
-                <ToastTitle>Account created successfully</ToastTitle>
-              </Toast>
-            );
-          },
-        });
+        showToast("Account created successfully", "success");
       } catch (error) {
         setValidated({ emailValid: false, passwordValid: false });
-        toast.show({
-          placement: "top",
-          duration: 5000,
-          render: ({ id }: RenderProps) => {
-            return (
-              <Toast nativeID={id} variant="outline" action="error">
-                <ToastTitle>
-                  {(error as any).response?.data?.message ||
-                    "An unexpected error occurred"}
-                </ToastTitle>
-              </Toast>
-            );
-          },
-        });
+        showToast(
+          (error as any).response?.data?.message ||
+            "An unexpected error occurred",
+          "error"
+        );
       }
     }
   };
@@ -149,7 +135,7 @@ const SignUpScreen = () => {
   };
 
   return (
-    <VStack className="h-full w-full justify-center p-4">
+    <VStack className="bg-white p-4">
       <VStack className="h-3/5 justify-end">
         <Card className="shadow-xl gap-8">
           <Heading size="xl" className="text-brand-primary">
@@ -307,7 +293,7 @@ const SignUpScreen = () => {
           onVerified={async () => {
             reset();
             setShowVerifyEmailModal(false);
-            router.replace("/companies");
+            router.replace("/");
           }}
           isVerified={true}
         />

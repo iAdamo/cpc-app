@@ -70,23 +70,24 @@ const VerifyCodeModal: React.FC<VerifyCodeModalProps> = ({
   const handleVerifyEmail = async (data: FormSchemaType) => {
     try {
       await verifyEmail(data.code);
-      toast.show({
-        placement: "top",
-        duration: 3000,
-        render: ({ id }) => (
-          <Toast nativeID={id} variant="outline" action="success">
-            <ToastTitle>Email verified</ToastTitle>
-          </Toast>
-        ),
-      });
+        toast.show({
+          placement: "top",
+          duration: 3000,
+          render: ({ id }) => (
+            <Toast nativeID={id} variant="outline" action="success">
+              <ToastTitle>Email verified</ToastTitle>
+            </Toast>
+          ),
+        });
 
-      Keyboard.dismiss();
-      onVerified();
-      onClose();
+        Keyboard.dismiss();
+        onVerified();
+        onClose();
 
-      if (pathname === "/") {
-        router.replace("/companies");
-      }
+        if (pathname === "/") {
+          router.replace("/companies");
+        }
+
     } catch (error: any) {
       toast.show({
         placement: "top",
