@@ -1,9 +1,14 @@
 import gluestackPlugin from "@gluestack-ui/nativewind-utils/tailwind-plugin";
+import { Colors } from "./constants/Colors";
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: "class",
-  content: ["app/**/*.{tsx,jsx,ts,js}", "components/**/*.{tsx,jsx,ts,js}"],
+  content: [
+    "app/**/*.{tsx,jsx,ts,js}",
+    "components/**/*.{tsx,jsx,ts,js}",
+    "screens/**/*.{tsx,jsx,ts,js}",
+  ],
   presets: [require("nativewind/preset")],
   safelist: [
     {
@@ -14,6 +19,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        ...Colors,
         primary: {
           0: "rgb(var(--color-primary-0)/<alpha-value>)",
           50: "rgb(var(--color-primary-50)/<alpha-value>)",
