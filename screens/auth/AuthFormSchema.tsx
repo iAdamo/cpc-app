@@ -8,6 +8,14 @@ export const FormSchema = z.object({
       /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
       "Invalid email format"
     ),
+  phoneNumber: z
+    .string()
+    .min(10, "Phone number is required")
+    .max(15, "Phone number is too long")
+    .regex(
+      /^\d{10,15}$/,
+      "Phone number must be 10-15 digits and contain only numbers"
+    ),
   code: z.string().regex(new RegExp("^[0-9]{6}$"), "Code must be 6 digits"),
   password: z
     .string()

@@ -14,6 +14,8 @@ import { StatusBar } from "react-native";
 import Toast from "react-native-toast-message";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useGlobalStore from "@/store/globalStore";
+import { router } from "expo-router";
+// import { useRouter } from "expo-router";
 
 import "../global.css";
 
@@ -44,7 +46,9 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (loaded) {
-      SplashScreen.hideAsync();
+      SplashScreen.hideAsync().then(() => {
+        router.push("/");
+      });
     }
   }, [loaded]);
 
@@ -60,7 +64,9 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const { error, clearError } = useGlobalStore();
+  const { error, clearError } =
+    useGlobalStore();
+
   useEffect(() => {
     if (error) {
       Toast.show({
@@ -77,12 +83,10 @@ function RootLayoutNav() {
       <StatusBar
         barStyle="light-content"
         translucent={true}
-        backgroundColor={"#102343"}
+        backgroundColor={"transparent"}
       />
-      <SafeAreaView style={{ flex: 1 }}>
         <Slot />
         <Toast />
-      </SafeAreaView>
     </GluestackUIProvider>
   );
 }

@@ -21,10 +21,8 @@ import { Heading } from "@/components/ui/heading";
 import { EyeIcon, EyeOffIcon } from "@/components/ui/icon";
 import { Button, ButtonText } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import VerifyCodeModal from "@/screens/auth/VerifyCodeModal";
 import { Spinner } from "@/components/ui/spinner";
 import useGlobalStore from "@/store/globalStore";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 type ControllerRenderType = {
   field: {
@@ -39,38 +37,19 @@ interface ValidatedState {
   passwordValid: boolean;
 }
 
-interface RenderProps {
-  id: string;
-}
-
 const SignUpScreen = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showVerifyEmailModal, setShowVerifyEmailModal] = useState(false);
 
-  const { signUp, isLoading, setError } = useGlobalStore();
+  const { signUp, isLoading, setError, setSuccess, setCurrentStep } =
+    useGlobalStore();
 
   const router = useRouter();
 
   const switchToSignIn = () => {
     router.replace("/auth/signin");
   };
-  const toast = useToast();
 
-  const showToast = useCallback(
-    (message: string, type: "error" | "success") => {
-      toast.show({
-        placement: "bottom",
-        duration: 3000,
-        render: ({ id }) => (
-          <Toast nativeID={id} variant="solid" action={type}>
-            <ToastTitle>{message}</ToastTitle>
-          </Toast>
-        ),
-      });
-    },
-    [toast]
-  );
   // Define a type that matches the schema after omitting "code"
   type SignUpFormType = z.infer<
     ReturnType<typeof FormSchema.omit<{ code: true }>>
@@ -97,19 +76,17 @@ const SignUpScreen = () => {
     Keyboard.dismiss();
     if (data.password !== data.confirmPassword) {
       setError("Passwords do not match");
-      showToast("Passwords do not match", "error");
       return;
     } else {
       try {
         await signUp(data);
-        setShowVerifyEmailModal(true);
-        showToast("Account created successfully", "success");
+        setCurrentStep(3);
+        setSuccess("Account created successfully");
       } catch (error) {
         setValidated({ emailValid: false, passwordValid: false });
-        showToast(
+        setError(
           (error as any).response?.data?.message ||
-            "An unexpected error occurred",
-          "error"
+            "An unexpected error occurred"
         );
       }
     }
@@ -136,13 +113,41 @@ const SignUpScreen = () => {
 
   return (
     <VStack className="bg-white p-4">
-      <VStack className="h-3/5 justify-end">
+      <VStack className="justify-end">
         <Card className="shadow-xl gap-8">
           <Heading size="xl" className="text-brand-primary">
             Let's get started!
           </Heading>
 
           <VStack className="gap-4">
+            {/* Phone Number */}
+            <FormControl className="w-full" isInvalid={!!errors?.phoneNumber}>
+              <FormControlLabel>
+                <FormControlLabelText>Phone Number</FormControlLabelText>
+              </FormControlLabel>
+              <Controller
+                defaultValue=""
+                name="phoneNumber"
+                control={control}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input className="h-12">
+                    <InputField
+                      placeholder="Phone Number"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      keyboardType="phone-pad"
+                      className=""
+                    />
+                  </Input>
+                )}
+              />
+              <FormControlError>
+                <FormControlErrorText>
+                  {errors?.phoneNumber?.message}
+                </FormControlErrorText>
+              </FormControlError>
+            </FormControl>
             {/** Email */}
             <FormControl
               className="w-full"
@@ -271,33 +276,17 @@ const SignUpScreen = () => {
           </VStack>
         </Card>
       </VStack>
-      <VStack className="h-2/5 justify-center items-center">
-        <VStack className="items-center gap-2">
-          <Text size="md" className="text-text-secondary text-center">
-            Already have an account?
-          </Text>
-          <Button
-            onPress={switchToSignIn}
-            className="bg-brand-secondary hover:bg-btn-secondary active:bg-brand-secondary"
-          >
-            <ButtonText className="">Sign In Here</ButtonText>
-          </Button>
-        </VStack>
+      <VStack className="mt-24 items-center gap-2">
+        <Text size="md" className="text-text-secondary text-center">
+          Already have an account?
+        </Text>
+        <Button
+          onPress={switchToSignIn}
+          className="bg-brand-secondary hover:bg-btn-secondary active:bg-brand-secondary"
+        >
+          <ButtonText className="">Sign In Here</ButtonText>
+        </Button>
       </VStack>
-
-      {showVerifyEmailModal && (
-        <VerifyCodeModal
-          isOpen={showVerifyEmailModal}
-          onClose={() => setShowVerifyEmailModal(false)}
-          email={getValues("email")}
-          onVerified={async () => {
-            reset();
-            setShowVerifyEmailModal(false);
-            router.replace("/");
-          }}
-          isVerified={true}
-        />
-      )}
     </VStack>
   );
 };

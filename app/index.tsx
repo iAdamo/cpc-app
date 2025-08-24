@@ -3,21 +3,15 @@ import { Text } from "@/components/ui/text";
 import { Center } from "@/components/ui/center";
 import { VStack } from "@/components/ui/vstack";
 import { router } from "expo-router";
-import OnboardingFlow from "@/screens/onboarding";
-import useGlobalStore from "@/store/globalStore";
 
 export default function App() {
-  const { isAuthenticated, isOnboardingComplete } = useGlobalStore();
   useEffect(() => {
-    if (!isAuthenticated) {
+    const timer = setTimeout(() => {
       router.replace("/auth/signin");
-    } else if (isAuthenticated && !isOnboardingComplete) {
-      router.replace("/onboarding");
-    } else if (isAuthenticated && isOnboardingComplete) {
-      router.replace("/");
-    }
-  }, [isAuthenticated, isOnboardingComplete]);
+    }, 2000); // 2 seconds delay
 
+    return () => clearTimeout(timer); // Cleanup the timer on unmount
+  }, []);
   return (
     <VStack className="flex-1 bg-brand-primary">
       <VStack className="items-center mt-80 flex-1 gap-2">
