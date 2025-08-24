@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { PersistedAppState } from "@/types";
+import { set } from "react-hook-form";
 export const getAppData = async (): Promise<PersistedAppState | null> => {
   try {
     const value = await AsyncStorage.getItem("app-storage");
@@ -9,6 +10,15 @@ export const getAppData = async (): Promise<PersistedAppState | null> => {
     return null;
   }
 };
+
+export const setAppData = async (data: PersistedAppState) => {
+  try {
+    await AsyncStorage.setItem("app-storage", JSON.stringify(data));
+  } catch (error) {
+    console.error("Error setting storage data:", error);
+  }
+};
+
 
 export const clearAppData = async () => {
   try {

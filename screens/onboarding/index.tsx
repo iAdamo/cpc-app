@@ -4,6 +4,7 @@ import { VStack } from "@/components/ui/vstack";
 import { Text } from "@/components/ui/text";
 import EmailVerificationPage from "./onboardingFlow/EmailVerify";
 import FirstOnboardingPage from "./onboardingFlow/00FirstPage";
+import PhoneVerificationPage from "./onboardingFlow/PhoneVerify";
 import SignUpScreen from "@/screens/auth/signup";
 import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -21,7 +22,7 @@ export function OnboardingFlow() {
       case 3:
         return <EmailVerificationPage />;
       case 4:
-        return <Text>Step 4: Complete Onboarding</Text>;
+        return <PhoneVerificationPage />;
       case 5:
         return <Text>Step 5: Complete Onboarding</Text>;
       default:

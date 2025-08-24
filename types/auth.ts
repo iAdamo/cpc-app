@@ -2,7 +2,7 @@ import { CompanyData } from "./company";
 
 export interface SignUpData {
   email: string;
-  phoneNumber?: string;
+  phoneNumber: string;
   password: string;
 }
 

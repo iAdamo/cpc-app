@@ -3,7 +3,6 @@ import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Card } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
-import { Pressable } from "@/components/ui/pressable";
 import { Text } from "@/components/ui/text";
 import { Button, ButtonText } from "@/components/ui/button";
 import { getAppData, setAppData } from "@/utils/getStorageData";
@@ -23,35 +22,39 @@ import { Keyboard, TouchableOpacity, View } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormSchema } from "@/screens/auth/AuthFormSchema";
+import { Toast, ToastTitle, useToast } from "@/components/ui/toast";
 import { Icon, EditIcon, CheckIcon, CloseIcon } from "@/components/ui/icon";
+import {
+  parsePhoneNumberFromString,
+  isValidPhoneNumber,
+} from "libphonenumber-js";
+import { Pressable } from "@/components/ui/pressable";
 
-const EmailVerificationPage = () => {
-  const [email, setEmail] = useState<string | null>(null);
-  const [originalEmail, setOriginalEmail] = useState<string | null>(null);
+const PhoneVerificationPage = () => {
+  const [phone, setPhone] = useState<string | null>(null);
+  const [originalPhone, setOriginalPhone] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isEditing, setIsEditing] = useState(false);
   const [editCount, setEditCount] = useState(0);
   const [maxEdits] = useState(1); // Allow only one edit
-  const [tempEmail, setTempEmail] = useState("");
-  const [message, setMessage] = useState<{
-    text: string;
-    type: "success" | "error" | "info";
-  } | null>(null);
+  const [tempPhone, setTempPhone] = useState("");
   const {
-    verifyEmail,
+    verifyPhone,
     sendCode,
     isLoading,
     setError,
     setSuccess,
     setCurrentStep,
   } = useGlobalStore();
+  const router = useRouter();
+  const toast = useToast();
 
-  const EmailVerifySchema = FormSchema.pick({ email: true, code: true });
-  type EmailVerifySchemaType = z.infer<typeof EmailVerifySchema>;
+  const PhoneVerifySchema = FormSchema.pick({ phoneNumber: true, code: true });
+  type PhoneVerifySchemaType = z.infer<typeof PhoneVerifySchema>;
 
   const inputRefs = useRef<Array<any>>([]);
-  const emailInputRef = useRef<any>(null);
+  const phoneInputRef = useRef<any>(null);
 
   const {
     control,
@@ -59,30 +62,30 @@ const EmailVerificationPage = () => {
     setValue,
     watch,
     formState: { errors },
-  } = useForm<EmailVerifySchemaType>({
-    resolver: zodResolver(EmailVerifySchema),
+  } = useForm<PhoneVerifySchemaType>({
+    resolver: zodResolver(PhoneVerifySchema),
     defaultValues: {
       code: "",
-      email: "",
+      phoneNumber: "",
     },
   });
 
-  // const emailValue = watch("email");
+  // const phoneNumberValue = watch("phoneNumber");
 
   useEffect(() => {
-    const fetchEmailData = async () => {
+    const fetchPhoneData = async () => {
       const appData: PersistedAppState | null = await getAppData();
       if (appData && appData.user) {
-        setEmail(appData.user.email);
-        setOriginalEmail(appData.user.email);
-        setValue("email", appData.user.email);
+        setPhone(appData.user.phoneNumber);
+        setOriginalPhone(appData.user.phoneNumber);
+        setValue("phoneNumber", appData.user.phoneNumber);
 
         // Load edit count from storage
-        const editCount = appData.user.emailEditCount || 0;
+        const editCount = appData.user.phoneEditCount || 0;
         setEditCount(editCount);
       }
     };
-    fetchEmailData();
+    fetchPhoneData();
   }, []);
 
   useEffect(() => {
@@ -93,14 +96,6 @@ const EmailVerificationPage = () => {
     return () => clearTimeout(timer);
   }, [cooldown]);
 
-  // Clear message after 3 seconds
-  useEffect(() => {
-    if (message) {
-      const timer = setTimeout(() => setMessage(null), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [message]);
-
   const handleKeyPress = (index: number, key: string) => {
     if (key === "Backspace" && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
@@ -109,52 +104,65 @@ const EmailVerificationPage = () => {
       (key === "Enter" || key === "Done" || key === "Return") &&
       index === otp.length - 1
     ) {
-      handleSubmit(handleVerifyEmail)();
+      handleSubmit(handleVerifyPhone)();
     }
   };
 
-  const validateEmail = (value: string): boolean | string => {
-    if (!value) return "Email is required";
+  const validatePhoneNumber = (value: string): boolean | string => {
+    if (!value) return "Phone number is required";
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(value) ? true : "Please enter a valid email address";
+    try {
+      const phoneNumber = parsePhoneNumberFromString(value, "US"); // or use country from user profile
+      return phoneNumber && isValidPhoneNumber(phoneNumber.number)
+        ? true
+        : "Please enter a valid phone number";
+    } catch {
+      return "Invalid phone number format";
+    }
   };
 
   const handleEditToggle = () => {
     if (isEditing) {
       // Cancel edit
-      setTempEmail("");
+      setTempPhone("");
       setIsEditing(false);
-      setMessage(null);
     } else if (editCount < maxEdits) {
       // Start editing
-      setTempEmail(email || "");
+      setTempPhone(phone || "");
       setIsEditing(true);
-      setTimeout(() => emailInputRef.current?.focus(), 100);
+      setTimeout(() => phoneInputRef.current?.focus(), 100);
     } else {
-      setMessage({
-        text: "You can only edit your email once. Contact support for further changes.",
-        type: "error",
+      toast.show({
+        placement: "top",
+        duration: 3000,
+        render: ({ id }) => (
+          <Toast nativeID={id} variant="outline" action="error">
+            <ToastTitle>
+              You can only edit your phone number once. Contact support for
+              further changes.
+            </ToastTitle>
+          </Toast>
+        ),
       });
     }
   };
 
   const handleSaveEdit = async () => {
-    const validation = validateEmail(tempEmail);
+    const validation = validatePhoneNumber(tempPhone);
     if (validation !== true) {
-      setMessage({ text: validation as string, type: "error" });
+      setError(validation.toString());
       return;
     }
 
     try {
-      // Update email in storage
+      // Update phone number in storage
       const appData: PersistedAppState | null = await getAppData();
       if (appData && appData.user) {
         const updatedUser = {
           ...appData.user,
-          email: tempEmail,
-          emailEditCount: (appData.user.emailEditCount || 0) + 1,
-          emailVerified: false, // Reset verification status
+          phoneNumber: tempPhone,
+          phoneEditCount: (appData.user.phoneEditCount || 0) + 1,
+          phoneVerified: false, // Reset verification status
         };
 
         await setAppData({
@@ -162,28 +170,39 @@ const EmailVerificationPage = () => {
           user: updatedUser,
         });
 
-        setEmail(tempEmail);
-        setEditCount(updatedUser.emailEditCount);
+        setPhone(tempPhone);
+        setEditCount(updatedUser.phoneEditCount);
         setIsEditing(false);
         setOtp(["", "", "", "", "", ""]);
         setValue("code", "");
-        setMessage({
-          text: "Email updated. Verification required.",
-          type: "success",
+
+        toast.show({
+          placement: "top",
+          duration: 3000,
+          render: ({ id }) => (
+            <Toast nativeID={id} variant="outline" action="success">
+              <ToastTitle>
+                Phone number updated. Verification required.
+              </ToastTitle>
+            </Toast>
+          ),
         });
 
         // Send new verification code
-        await handleSendCode(tempEmail);
+        await handleSendCode(tempPhone);
       }
     } catch (error) {
-      setMessage({ text: "Failed to update email", type: "error" });
+      setError("Failed to update phone number.");
     }
   };
 
-  const handleVerifyEmail = async (data: { code: string; email?: string }) => {
+  const handleVerifyPhone = async (data: {
+    code: string;
+    phoneNumber?: string;
+  }) => {
     try {
       Keyboard.dismiss();
-      await verifyEmail(data.code);
+      await verifyPhone(data.code);
 
       // Update verification status in storage
       const appData: PersistedAppState | null = await getAppData();
@@ -192,49 +211,39 @@ const EmailVerificationPage = () => {
           ...appData,
           user: {
             ...appData.user,
-            isEmailVerified: true,
+            isPhoneVerified: true,
           },
         });
       }
 
-      setSuccess("Email verified successfully");
-      setCurrentStep(4);
+      setSuccess("Phone number verified successfully");
+      setCurrentStep(5);
     } catch (error: any) {
-      setError(error?.response?.data?.message || "Email verification failed");
-      setMessage({
-        text: error?.response?.data?.message || "Email verification failed",
-        type: "error",
-      });
+      setError(error?.response?.data?.message || "Phone verification failed");
     }
   };
 
-  const handleSendCode = async (emailAddress?: string) => {
+  const handleSendCode = async (phoneNumber?: string) => {
     if (cooldown > 0) return;
 
     try {
-      const targetEmail = emailAddress || email;
-      if (!targetEmail) {
-        setError("Email not found");
-        setMessage({ text: "Email not found", type: "error" });
+      const targetPhone = phoneNumber || phone;
+      if (!targetPhone) {
+        setError("Phone number not found");
         return;
       }
 
-      await sendCode(targetEmail);
+      await sendCode(targetPhone);
       setSuccess("Verification code sent");
-      setMessage({
-        text: "Verification code sent to your email",
-        type: "success",
-      });
 
       Keyboard.dismiss();
-      setCooldown(30);
+      setCooldown(60);
       setOtp(["", "", "", "", "", ""]);
       setValue("code", "");
     } catch (error: any) {
-      const errorMessage =
-        error?.response?.data?.message || "Failed to send verification code";
-      setError(errorMessage);
-      setMessage({ text: errorMessage, type: "error" });
+      setError(
+        error?.response?.data?.message || "Failed to send verification code"
+      );
     }
   };
 
@@ -245,7 +254,7 @@ const EmailVerificationPage = () => {
       <Card className="gap-8">
         <VStack className="items-center gap-6">
           <Heading size="xl" className="text-brand-primary">
-            Email Verification
+            Phone Verification
           </Heading>
 
           <VStack className="items-center gap-4 w-full">
@@ -253,44 +262,22 @@ const EmailVerificationPage = () => {
               A verification code has been sent to
             </Text>
 
-            {/* Message Display */}
-            {message && (
-              <View
-                className={`w-full p-3 rounded-lg ${
-                  message.type === "success"
-                    ? "bg-green-100 border border-green-200"
-                    : message.type === "error"
-                    ? "bg-red-100 border border-red-200"
-                    : "bg-blue-100 border border-blue-200"
-                }`}
-              >
-                <Text
-                  className={`text-center ${
-                    message.type === "success"
-                      ? "text-green-800"
-                      : message.type === "error"
-                      ? "text-red-800"
-                      : "text-blue-800"
-                  }`}
-                >
-                  {message.text}
-                </Text>
-              </View>
-            )}
-
-            {/* Email Display/Edit Section */}
+            {/* Phone Number Display/Edit Section */}
             <VStack className="items-center gap-2 w-full">
               <HStack className="items-center justify-center gap-2">
                 {isEditing ? (
-                  <FormControl className="flex-1" isInvalid={!!errors.email}>
-                    <Input className="h-10 border-0 bg-brand-primary/10">
+                  <FormControl
+                    className="flex-1"
+                    isInvalid={!!errors.phoneNumber}
+                  >
+                    <Input className="border-0 bg-brand-primary/10">
                       <InputField
-                        ref={emailInputRef}
-                        placeholder="Enter email address"
-                        value={tempEmail}
-                        onChangeText={setTempEmail}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
+                        ref={phoneInputRef}
+                        placeholder="Enter phone number"
+                        value={tempPhone}
+                        onChangeText={setTempPhone}
+                        keyboardType="phone-pad"
+                        maxLength={15}
                       />
                     </Input>
                   </FormControl>
@@ -299,48 +286,46 @@ const EmailVerificationPage = () => {
                     size="sm"
                     className="bg-green-100 p-2 rounded-lg text-green-800"
                   >
-                    {email || "Loading..."}
+                    {phone || "+2349139290549"}
                   </Heading>
                 )}
 
-                <HStack className="gap-1">
-                  {isEditing ? (
-                    <HStack className="gap-1">
-                      <TouchableOpacity
-                        onPress={handleSaveEdit}
-                        className="p-2 bg-green-500/20 rounded-lg"
-                      >
-                        <Icon as={CheckIcon} color="green" />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => setIsEditing(false)}
-                        className="p-2 bg-red-500/20 rounded-lg"
-                      >
-                        <Icon as={CloseIcon} color="red" />
-                      </TouchableOpacity>
-                    </HStack>
-                  ) : (
-                    <Pressable
-                      onPress={handleEditToggle}
-                      disabled={editCount >= maxEdits}
-                      className={`p-2 rounded-lg ${
-                        editCount >= maxEdits
-                          ? "bg-gray-300/20"
-                          : "bg-blue-500/20"
-                      }`}
+                {isEditing ? (
+                  <HStack className="gap-1">
+                    <TouchableOpacity
+                      onPress={handleSaveEdit}
+                      className="p-2 bg-green-500/20 rounded-lg"
                     >
-                      <Icon
-                        as={EditIcon}
-                        color={editCount >= maxEdits ? "gray" : "blue"}
-                      />
-                    </Pressable>
-                  )}
-                </HStack>
+                      <Icon as={CheckIcon} color="green" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => setIsEditing(false)}
+                      className="p-2 bg-red-500/20 rounded-lg"
+                    >
+                      <Icon as={CloseIcon} color="red" />
+                    </TouchableOpacity>
+                  </HStack>
+                ) : (
+                  <Pressable
+                    onPress={handleEditToggle}
+                    disabled={editCount >= maxEdits}
+                    className={`p-2 rounded-lg ${
+                      editCount >= maxEdits
+                        ? "bg-gray-300/20"
+                        : "bg-blue-500/20"
+                    }`}
+                  >
+                    <Icon
+                      as={EditIcon}
+                      color={editCount >= maxEdits ? "gray" : "blue"}
+                    />
+                  </Pressable>
+                )}
               </HStack>
 
               {!isEditing && editsRemaining > 0 && (
                 <Text className="text-sm text-blue-600">
-                  You can edit your email {editsRemaining} more time
+                  You can edit your phone number {editsRemaining} more time
                   {editsRemaining !== 1 ? "s" : ""}
                 </Text>
               )}
@@ -353,8 +338,8 @@ const EmailVerificationPage = () => {
             </VStack>
 
             <Text className="text-center mt-4 text-gray-500">
-              Please check your inbox and enter the code below to verify your
-              email address.
+              Please check your messages and enter the code below to verify your
+              phone number.
             </Text>
           </VStack>
         </VStack>
@@ -396,7 +381,7 @@ const EmailVerificationPage = () => {
                               text &&
                               newOtp.every((d) => d)
                             ) {
-                              handleSubmit(handleVerifyEmail)();
+                              handleSubmit(handleVerifyPhone)();
                             }
                           }}
                           onKeyPress={({ nativeEvent: { key } }) =>
@@ -423,12 +408,12 @@ const EmailVerificationPage = () => {
             <Button
               size="xl"
               variant="solid"
-              onPress={handleSubmit(handleVerifyEmail)}
+              onPress={handleSubmit(handleVerifyPhone)}
               isDisabled={isLoading || otp.some((digit) => digit === "")}
               className="w-full bg-brand-primary data-[hover=true]:bg-blue-600"
             >
               <ButtonText>
-                {isLoading ? "Verifying..." : "Verify Email"}
+                {isLoading ? "Verifying..." : "Verify Phone"}
               </ButtonText>
             </Button>
 
@@ -436,7 +421,7 @@ const EmailVerificationPage = () => {
               variant="outline"
               onPress={() => handleSendCode()}
               isDisabled={cooldown > 0 || isLoading || isEditing}
-              className="w-full border-0"
+              className="w-full border-0 data-[hover=true]:bg-gray-100"
             >
               <ButtonText className="text-gray-700">
                 {cooldown > 0
@@ -451,4 +436,4 @@ const EmailVerificationPage = () => {
   );
 };
 
-export default EmailVerificationPage;
+export default PhoneVerificationPage;
