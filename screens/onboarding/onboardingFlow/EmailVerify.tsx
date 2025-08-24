@@ -47,7 +47,9 @@ const EmailVerificationPage = () => {
     setCurrentStep,
   } = useGlobalStore();
 
-  const EmailVerifySchema = FormSchema.pick({ email: true, code: true });
+  const EmailVerifySchema = FormSchema.pick(
+    isEditing ? { email: true } : { code: true }
+  );
   type EmailVerifySchemaType = z.infer<typeof EmailVerifySchema>;
 
   const inputRefs = useRef<Array<any>>([]);
@@ -113,13 +115,6 @@ const EmailVerificationPage = () => {
     }
   };
 
-  const validateEmail = (value: string): boolean | string => {
-    if (!value) return "Email is required";
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(value) ? true : "Please enter a valid email address";
-  };
-
   const handleEditToggle = () => {
     if (isEditing) {
       // Cancel edit
@@ -140,12 +135,6 @@ const EmailVerificationPage = () => {
   };
 
   const handleSaveEdit = async () => {
-    const validation = validateEmail(tempEmail);
-    if (validation !== true) {
-      setMessage({ text: validation as string, type: "error" });
-      return;
-    }
-
     try {
       // Update email in storage
       const appData: PersistedAppState | null = await getAppData();
@@ -180,10 +169,10 @@ const EmailVerificationPage = () => {
     }
   };
 
-  const handleVerifyEmail = async (data: { code: string; email?: string }) => {
+  const handleVerifyEmail = async (data: { code?: string; email?: string }) => {
     try {
       Keyboard.dismiss();
-      await verifyEmail(data.code);
+      await verifyEmail(data.code!);
 
       // Update verification status in storage
       const appData: PersistedAppState | null = await getAppData();

@@ -50,7 +50,9 @@ const PhoneVerificationPage = () => {
   const router = useRouter();
   const toast = useToast();
 
-  const PhoneVerifySchema = FormSchema.pick({ phoneNumber: true, code: true });
+  const PhoneVerifySchema = FormSchema.pick(
+    isEditing ? { phoneNumber: true } : { code: true }
+  );
   type PhoneVerifySchemaType = z.infer<typeof PhoneVerifySchema>;
 
   const inputRefs = useRef<Array<any>>([]);
@@ -132,18 +134,9 @@ const PhoneVerificationPage = () => {
       setIsEditing(true);
       setTimeout(() => phoneInputRef.current?.focus(), 100);
     } else {
-      toast.show({
-        placement: "top",
-        duration: 3000,
-        render: ({ id }) => (
-          <Toast nativeID={id} variant="outline" action="error">
-            <ToastTitle>
-              You can only edit your phone number once. Contact support for
-              further changes.
-            </ToastTitle>
-          </Toast>
-        ),
-      });
+      setError(
+        " You can only edit your phone number once. Contact support for further changes."
+      );
     }
   };
 
@@ -175,19 +168,7 @@ const PhoneVerificationPage = () => {
         setIsEditing(false);
         setOtp(["", "", "", "", "", ""]);
         setValue("code", "");
-
-        toast.show({
-          placement: "top",
-          duration: 3000,
-          render: ({ id }) => (
-            <Toast nativeID={id} variant="outline" action="success">
-              <ToastTitle>
-                Phone number updated. Verification required.
-              </ToastTitle>
-            </Toast>
-          ),
-        });
-
+        setSuccess("Phone number updated. Verification required.");
         // Send new verification code
         await handleSendCode(tempPhone);
       }

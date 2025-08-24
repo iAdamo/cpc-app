@@ -7,7 +7,7 @@ const initialUserProfile: OnboardingData = {
   lastName: "",
   profilePicture: null,
   notificationEnabled: true,
-  role: "",
+  activeRole: "",
   companyName: "",
   companyDescription: "",
   companyEmail: "",

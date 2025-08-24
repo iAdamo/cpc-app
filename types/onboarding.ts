@@ -1,5 +1,5 @@
 export interface OnboardingData {
-  role: string;
+  activeRole: string;
   firstName: string;
   lastName: string;
   profilePicture: File | null;
