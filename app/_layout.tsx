@@ -64,8 +64,7 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const { error, clearError } =
-    useGlobalStore();
+  const { error } = useGlobalStore();
 
   useEffect(() => {
     if (error) {
@@ -74,9 +73,8 @@ function RootLayoutNav() {
         text1: error,
         visibilityTime: 3000,
       });
-      clearError?.();
     }
-  }, [error, clearError]);
+  }, [error]);
 
   return (
     <GluestackUIProvider>
@@ -85,8 +83,8 @@ function RootLayoutNav() {
         translucent={true}
         backgroundColor={"transparent"}
       />
-        <Slot />
-        <Toast />
+      <Slot />
+      <Toast />
     </GluestackUIProvider>
   );
 }

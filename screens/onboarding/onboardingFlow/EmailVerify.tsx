@@ -42,8 +42,11 @@ const EmailVerificationPage = () => {
     sendCode,
     isLoading,
     setError,
+    error,
+    clearError,
     setSuccess,
     setCurrentStep,
+    currentStep,
   } = useGlobalStore();
 
   const EmailVerifySchema = FormSchema.pick(
@@ -172,6 +175,10 @@ const EmailVerificationPage = () => {
     try {
       Keyboard.dismiss();
       await verifyEmail(data.code!);
+      if (error) {
+        clearError();
+        return;
+      }
 
       // Update verification status in storage
       const appData: PersistedAppState | null = await getAppData();
@@ -186,7 +193,7 @@ const EmailVerificationPage = () => {
       }
 
       setSuccess("Email verified successfully");
-      setCurrentStep(4);
+      setCurrentStep(currentStep + 1);
     } catch (error: any) {
       setError(error?.response?.data?.message || "Email verification failed");
       setMessage({

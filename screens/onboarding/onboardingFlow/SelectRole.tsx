@@ -12,12 +12,12 @@ import Providers from "@/assets/Icons/Providers";
 import { UserData, OnboardingData } from "@/types";
 
 const SelectRole = () => {
-  const { setCurrentStep, updateProfile, userProfile } = useGlobalStore();
+  const { setCurrentStep, currentStep, updateProfile, userProfile } = useGlobalStore();
   const [activeRole, setActiveRole] = useState(userProfile.activeRole);
 
   const handleSubmit = () => {
     updateProfile({ activeRole });
-    setCurrentStep(6);
+    setCurrentStep(currentStep + 1);
     return;
   };
   return (
@@ -44,7 +44,7 @@ const SelectRole = () => {
           >
             <Box className="w-1/4 h-full p-2 items-center justify-between rounded-lg bg-brand-primary/40 ">
               <Box className="flex flex-col p-2 rounded-full bg-brand-primary/40 ">
-                <Clients width={25} height={25} />
+                <Clients width={25} height={25} color="red" />
               </Box>
               <Text size="lg" className="font-medium text-brand-primary">
                 Client
@@ -62,9 +62,9 @@ const SelectRole = () => {
             )}
           </Pressable>
           <Pressable
-            onPress={() => setActiveRole("Company")}
+            onPress={() => setActiveRole("Provider")}
             className={`flex-row w-full h-28 p-2 border rounded-xl data-[active=true]:bg-[#F6F6F6] data-[active=true]:border-brand-secondary ${
-              activeRole === "Company"
+              activeRole === "Provider"
                 ? "border-brand-secondary"
                 : "border-black/10"
             }`}
@@ -82,7 +82,7 @@ const SelectRole = () => {
                 I&apos;d like to offer my services
               </Text>
             </VStack>
-            {activeRole === "Company" && (
+            {activeRole === "Provider" && (
               <VStack className="w-1/12 bg-brand-secondary rounded h-1/3 justify-center items-center">
                 <Icon as={CheckIcon} className="text-white" />
               </VStack>
@@ -92,14 +92,14 @@ const SelectRole = () => {
       </Box>
       <Button
         size="xl"
-        className="bg-brand-primary data-[active=true]:bg-brand-primary/70 mb-8"
+        className="bg-brand-primary data-[active=true]:bg-brand-primary/70 mb-20"
         onPress={handleSubmit}
         isDisabled={!activeRole}
       >
         <ButtonText className="text-white">{`Continue ${
           activeRole === "Client"
             ? "as Client"
-            : activeRole === "Company"
+            : activeRole === "Provider"
             ? "as Service Provider"
             : ""
         }`}</ButtonText>

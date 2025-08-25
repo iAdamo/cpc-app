@@ -1,3 +1,4 @@
+import { updateUserProfile } from './../axios/user';
 import { SignUpData, LoginData } from "./auth";
 import { UserData } from "./user";
 import { OnboardingData } from "./onboarding";
@@ -41,6 +42,7 @@ export interface OnboardingState {
   userProfile: OnboardingData;
   setCurrentStep: (step: number) => void;
   updateProfile: (updates: Partial<OnboardingData>) => void;
+  updateUserProfile: () => Promise<void>;
   completeOnboarding: () => void;
   resetOnboarding: () => void;
 }

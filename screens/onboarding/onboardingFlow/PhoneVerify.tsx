@@ -46,6 +46,7 @@ const PhoneVerificationPage = () => {
     setError,
     setSuccess,
     setCurrentStep,
+    currentStep,
   } = useGlobalStore();
 
   const PhoneVerifySchema = FormSchema.pick(
@@ -196,7 +197,7 @@ const PhoneVerificationPage = () => {
       }
 
       setSuccess("Phone number verified successfully");
-      setCurrentStep(5);
+      setCurrentStep(currentStep + 1);
     } catch (error: any) {
       setError(error?.response?.data?.message || "Phone verification failed");
     }

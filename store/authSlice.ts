@@ -26,7 +26,7 @@ export const authSlice: StateCreator<
     try {
       const formData = new FormData();
       formData.append("email", userData.email);
-      formData.append("phoneNumber", userData.phoneNumber); 
+      formData.append("phoneNumber", userData.phoneNumber);
       formData.append("password", userData.password);
 
       const response = await signUpUser(formData);

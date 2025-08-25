@@ -7,6 +7,7 @@ import FirstOnboardingPage from "./onboardingFlow/00FirstPage";
 import PhoneVerificationPage from "./onboardingFlow/PhoneVerify";
 import SelectRole from "./onboardingFlow/SelectRole";
 import ProfileInfo from "./onboardingFlow/ProfileInfo";
+import FinalPage from "./onboardingFlow/FinalPage";
 import SignUpScreen from "@/screens/auth/signup";
 import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -15,34 +16,31 @@ import { ChevronLeftIcon } from "@/components/ui/icon";
 export function OnboardingFlow() {
   const { currentStep, setCurrentStep } = useGlobalStore();
 
-  const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return <FirstOnboardingPage />;
-      case 6:
-        return <SignUpScreen />;
-      case 3:
-        return <EmailVerificationPage />;
-      case 4:
-        return <PhoneVerificationPage />;
-      case 5:
-        return <SelectRole />;
-      case 2:
-        return <ProfileInfo />;
-      default:
-        return <Text>Step 1: Welcome to Onboarding</Text>;
-    }
+  // Map step numbers to components for easier maintenance
+  const stepComponents: { [key: number]: React.ComponentType } = {
+    3: FirstOnboardingPage,
+    2: SignUpScreen,
+    1: EmailVerificationPage,
+    4: PhoneVerificationPage,
+    5: SelectRole,
+    6: ProfileInfo,
   };
+  const StepComponent: React.ComponentType = stepComponents[currentStep] || FinalPage;
+
+  // Use a set for steps that should NOT show the back button
+  const noBackButtonSteps = new Set([0, 1, 5]);
+  const showBackButton =
+    !noBackButtonSteps.has(currentStep) && currentStep < 10;
 
   const handleBack = () => {
     setCurrentStep(currentStep > 1 ? currentStep - 1 : 1);
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-transparent">
-      <VStack className="bg-white h-full">
+    <VStack className="bg-white">
+      <VStack className="bg-white h-full mt-8">
         {/* <OnboardingProgess /> */}
-        {currentStep != 1 && currentStep != 5 && currentStep < 10 && (
+        {showBackButton && (
           <Button
             size="xl"
             variant="link"
@@ -55,8 +53,10 @@ export function OnboardingFlow() {
             />
           </Button>
         )}
-        <VStack className=""> {renderStep()}</VStack>
+        <VStack className="">
+          <StepComponent />
+        </VStack>
       </VStack>
-    </SafeAreaView>
+    </VStack>
   );
 }

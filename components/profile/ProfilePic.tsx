@@ -258,7 +258,7 @@ const ProfilePic = ({
               <Box className="bg-brand-primary/60 rounded-full p-3">
                 <Icon as={Camera} className="text-brand-primary w-6 h-6" />
               </Box>
-              <Text size="xl" className="">
+              <Text size="xl" className="font-medium">
                 Camera
               </Text>
             </Pressable>
@@ -272,7 +272,7 @@ const ProfilePic = ({
               <Box className="bg-brand-primary/60 rounded-full p-3">
                 <Icon as={Gallery} className="text-brand-primary w-6 h-6" />
               </Box>
-              <Text size="xl" className="">
+              <Text size="xl" className="font-medium">
                 Choose from Photos
               </Text>
             </Pressable>

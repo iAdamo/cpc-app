@@ -2,6 +2,7 @@ export interface OnboardingData {
   activeRole: string;
   firstName: string;
   lastName: string;
+  homeAddress: string;
   profilePicture: File | null;
   companyName: string;
   companyDescription: string;

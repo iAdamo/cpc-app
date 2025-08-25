@@ -15,7 +15,7 @@ import { Image } from "@/components/ui/image";
 import { Link } from "expo-router";
 
 const FirstOnboardingPage = () => {
-  const { setCurrentStep } = useGlobalStore();
+  const { setCurrentStep, currentStep } = useGlobalStore();
   const [page, setPage] = useState(0);
   const pagerRef = useRef<PagerView>(null);
 
@@ -70,7 +70,7 @@ const FirstOnboardingPage = () => {
   ];
 
   return (
-    <VStack className="h-full">
+    <VStack className="h-full -mt-8">
       <PagerView
         ref={pagerRef}
         style={{ flex: 1 }}
@@ -149,7 +149,7 @@ const FirstOnboardingPage = () => {
                   <Button
                     size="xl"
                     variant={page === views.length - 1 ? "solid" : "outline"}
-                    onPress={() => setCurrentStep(2)}
+                    onPress={() => setCurrentStep(currentStep + 1)}
                     className={`${
                       page === views.length - 1
                         ? "bg-brand-primary"

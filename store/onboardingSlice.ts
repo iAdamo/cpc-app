@@ -1,10 +1,11 @@
 import { StateCreator } from "zustand";
 import { OnboardingData, OnboardingState, GlobalStore } from "@/types";
-
+import { updateUserProfile } from "@/axios/user";
 
 const initialUserProfile: OnboardingData = {
   firstName: "",
   lastName: "",
+  homeAddress: "",
   profilePicture: null,
   notificationEnabled: true,
   activeRole: "",
@@ -39,7 +40,7 @@ export const onboardingSlice: StateCreator<
 
   setCurrentStep: (step: number) => {
     set((state) => ({
-      currentStep: Math.min(Math.max(step, 1), state.totalSteps),
+      currentStep: Math.min(Math.max(step, 0), state.totalSteps),
     }));
   },
 
@@ -47,6 +48,41 @@ export const onboardingSlice: StateCreator<
     set((state) => ({
       userProfile: { ...state.userProfile, ...updates },
     }));
+  },
+
+  updateUserProfile: async () => {
+    const { userProfile } = get();
+    set({ isLoading: true, error: null });
+    try {
+      const formData = new FormData();
+      if (userProfile.firstName)
+        formData.append("firstName", userProfile.firstName);
+      if (userProfile.lastName)
+        formData.append("lastName", userProfile.lastName);
+      if (userProfile.homeAddress)
+        formData.append("homeAddress", userProfile.homeAddress);
+      if (userProfile.profilePicture)
+        formData.append("profilePicture", userProfile.profilePicture);
+      if (userProfile.companyName)
+        if (userProfile.activeRole)
+          formData.append("activeRole", userProfile.activeRole);
+      if (userProfile.notificationEnabled !== undefined)
+        formData.append(
+          "notificationEnabled",
+          String(userProfile.notificationEnabled)
+        );
+
+      const response = await updateUserProfile(formData);
+      if (response) {
+        set({ isLoading: false });
+      }
+    } catch (error: any) {
+      const { setError } = get();
+      set({
+        error: error?.message || "Profile update failed",
+        isLoading: false,
+      });
+    }
   },
 
   completeOnboarding: () => {
