@@ -47,8 +47,6 @@ const PhoneVerificationPage = () => {
     setSuccess,
     setCurrentStep,
   } = useGlobalStore();
-  const router = useRouter();
-  const toast = useToast();
 
   const PhoneVerifySchema = FormSchema.pick(
     isEditing ? { phoneNumber: true } : { code: true }

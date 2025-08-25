@@ -6,6 +6,7 @@ import EmailVerificationPage from "./onboardingFlow/EmailVerify";
 import FirstOnboardingPage from "./onboardingFlow/00FirstPage";
 import PhoneVerificationPage from "./onboardingFlow/PhoneVerify";
 import SelectRole from "./onboardingFlow/SelectRole";
+import ProfileInfo from "./onboardingFlow/ProfileInfo";
 import SignUpScreen from "@/screens/auth/signup";
 import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,7 +19,7 @@ export function OnboardingFlow() {
     switch (currentStep) {
       case 1:
         return <FirstOnboardingPage />;
-      case 2:
+      case 6:
         return <SignUpScreen />;
       case 3:
         return <EmailVerificationPage />;
@@ -26,6 +27,8 @@ export function OnboardingFlow() {
         return <PhoneVerificationPage />;
       case 5:
         return <SelectRole />;
+      case 2:
+        return <ProfileInfo />;
       default:
         return <Text>Step 1: Welcome to Onboarding</Text>;
     }
@@ -39,7 +42,7 @@ export function OnboardingFlow() {
     <SafeAreaView className="flex-1 bg-transparent">
       <VStack className="bg-white h-full">
         {/* <OnboardingProgess /> */}
-        {currentStep < 5 && (
+        {currentStep != 1 && currentStep != 5 && currentStep < 10 && (
           <Button
             size="xl"
             variant="link"

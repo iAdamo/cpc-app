@@ -18,6 +18,7 @@ const SelectRole = () => {
   const handleSubmit = () => {
     updateProfile({ activeRole });
     setCurrentStep(6);
+    return;
   };
   return (
     <VStack className="p-4 h-full justify-between">
@@ -92,7 +93,7 @@ const SelectRole = () => {
       <Button
         size="xl"
         className="bg-brand-primary data-[active=true]:bg-brand-primary/70 mb-8"
-        onPress={() => null}
+        onPress={handleSubmit}
         isDisabled={!activeRole}
       >
         <ButtonText className="text-white">{`Continue ${

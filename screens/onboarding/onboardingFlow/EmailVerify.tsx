@@ -8,7 +8,6 @@ import { Text } from "@/components/ui/text";
 import { Button, ButtonText } from "@/components/ui/button";
 import { getAppData, setAppData } from "@/utils/getStorageData";
 import { PersistedAppState } from "@/types";
-import { useRouter } from "expo-router";
 import {
   FormControl,
   FormControlError,
@@ -59,7 +58,7 @@ const EmailVerificationPage = () => {
     control,
     handleSubmit,
     setValue,
-    watch,
+    // watch,
     formState: { errors },
   } = useForm<EmailVerifySchemaType>({
     resolver: zodResolver(EmailVerifySchema),

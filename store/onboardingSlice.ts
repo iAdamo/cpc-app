@@ -33,7 +33,7 @@ export const onboardingSlice: StateCreator<
   OnboardingState
 > = (set, get) => ({
   currentStep: 1,
-  totalSteps: 5,
+  totalSteps: 10,
   isOnboardingComplete: false,
   userProfile: initialUserProfile,
 
