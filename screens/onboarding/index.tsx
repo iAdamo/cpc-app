@@ -18,14 +18,15 @@ export function OnboardingFlow() {
 
   // Map step numbers to components for easier maintenance
   const stepComponents: { [key: number]: React.ComponentType } = {
-    3: FirstOnboardingPage,
+    1: FirstOnboardingPage,
     2: SignUpScreen,
-    1: EmailVerificationPage,
-    4: PhoneVerificationPage,
+    4: EmailVerificationPage,
+    3: PhoneVerificationPage,
     5: SelectRole,
     6: ProfileInfo,
   };
-  const StepComponent: React.ComponentType = stepComponents[currentStep] || FinalPage;
+  const StepComponent: React.ComponentType =
+    stepComponents[currentStep] || FinalPage;
 
   // Use a set for steps that should NOT show the back button
   const noBackButtonSteps = new Set([0, 1, 5]);

@@ -11,12 +11,10 @@ import {
   sendCode,
 } from "@/axios/auth";
 
-export const authSlice: StateCreator<
-  GlobalStore,
-  [],
-  [],
-  AuthState
-> = (set, get) => ({
+export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
+  set,
+  get
+) => ({
   user: null,
   token: null,
   isAuthenticated: false,
@@ -31,9 +29,9 @@ export const authSlice: StateCreator<
 
       const response = await signUpUser(formData);
       if (response) {
-        await sendCode({ email: userData.email });
         set({
           user: response,
+          success: "Account created successfully!",
           isAuthenticated: true,
           isLoading: false,
         });
@@ -51,6 +49,7 @@ export const authSlice: StateCreator<
       if (response) {
         set({
           user: response,
+          success: "Logged in successfully!",
           isAuthenticated: true,
           isLoading: false,
         });
@@ -78,7 +77,7 @@ export const authSlice: StateCreator<
     set({ isLoading: true, error: null });
     try {
       await verifyPhoneNumber({ code });
-      set({ isLoading: false });
+      set({ isLoading: false, success: "Phone number verified successfully" });
     } catch (error: any) {
       set({
         error: error?.message || "Phone number verification failed",
@@ -91,7 +90,7 @@ export const authSlice: StateCreator<
     set({ isLoading: true, error: null });
     try {
       await verifyEmail({ code });
-      set({ isLoading: false });
+      set({ isLoading: false, success: "Email verified successfully" });
     } catch (error: any) {
       set({
         error: error?.message || "Email verification failed",
@@ -100,11 +99,16 @@ export const authSlice: StateCreator<
     }
   },
 
-  sendCode: async (email: string) => {
+  sendCode: async () => {
     set({ isLoading: true, error: null });
     try {
+      const email = get().user?.email || "";
+      if (!email) {
+        set({ error: "Email not found", isLoading: false });
+        return;
+      }
       await sendCode({ email });
-      set({ isLoading: false });
+      set({ isLoading: false, success: "Verification code sent" });
     } catch (error: any) {
       set({
         error: error?.message || "Failed to send verification code",

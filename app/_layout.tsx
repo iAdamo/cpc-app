@@ -64,7 +64,7 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const { error } = useGlobalStore();
+  const { error, success } = useGlobalStore();
 
   useEffect(() => {
     if (error) {
@@ -73,8 +73,14 @@ function RootLayoutNav() {
         text1: error,
         visibilityTime: 3000,
       });
+    } else if (success) {
+      Toast.show({
+        type: "success",
+        text1: success,
+        visibilityTime: 3000,
+      });
     }
-  }, [error]);
+  }, [success, error]);
 
   return (
     <GluestackUIProvider>

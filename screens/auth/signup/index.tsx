@@ -34,6 +34,7 @@ type ControllerRenderType = {
 
 interface ValidatedState {
   emailValid: boolean;
+  phoneNumberValid: boolean;
   passwordValid: boolean;
 }
 
@@ -41,8 +42,14 @@ const SignUpScreen = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const { signUp, isLoading, setError, setSuccess, setCurrentStep } =
-    useGlobalStore();
+  const {
+    signUp,
+    isLoading,
+    setError,
+    isAuthenticated,
+    setCurrentStep,
+    currentStep,
+  } = useGlobalStore();
 
   const router = useRouter();
 
@@ -68,6 +75,7 @@ const SignUpScreen = () => {
   // handle form validation
   const [validated, setValidated] = useState<ValidatedState>({
     emailValid: true,
+    phoneNumberValid: true,
     passwordValid: true,
   });
 
@@ -77,19 +85,21 @@ const SignUpScreen = () => {
     if (data.password !== data.confirmPassword) {
       setError("Passwords do not match");
       return;
-    } else {
-      try {
-        await signUp(data);
-        setCurrentStep(3);
-        setSuccess("Account created successfully");
-      } catch (error) {
-        setValidated({ emailValid: false, passwordValid: false });
-        setError(
-          (error as any).response?.data?.message ||
-            "An unexpected error occurred"
-        );
-      }
     }
+
+    await signUp(data);
+    // UNDO THIS IN PRODUCTION
+
+    // if (!isAuthenticated) {
+    //   setValidated({
+    //     emailValid: false,
+    //     phoneNumberValid: false,
+    //     passwordValid: false,
+    //   });
+    //   return;
+    // }
+    reset();
+    setCurrentStep(currentStep + 1);
   };
 
   // handle password visibility
@@ -121,7 +131,10 @@ const SignUpScreen = () => {
 
           <VStack className="gap-4">
             {/* Phone Number */}
-            <FormControl className="w-full" isInvalid={!!errors?.phoneNumber}>
+            <FormControl
+              className="w-full"
+              isInvalid={!!errors?.phoneNumber || !validated.phoneNumberValid}
+            >
               <FormControlLabel>
                 <FormControlLabelText>Phone Number</FormControlLabelText>
               </FormControlLabel>

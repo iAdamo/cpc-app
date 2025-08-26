@@ -1,8 +1,7 @@
-import { updateUserProfile } from './../axios/user';
+import { updateUserProfile } from "./../axios/user";
 import { SignUpData, LoginData } from "./auth";
 import { UserData } from "./user";
 import { OnboardingData } from "./onboarding";
-
 
 export type PersistedAppState = {
   user: UserData | null;
@@ -29,7 +28,7 @@ export interface AuthState {
   forgotPassword: (email: string) => Promise<void>;
   verifyPhone: (code: string) => Promise<void>;
   verifyEmail: (code: string) => Promise<void>;
-  sendCode: (email: string) => Promise<void>;
+  sendCode: () => Promise<void>;
   resetPassword: (password: string, email?: string) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;

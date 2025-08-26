@@ -6,20 +6,21 @@ import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AppLayout() {
-    const { isAuthenticated, isOnboardingComplete } =
-      useGlobalStore();
+  const { isAuthenticated, isOnboardingComplete } = useGlobalStore();
 
-    useEffect(() => {
-      if (!isAuthenticated) {
-        router.replace("/auth/signin");
-      } else if (isAuthenticated && !isOnboardingComplete) {
-        router.replace("/onboarding");
-      } else if (isAuthenticated && isOnboardingComplete) {
-        router.replace("/");
-      }
-    }, [isAuthenticated, isOnboardingComplete]);
+  useEffect(() => {
+    if (isAuthenticated && !isOnboardingComplete) {
+      router.replace("/onboarding");
+    } else if (isAuthenticated && isOnboardingComplete) {
+      router.replace("/");
+    } else if (!isAuthenticated && !isOnboardingComplete) {
+      router.replace("/onboarding");
+    } else if (!isAuthenticated && isOnboardingComplete) {
+      router.replace("/auth/signin");
+    }
+  }, [isAuthenticated, isOnboardingComplete]);
   return (
-      <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }}>
       <StatusBar
         barStyle="dark-content"
         translucent={true}

@@ -6,7 +6,7 @@ import { Heading } from "@/components/ui/heading";
 import { Pressable } from "@/components/ui/pressable";
 import { Text } from "@/components/ui/text";
 import { Button, ButtonText } from "@/components/ui/button";
-import { getAppData, setAppData } from "@/utils/getStorageData";
+import { AppStorage } from "@/utils/getStorageData";
 import { PersistedAppState } from "@/types";
 import {
   FormControl,
@@ -26,23 +26,17 @@ import { Icon, EditIcon, CheckIcon, CloseIcon } from "@/components/ui/icon";
 
 const EmailVerificationPage = () => {
   const [email, setEmail] = useState<string | null>(null);
-  const [originalEmail, setOriginalEmail] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isEditing, setIsEditing] = useState(false);
   const [editCount, setEditCount] = useState(0);
   const [maxEdits] = useState(1); // Allow only one edit
   const [tempEmail, setTempEmail] = useState("");
-  const [message, setMessage] = useState<{
-    text: string;
-    type: "success" | "error" | "info";
-  } | null>(null);
   const {
     verifyEmail,
     sendCode,
     isLoading,
     setError,
-    error,
     clearError,
     setSuccess,
     setCurrentStep,
@@ -72,15 +66,12 @@ const EmailVerificationPage = () => {
   });
 
   // const emailValue = watch("email");
+  const appStorage = new AppStorage();
 
   useEffect(() => {
     const fetchEmailData = async () => {
-      const appData: PersistedAppState | null = await getAppData();
+      const appData: PersistedAppState | null = await appStorage.getAppData();
       if (appData && appData.user) {
-        setEmail(appData.user.email);
-        setOriginalEmail(appData.user.email);
-        setValue("email", appData.user.email);
-
         // Load edit count from storage
         const editCount = appData.user.emailEditCount || 0;
         setEditCount(editCount);
@@ -96,14 +87,6 @@ const EmailVerificationPage = () => {
     }
     return () => clearTimeout(timer);
   }, [cooldown]);
-
-  // Clear message after 3 seconds
-  useEffect(() => {
-    if (message) {
-      const timer = setTimeout(() => setMessage(null), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [message]);
 
   const handleKeyPress = (index: number, key: string) => {
     if (key === "Backspace" && !otp[index] && index > 0) {
@@ -122,115 +105,83 @@ const EmailVerificationPage = () => {
       // Cancel edit
       setTempEmail("");
       setIsEditing(false);
-      setMessage(null);
+      // setMessage(null);
     } else if (editCount < maxEdits) {
       // Start editing
       setTempEmail(email || "");
       setIsEditing(true);
       setTimeout(() => emailInputRef.current?.focus(), 100);
     } else {
-      setMessage({
-        text: "You can only edit your email once. Contact support for further changes.",
-        type: "error",
-      });
+      setError(
+        "You can only edit your email once. Contact support for further changes."
+      );
     }
   };
 
   const handleSaveEdit = async () => {
-    try {
-      // Update email in storage
-      const appData: PersistedAppState | null = await getAppData();
-      if (appData && appData.user) {
-        const updatedUser = {
-          ...appData.user,
-          email: tempEmail,
-          emailEditCount: (appData.user.emailEditCount || 0) + 1,
-          emailVerified: false, // Reset verification status
-        };
+    // Update email in storage
+    const appData: PersistedAppState | null = await appStorage.getAppData();
+    if (appData && appData.user) {
+      const updatedUser = {
+        ...appData.user,
+        email: tempEmail,
+        emailEditCount: (appData.user.emailEditCount || 0) + 1,
+        emailVerified: false, // Reset verification status
+      };
 
-        await setAppData({
-          ...appData,
-          user: updatedUser,
-        });
-
-        setEmail(tempEmail);
-        setEditCount(updatedUser.emailEditCount);
-        setIsEditing(false);
-        setOtp(["", "", "", "", "", ""]);
-        setValue("code", "");
-        setMessage({
-          text: "Email updated. Verification required.",
-          type: "success",
-        });
-
-        // Send new verification code
-        await handleSendCode(tempEmail);
-      }
-    } catch (error) {
-      setMessage({ text: "Failed to update email", type: "error" });
-    }
-  };
-
-  const handleVerifyEmail = async (data: { code?: string; email?: string }) => {
-    try {
-      Keyboard.dismiss();
-      await verifyEmail(data.code!);
-      if (error) {
-        clearError();
-        return;
-      }
-
-      // Update verification status in storage
-      const appData: PersistedAppState | null = await getAppData();
-      if (appData && appData.user) {
-        await setAppData({
-          ...appData,
-          user: {
-            ...appData.user,
-            isEmailVerified: true,
-          },
-        });
-      }
-
-      setSuccess("Email verified successfully");
-      setCurrentStep(currentStep + 1);
-    } catch (error: any) {
-      setError(error?.response?.data?.message || "Email verification failed");
-      setMessage({
-        text: error?.response?.data?.message || "Email verification failed",
-        type: "error",
-      });
-    }
-  };
-
-  const handleSendCode = async (emailAddress?: string) => {
-    if (cooldown > 0) return;
-
-    try {
-      const targetEmail = emailAddress || email;
-      if (!targetEmail) {
-        setError("Email not found");
-        setMessage({ text: "Email not found", type: "error" });
-        return;
-      }
-
-      await sendCode(targetEmail);
-      setSuccess("Verification code sent");
-      setMessage({
-        text: "Verification code sent to your email",
-        type: "success",
+      await appStorage.setAppData({
+        ...appData,
+        user: updatedUser,
       });
 
-      Keyboard.dismiss();
-      setCooldown(30);
+      setEmail(tempEmail);
+      setEditCount(updatedUser.emailEditCount);
+      setIsEditing(false);
       setOtp(["", "", "", "", "", ""]);
       setValue("code", "");
-    } catch (error: any) {
-      const errorMessage =
-        error?.response?.data?.message || "Failed to send verification code";
-      setError(errorMessage);
-      setMessage({ text: errorMessage, type: "error" });
+      setSuccess("Email updated. Verification required.");
+
+      // Send new verification code
+      await handleSendCode();
     }
+  };
+
+  const handleVerifyEmail = async (data: { code: string }) => {
+    Keyboard.dismiss();
+    await verifyEmail(data.code);
+    // undo this to enforce the error
+    // if (useGlobalStore.getState().error) {
+    //   clearError();
+    //   return;
+    // }
+
+    // Update verification status in storage
+    const appData: PersistedAppState | null = await appStorage.getAppData();
+    if (appData && appData.user) {
+      await appStorage.setAppData({
+        ...appData,
+        user: {
+          ...appData.user,
+          isEmailVerified: true,
+        },
+      });
+    }
+    setCurrentStep(currentStep + 1);
+  };
+
+  const handleSendCode = async () => {
+    if (cooldown > 0) return;
+
+    await sendCode();
+    if (useGlobalStore.getState().error) {
+      clearError();
+      return;
+    }
+
+    Keyboard.dismiss();
+    setCooldown(30);
+    setOtp(["", "", "", "", "", ""]);
+    setValue("code", "");
   };
 
   const editsRemaining = maxEdits - editCount;
@@ -247,31 +198,6 @@ const EmailVerificationPage = () => {
             <Text className="text-center text-gray-600">
               A verification code has been sent to
             </Text>
-
-            {/* Message Display */}
-            {message && (
-              <View
-                className={`w-full p-3 rounded-lg ${
-                  message.type === "success"
-                    ? "bg-green-100 border border-green-200"
-                    : message.type === "error"
-                    ? "bg-red-100 border border-red-200"
-                    : "bg-blue-100 border border-blue-200"
-                }`}
-              >
-                <Text
-                  className={`text-center ${
-                    message.type === "success"
-                      ? "text-green-800"
-                      : message.type === "error"
-                      ? "text-red-800"
-                      : "text-blue-800"
-                  }`}
-                >
-                  {message.text}
-                </Text>
-              </View>
-            )}
 
             {/* Email Display/Edit Section */}
             <VStack className="items-center gap-2 w-full">

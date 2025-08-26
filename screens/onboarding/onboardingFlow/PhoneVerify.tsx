@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { Button, ButtonText } from "@/components/ui/button";
-import { getAppData, setAppData } from "@/utils/getStorageData";
+import { AppStorage } from "@/utils/getStorageData";
 import { PersistedAppState } from "@/types";
 import { useRouter } from "expo-router";
 import {
@@ -22,7 +22,6 @@ import { Keyboard, TouchableOpacity, View } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormSchema } from "@/screens/auth/AuthFormSchema";
-import { Toast, ToastTitle, useToast } from "@/components/ui/toast";
 import { Icon, EditIcon, CheckIcon, CloseIcon } from "@/components/ui/icon";
 import {
   parsePhoneNumberFromString,
@@ -32,7 +31,6 @@ import { Pressable } from "@/components/ui/pressable";
 
 const PhoneVerificationPage = () => {
   const [phone, setPhone] = useState<string | null>(null);
-  const [originalPhone, setOriginalPhone] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isEditing, setIsEditing] = useState(false);
@@ -44,6 +42,7 @@ const PhoneVerificationPage = () => {
     sendCode,
     isLoading,
     setError,
+    clearError,
     setSuccess,
     setCurrentStep,
     currentStep,
@@ -73,12 +72,13 @@ const PhoneVerificationPage = () => {
 
   // const phoneNumberValue = watch("phoneNumber");
 
+  const appStorage = new AppStorage();
+
   useEffect(() => {
     const fetchPhoneData = async () => {
-      const appData: PersistedAppState | null = await getAppData();
+      const appData: PersistedAppState | null = await appStorage.getAppData();
       if (appData && appData.user) {
         setPhone(appData.user.phoneNumber);
-        setOriginalPhone(appData.user.phoneNumber);
         setValue("phoneNumber", appData.user.phoneNumber);
 
         // Load edit count from storage
@@ -145,86 +145,69 @@ const PhoneVerificationPage = () => {
       setError(validation.toString());
       return;
     }
+    // Update phone number in storage
+    const appData: PersistedAppState | null = await appStorage.getAppData();
+    if (appData && appData.user) {
+      const updatedUser = {
+        ...appData.user,
+        phoneNumber: tempPhone,
+        phoneEditCount: (appData.user.phoneEditCount || 0) + 1,
+        phoneVerified: false, // Reset verification status
+      };
 
-    try {
-      // Update phone number in storage
-      const appData: PersistedAppState | null = await getAppData();
-      if (appData && appData.user) {
-        const updatedUser = {
-          ...appData.user,
-          phoneNumber: tempPhone,
-          phoneEditCount: (appData.user.phoneEditCount || 0) + 1,
-          phoneVerified: false, // Reset verification status
-        };
+      await appStorage.setAppData({
+        ...appData,
+        user: updatedUser,
+      });
 
-        await setAppData({
-          ...appData,
-          user: updatedUser,
-        });
-
-        setPhone(tempPhone);
-        setEditCount(updatedUser.phoneEditCount);
-        setIsEditing(false);
-        setOtp(["", "", "", "", "", ""]);
-        setValue("code", "");
-        setSuccess("Phone number updated. Verification required.");
-        // Send new verification code
-        await handleSendCode(tempPhone);
-      }
-    } catch (error) {
-      setError("Failed to update phone number.");
-    }
-  };
-
-  const handleVerifyPhone = async (data: {
-    code: string;
-    phoneNumber?: string;
-  }) => {
-    try {
-      Keyboard.dismiss();
-      await verifyPhone(data.code);
-
-      // Update verification status in storage
-      const appData: PersistedAppState | null = await getAppData();
-      if (appData && appData.user) {
-        await setAppData({
-          ...appData,
-          user: {
-            ...appData.user,
-            isPhoneVerified: true,
-          },
-        });
-      }
-
-      setSuccess("Phone number verified successfully");
-      setCurrentStep(currentStep + 1);
-    } catch (error: any) {
-      setError(error?.response?.data?.message || "Phone verification failed");
-    }
-  };
-
-  const handleSendCode = async (phoneNumber?: string) => {
-    if (cooldown > 0) return;
-
-    try {
-      const targetPhone = phoneNumber || phone;
-      if (!targetPhone) {
-        setError("Phone number not found");
-        return;
-      }
-
-      await sendCode(targetPhone);
-      setSuccess("Verification code sent");
-
-      Keyboard.dismiss();
-      setCooldown(60);
+      setPhone(tempPhone);
+      setEditCount(updatedUser.phoneEditCount);
+      setIsEditing(false);
       setOtp(["", "", "", "", "", ""]);
       setValue("code", "");
-    } catch (error: any) {
-      setError(
-        error?.response?.data?.message || "Failed to send verification code"
-      );
+      setSuccess("Phone number updated. Verification required.");
+      // Send new verification code
+      await handleSendCode();
     }
+    Keyboard.dismiss();
+  };
+
+  const handleVerifyPhone = async (data: { code: string }) => {
+    Keyboard.dismiss();
+    await verifyPhone(data.code);
+    // UNDO THIS TO ENFORCE THE ERROR
+    // if (useGlobalStore.getState().error) {
+    //   clearError();
+    //   return;
+    // }
+
+    // Update verification status in storage
+    const appData: PersistedAppState | null = await appStorage.getAppData();
+    if (appData && appData.user) {
+      await appStorage.setAppData({
+        ...appData,
+        user: {
+          ...appData.user,
+          isPhoneVerified: true,
+        },
+      });
+    }
+    setCurrentStep(currentStep + 1);
+  };
+
+  const handleSendCode = async () => {
+    if (cooldown > 0) return;
+
+    await sendCode();
+    if (useGlobalStore.getState().error) {
+      clearError();
+      return;
+    }
+
+    Keyboard.dismiss();
+    setCooldown(60);
+    setOtp(["", "", "", "", "", ""]);
+    setValue("code", "");
   };
 
   const editsRemaining = maxEdits - editCount;

@@ -5,8 +5,9 @@ import { VStack } from "@/components/ui/vstack";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { Spinner } from "@/components/ui/spinner";
-import { Image } from "@/components/ui/image";
+// import { Image } from "@/components/ui/image";
 import useGlobalStore from "@/store/globalStore";
+import { Image } from "react-native";
 
 const FinalPage = () => {
   const { userProfile, updateUserProfile, completeOnboarding, isLoading } =
@@ -34,7 +35,6 @@ const FinalPage = () => {
           <Center className="gap-6">
             <Image
               source={require("@/assets/images/success-img.png")}
-              alt="Success"
               className="w-32 h-32"
             />
             <Heading size="2xl" className="text-brand-primary text-center">

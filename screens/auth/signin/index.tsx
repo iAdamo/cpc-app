@@ -47,7 +47,7 @@ const SignInScreen = () => {
 
   //const { login } = useSession();
   const router = useRouter();
-  const { login, isLoading } = useGlobalStore();
+  const { login, isLoading, isAuthenticated } = useGlobalStore();
   const switchToSignUp = () => {
     router.replace("/auth/signup");
   };
@@ -75,26 +75,12 @@ const SignInScreen = () => {
   // handle form submission
   const onSubmit = async (data: SignInSchemaType) => {
     Keyboard.dismiss();
-    try {
-      await login(data);
-      reset();
-    } catch (error) {
+    await login(data);
+    if (!isAuthenticated) {
       setValidated({ emailValid: false, passwordValid: false });
-      toast.show({
-        placement: "bottom",
-        duration: 5000,
-        render: ({ id }: RenderProps) => {
-          return (
-            <Toast nativeID={id} variant="solid" action="error">
-              <ToastTitle>
-                {(error as any).response?.data?.message ||
-                  "An unexpected error occurred"}
-              </ToastTitle>
-            </Toast>
-          );
-        },
-      });
+      return;
     }
+    reset();
   };
 
   // handle password visibility
