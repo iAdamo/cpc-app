@@ -4,8 +4,10 @@ import { UserData } from "./user";
 import { OnboardingData } from "./onboarding";
 
 export type PersistedAppState = {
-  user: UserData | null;
-  isAuthenticated: boolean;
+  state: {
+    user: UserData | null;
+    isAuthenticated: boolean;
+  };
 };
 
 export interface GlobalState {
@@ -23,15 +25,16 @@ export interface AuthState {
   isAuthenticated: boolean;
 
   // Actions
-  signUp: (userData: SignUpData) => Promise<void>;
-  login: (credentials: LoginData) => Promise<void>;
+  signUp: (userData: SignUpData) => Promise<boolean | undefined>;
+  login: (credentials: LoginData) => Promise<boolean | undefined>;
   forgotPassword: (email: string) => Promise<void>;
-  verifyPhone: (code: string) => Promise<void>;
-  verifyEmail: (code: string) => Promise<void>;
-  sendCode: () => Promise<void>;
+  verifyPhone: (phoneNumber: string, code: string) => Promise<boolean | undefined>;
+  verifyEmail: (email: string, code: string) => Promise<boolean | undefined>;
+  sendCode: (email: string) => Promise<boolean | undefined>;
   resetPassword: (password: string, email?: string) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
+  clearSuccess: () => void;
 }
 
 export interface OnboardingState {

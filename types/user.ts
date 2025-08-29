@@ -3,21 +3,21 @@ import { CompanyData } from "./company";
 export interface UserData {
   id: string;
   _id: string;
-  token: string;
-  username: string;
+  accessToken: string;
   firstName?: string;
   lastName?: string;
   activeRole: "Client" | "Company" | "Admin";
   email: string;
+  language: string;
   emailEditCount: number;
   phoneNumber: string;
   phoneEditCount: number;
   profilePicture?: string;
   purchasedServices: any[];
-  admins: any[];
   createdAt: string;
+  updatedAt: string;
   activeRoleId?: Partial<CompanyData>;
-  verified: boolean;
+  isVerified: boolean;
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
   clients: {

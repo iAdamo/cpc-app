@@ -2,6 +2,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { PersistedAppState } from "@/types";
 import useGlobalStore from "@/store/globalStore";
 
+interface AppData {
+  state: PersistedAppState | null;
+}
 export class AppStorage {
   // setError: (msg: string) => void;
   // setSuccess: (msg: string) => void;
@@ -14,8 +17,8 @@ export class AppStorage {
 
   getAppData = async (): Promise<PersistedAppState | null> => {
     try {
-      const value = await AsyncStorage.getItem("app-storage");
-      return value ? JSON.parse(value) : null;
+      const value = await AsyncStorage.getItem("app-storage")
+      return value ? JSON.parse(value) as PersistedAppState : null;
     } catch (error) {
       console.error("Error getting storage data:", error);
       return null;

@@ -1,14 +1,13 @@
 import { ApiClientSingleton } from "./conf";
-import { UserData } from "@/types";
+import { UserData, SignUpData } from "@/types";
 
 const { axiosInstance } = ApiClientSingleton.getInstance();
 
-export const signUpUser = async (data: FormData): Promise<UserData> => {
-  const response = await axiosInstance.post("users", data, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+export const signUpUser = async (data: SignUpData): Promise<UserData> => {
+  const response = await axiosInstance.post(
+    "auth/register?tokenType=Bearer",
+    data
+  );
   return response.data;
 };
 
@@ -16,7 +15,10 @@ export const loginUser = async (credentials: {
   email: string;
   password: string;
 }): Promise<UserData> => {
-  const response = await axiosInstance.post("auth/login", credentials);
+  const response = await axiosInstance.post(
+    "auth/login?tokenType=Bearer",
+    credentials
+  );
   return response.data;
 };
 
@@ -29,12 +31,15 @@ export const sendCode = async (data: { email: string }) => {
   return response.data;
 };
 
-export const verifyEmail = async (data: { code: string }) => {
+export const verifyEmail = async (data: { email: string; code: string }) => {
   const response = await axiosInstance.post("/auth/verify-email", data);
   return response.data;
 };
 
-export const verifyPhoneNumber = async (data: { code: string }) => {
+export const verifyPhoneNumber = async (data: {
+  phoneNumber: string;
+  code: string;
+}) => {
   const response = await axiosInstance.post("auth/verify-phone", data);
   return response.data;
 };
@@ -44,7 +49,10 @@ export const forgotPassword = async (data: { email: string }) => {
   return response.data;
 };
 
-export const resetPassword = async (data: { email: string; password: string }) => {
+export const resetPassword = async (data: {
+  email: string;
+  password: string;
+}) => {
   const response = await axiosInstance.post("/auth/reset-password", data);
   return response.data;
 };

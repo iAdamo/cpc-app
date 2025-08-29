@@ -60,6 +60,7 @@ const PhoneVerificationPage = () => {
     control,
     handleSubmit,
     setValue,
+    getValues,
     watch,
     formState: { errors },
   } = useForm<PhoneVerifySchemaType>({
@@ -77,12 +78,10 @@ const PhoneVerificationPage = () => {
   useEffect(() => {
     const fetchPhoneData = async () => {
       const appData: PersistedAppState | null = await appStorage.getAppData();
-      if (appData && appData.user) {
-        setPhone(appData.user.phoneNumber);
-        setValue("phoneNumber", appData.user.phoneNumber);
-
+      if (appData && appData.state.user) {
+        setPhone(appData.state.user.phoneNumber);
         // Load edit count from storage
-        const editCount = appData.user.phoneEditCount || 0;
+        const editCount = appData.state.user.phoneEditCount || 0;
         setEditCount(editCount);
       }
     };
@@ -147,17 +146,20 @@ const PhoneVerificationPage = () => {
     }
     // Update phone number in storage
     const appData: PersistedAppState | null = await appStorage.getAppData();
-    if (appData && appData.user) {
+    if (appData && appData.state.user) {
       const updatedUser = {
-        ...appData.user,
+        ...appData.state.user,
         phoneNumber: tempPhone,
-        phoneEditCount: (appData.user.phoneEditCount || 0) + 1,
+        phoneEditCount: (appData.state.user.phoneEditCount || 0) + 1,
         phoneVerified: false, // Reset verification status
       };
 
       await appStorage.setAppData({
         ...appData,
-        user: updatedUser,
+        state: {
+          ...appData.state,
+          user: updatedUser,
+        },
       });
 
       setPhone(tempPhone);
@@ -172,23 +174,21 @@ const PhoneVerificationPage = () => {
     Keyboard.dismiss();
   };
 
-  const handleVerifyPhone = async (data: { code: string }) => {
+  const handleVerifyPhone = async () => {
     Keyboard.dismiss();
-    await verifyPhone(data.code);
-    // UNDO THIS TO ENFORCE THE ERROR
-    // if (useGlobalStore.getState().error) {
-    //   clearError();
-    //   return;
-    // }
+    if (!(await verifyPhone(phone!, getValues("code")))) return;
 
     // Update verification status in storage
     const appData: PersistedAppState | null = await appStorage.getAppData();
-    if (appData && appData.user) {
+    if (appData && appData.state.user) {
       await appStorage.setAppData({
         ...appData,
-        user: {
-          ...appData.user,
-          isPhoneVerified: true,
+        state: {
+          ...appData.state,
+          user: {
+            ...appData.state.user,
+            isPhoneVerified: true,
+          },
         },
       });
     }
@@ -198,7 +198,7 @@ const PhoneVerificationPage = () => {
   const handleSendCode = async () => {
     if (cooldown > 0) return;
 
-    await sendCode();
+    await sendCode(phone || "");
     if (useGlobalStore.getState().error) {
       clearError();
       return;
@@ -249,7 +249,7 @@ const PhoneVerificationPage = () => {
                     size="sm"
                     className="bg-green-100 p-2 rounded-lg text-green-800"
                   >
-                    {phone || "+2349139290549"}
+                    {phone || "loading..."}
                   </Heading>
                 )}
 

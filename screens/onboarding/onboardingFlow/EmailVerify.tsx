@@ -30,17 +30,17 @@ const EmailVerificationPage = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isEditing, setIsEditing] = useState(false);
   const [editCount, setEditCount] = useState(0);
-  const [maxEdits] = useState(1); // Allow only one edit
+  const [maxEdits] = useState(2); // Allow only one edit
   const [tempEmail, setTempEmail] = useState("");
   const {
     verifyEmail,
     sendCode,
     isLoading,
     setError,
-    clearError,
     setSuccess,
     setCurrentStep,
     currentStep,
+    isAuthenticated,
   } = useGlobalStore();
 
   const EmailVerifySchema = FormSchema.pick(
@@ -55,6 +55,7 @@ const EmailVerificationPage = () => {
     control,
     handleSubmit,
     setValue,
+    getValues,
     // watch,
     formState: { errors },
   } = useForm<EmailVerifySchemaType>({
@@ -65,15 +66,15 @@ const EmailVerificationPage = () => {
     },
   });
 
-  // const emailValue = watch("email");
   const appStorage = new AppStorage();
 
   useEffect(() => {
     const fetchEmailData = async () => {
       const appData: PersistedAppState | null = await appStorage.getAppData();
-      if (appData && appData.user) {
+      if (appData && appData.state.user) {
+        setEmail(appData.state.user.email);
         // Load edit count from storage
-        const editCount = appData.user.emailEditCount || 0;
+        const editCount = appData.state.user.emailEditCount || 0;
         setEditCount(editCount);
       }
     };
@@ -121,20 +122,23 @@ const EmailVerificationPage = () => {
   const handleSaveEdit = async () => {
     // Update email in storage
     const appData: PersistedAppState | null = await appStorage.getAppData();
-    if (appData && appData.user) {
+    if (appData && appData.state.user) {
       const updatedUser = {
-        ...appData.user,
+        ...appData.state.user,
         email: tempEmail,
-        emailEditCount: (appData.user.emailEditCount || 0) + 1,
+        emailEditCount: (appData.state.user.emailEditCount || 0) + 1,
         emailVerified: false, // Reset verification status
       };
 
       await appStorage.setAppData({
         ...appData,
-        user: updatedUser,
+        state: {
+          ...appData.state,
+          user: updatedUser,
+        },
       });
 
-      setEmail(tempEmail);
+      setEmail(tempEmail); // <-- update local state
       setEditCount(updatedUser.emailEditCount);
       setIsEditing(false);
       setOtp(["", "", "", "", "", ""]);
@@ -146,37 +150,32 @@ const EmailVerificationPage = () => {
     }
   };
 
-  const handleVerifyEmail = async (data: { code: string }) => {
+  const handleVerifyEmail = async () => {
     Keyboard.dismiss();
-    await verifyEmail(data.code);
-    // undo this to enforce the error
-    // if (useGlobalStore.getState().error) {
-    //   clearError();
-    //   return;
-    // }
+    //console.log("Verifying email with code:", code);
+    if (!(await verifyEmail(email!, getValues("code")))) return;
 
     // Update verification status in storage
     const appData: PersistedAppState | null = await appStorage.getAppData();
-    if (appData && appData.user) {
+    if (appData && appData.state.user) {
       await appStorage.setAppData({
         ...appData,
-        user: {
-          ...appData.user,
-          isEmailVerified: true,
+        state: {
+          ...appData.state,
+          user: {
+            ...appData.state.user,
+            isEmailVerified: true,
+          },
         },
       });
     }
-    setCurrentStep(currentStep + 1);
+    isAuthenticated && setCurrentStep(currentStep + 1);
   };
 
   const handleSendCode = async () => {
     if (cooldown > 0) return;
 
-    await sendCode();
-    if (useGlobalStore.getState().error) {
-      clearError();
-      return;
-    }
+    if (!(await sendCode(email!))) return;
 
     Keyboard.dismiss();
     setCooldown(30);

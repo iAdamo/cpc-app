@@ -20,8 +20,8 @@ export function OnboardingFlow() {
   const stepComponents: { [key: number]: React.ComponentType } = {
     1: FirstOnboardingPage,
     2: SignUpScreen,
-    4: EmailVerificationPage,
-    3: PhoneVerificationPage,
+    3: EmailVerificationPage,
+    4: PhoneVerificationPage,
     5: SelectRole,
     6: ProfileInfo,
   };

@@ -22,12 +22,8 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
   signUp: async (userData: SignUpData) => {
     set({ isLoading: true, error: null });
     try {
-      const formData = new FormData();
-      formData.append("email", userData.email);
-      formData.append("phoneNumber", userData.phoneNumber);
-      formData.append("password", userData.password);
-
-      const response = await signUpUser(formData);
+      const response = await signUpUser(userData);
+      console.log("response", response);
       if (response) {
         set({
           user: response,
@@ -35,10 +31,14 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
           isAuthenticated: true,
           isLoading: false,
         });
-        await SecureStore.setItemAsync("accessToken", response.token);
+        await SecureStore.setItemAsync("accessToken", response.accessToken);
+        return true;
       }
     } catch (error: any) {
-      set({ error: error?.message || "Signup failed", isLoading: false });
+      set({
+        error: error?.response.data.message || "Signup failed",
+        isLoading: false,
+      });
     }
   },
 
@@ -53,10 +53,14 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
           isAuthenticated: true,
           isLoading: false,
         });
-        await SecureStore.setItemAsync("accessToken", response.token);
+        await SecureStore.setItemAsync("accessToken", response.accessToken);
+        return true;
       }
     } catch (error: any) {
-      set({ error: error?.message || "Login failed", isLoading: false });
+      set({
+        error: error?.response.data.message || "Login failed",
+        isLoading: false,
+      });
     }
   },
 
@@ -67,51 +71,55 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       set({ isLoading: false });
     } catch (error: any) {
       set({
-        error: error?.message || "Forgot password failed",
+        error: error?.response.data.message || "Forgot password failed",
         isLoading: false,
       });
     }
   },
 
-  verifyPhone: async (code: string) => {
+  verifyPhone: async (phoneNumber: string, code: string) => {
     set({ isLoading: true, error: null });
     try {
-      await verifyPhoneNumber({ code });
+      await verifyPhoneNumber({ phoneNumber, code });
       set({ isLoading: false, success: "Phone number verified successfully" });
+      return true;
     } catch (error: any) {
       set({
-        error: error?.message || "Phone number verification failed",
+        error:
+          error?.response.data.message || "Phone number verification failed",
         isLoading: false,
       });
     }
   },
 
-  verifyEmail: async (code: string) => {
+  verifyEmail: async (email: string, code: string) => {
     set({ isLoading: true, error: null });
     try {
-      await verifyEmail({ code });
+      await verifyEmail({ email, code });
       set({ isLoading: false, success: "Email verified successfully" });
+      return true;
     } catch (error: any) {
       set({
-        error: error?.message || "Email verification failed",
+        error: error?.response.data.message || "Email verification failed",
         isLoading: false,
       });
     }
   },
 
-  sendCode: async () => {
+  sendCode: async (email: string) => {
     set({ isLoading: true, error: null });
     try {
-      const email = get().user?.email || "";
       if (!email) {
         set({ error: "Email not found", isLoading: false });
         return;
       }
       await sendCode({ email });
       set({ isLoading: false, success: "Verification code sent" });
+      return true;
     } catch (error: any) {
       set({
-        error: error?.message || "Failed to send verification code",
+        error:
+          error?.response.data.message || "Failed to send verification code",
         isLoading: false,
       });
     }
@@ -124,7 +132,7 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       set({ isLoading: false });
     } catch (error: any) {
       set({
-        error: error?.message || "Reset password failed",
+        error: error?.response.data.message || "Reset password failed",
         isLoading: false,
       });
     }
@@ -136,4 +144,5 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
   },
 
   clearError: () => set({ error: null }),
+  clearSuccess: () => set({ success: null }),
 });

@@ -64,7 +64,7 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const { error, success } = useGlobalStore();
+  const { error, success, clearError, clearSuccess } = useGlobalStore();
 
   useEffect(() => {
     if (error) {
@@ -80,7 +80,11 @@ function RootLayoutNav() {
         visibilityTime: 3000,
       });
     }
-  }, [success, error]);
+    return () => {
+      clearError();
+      clearSuccess();
+    };
+  }, [success, error, clearError]);
 
   return (
     <GluestackUIProvider>

@@ -87,17 +87,16 @@ const SignUpScreen = () => {
       return;
     }
 
-    await signUp(data);
     // UNDO THIS IN PRODUCTION
 
-    // if (!isAuthenticated) {
-    //   setValidated({
-    //     emailValid: false,
-    //     phoneNumberValid: false,
-    //     passwordValid: false,
-    //   });
-    //   return;
-    // }
+    if (!(await signUp(data))) {
+      setValidated({
+        emailValid: false,
+        phoneNumberValid: false,
+        passwordValid: false,
+      });
+      return;
+    }
     reset();
     setCurrentStep(currentStep + 1);
   };
@@ -276,7 +275,7 @@ const SignUpScreen = () => {
               </FormControlError>
             </FormControl>
             {/* ----------------------------------- Sign Up Button ------------------------------------------ */}
-            <VStack className="gap-2 w-full">
+            <VStack className="gap-2 w-full mt-4">
               <Button
                 size="xl"
                 isDisabled={isLoading}
