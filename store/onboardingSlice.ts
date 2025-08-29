@@ -36,7 +36,7 @@ export const onboardingSlice: StateCreator<
   currentStep: 1,
   totalSteps: 10,
   isOnboardingComplete: false,
-  userProfile: initialUserProfile,
+  // userProfile: initialUserProfile,
 
   setCurrentStep: (step: number) => {
     set((state) => ({
@@ -44,46 +44,46 @@ export const onboardingSlice: StateCreator<
     }));
   },
 
-  updateProfile: (updates: Partial<OnboardingData>) => {
-    set((state) => ({
-      userProfile: { ...state.userProfile, ...updates },
-    }));
-  },
+  // updateProfile: (updates: Partial<OnboardingData>) => {
+  //   set((state) => ({
+  //     userProfile: { ...state.userProfile, ...updates },
+  //   }));
+  // },
 
-  updateUserProfile: async () => {
-    const { userProfile } = get();
-    set({ isLoading: true, error: null });
-    try {
-      const formData = new FormData();
-      if (userProfile.firstName)
-        formData.append("firstName", userProfile.firstName);
-      if (userProfile.lastName)
-        formData.append("lastName", userProfile.lastName);
-      if (userProfile.homeAddress)
-        formData.append("homeAddress", userProfile.homeAddress);
-      if (userProfile.profilePicture)
-        formData.append("profilePicture", userProfile.profilePicture);
-      if (userProfile.companyName)
-        if (userProfile.activeRole)
-          formData.append("activeRole", userProfile.activeRole);
-      if (userProfile.notificationEnabled !== undefined)
-        formData.append(
-          "notificationEnabled",
-          String(userProfile.notificationEnabled)
-        );
+  // updateUserProfile: async () => {
+  //   const { userProfile } = get();
+  //   set({ isLoading: true, error: null });
+  //   try {
+  //     const formData = new FormData();
+  //     if (userProfile.firstName)
+  //       formData.append("firstName", userProfile.firstName);
+  //     if (userProfile.lastName)
+  //       formData.append("lastName", userProfile.lastName);
+  //     if (userProfile.homeAddress)
+  //       formData.append("homeAddress", userProfile.homeAddress);
+  //     if (userProfile.profilePicture)
+  //       formData.append("profilePicture", userProfile.profilePicture);
+  //     if (userProfile.companyName)
+  //       if (userProfile.activeRole)
+  //         formData.append("activeRole", userProfile.activeRole);
+  //     if (userProfile.notificationEnabled !== undefined)
+  //       formData.append(
+  //         "notificationEnabled",
+  //         String(userProfile.notificationEnabled)
+  //       );
 
-      const response = await updateUserProfile(formData);
-      if (response) {
-        set({ isLoading: false });
-      }
-    } catch (error: any) {
-      const { setError } = get();
-      set({
-        error: error?.message || "Profile update failed",
-        isLoading: false,
-      });
-    }
-  },
+  //     const response = await updateUserProfile(formData);
+  //     if (response) {
+  //       set({ isLoading: false });
+  //     }
+  //   } catch (error: any) {
+  //     const { setError } = get();
+  //     set({
+  //       error: error?.message || "Profile update failed",
+  //       isLoading: false,
+  //     });
+  //   }
+  // },
 
   completeOnboarding: () => {
     set({ isOnboardingComplete: true });
@@ -93,7 +93,7 @@ export const onboardingSlice: StateCreator<
     set({
       currentStep: 1,
       isOnboardingComplete: false,
-      userProfile: initialUserProfile,
+      // userProfile: initialUserProfile,
     });
   },
 });

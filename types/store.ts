@@ -28,7 +28,10 @@ export interface AuthState {
   signUp: (userData: SignUpData) => Promise<boolean | undefined>;
   login: (credentials: LoginData) => Promise<boolean | undefined>;
   forgotPassword: (email: string) => Promise<void>;
-  verifyPhone: (phoneNumber: string, code: string) => Promise<boolean | undefined>;
+  verifyPhone: (
+    phoneNumber: string,
+    code: string
+  ) => Promise<boolean | undefined>;
   verifyEmail: (email: string, code: string) => Promise<boolean | undefined>;
   sendCode: (email: string) => Promise<boolean | undefined>;
   resetPassword: (password: string, email?: string) => Promise<void>;
@@ -37,16 +40,22 @@ export interface AuthState {
   clearSuccess: () => void;
 }
 
+export interface UserState {
+  // Actions
+  updateProfile: (updates: Partial<UserData>) => void;
+  updateUserProfile: (data?: FormData) => Promise<boolean | undefined>;
+}
+
 export interface OnboardingState {
   currentStep: number;
   totalSteps: number;
   isOnboardingComplete: boolean;
-  userProfile: OnboardingData;
+  // userProfile: OnboardingData;
   setCurrentStep: (step: number) => void;
-  updateProfile: (updates: Partial<OnboardingData>) => void;
-  updateUserProfile: () => Promise<void>;
+  // updateProfile: (updates: Partial<OnboardingData>) => void;
+  // updateUserProfile: () => Promise<void>;
   completeOnboarding: () => void;
   resetOnboarding: () => void;
 }
 
-export type GlobalStore = AuthState & GlobalState & OnboardingState;
+export type GlobalStore = AuthState & GlobalState & OnboardingState & UserState;

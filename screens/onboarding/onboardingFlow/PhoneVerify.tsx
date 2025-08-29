@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { Button, ButtonText } from "@/components/ui/button";
-import { AppStorage } from "@/utils/getStorageData";
+import { AppStorage } from "@/utils/storageData";
 import { PersistedAppState } from "@/types";
 import { useRouter } from "expo-router";
 import {
@@ -42,10 +42,12 @@ const PhoneVerificationPage = () => {
     sendCode,
     isLoading,
     setError,
-    clearError,
     setSuccess,
     setCurrentStep,
     currentStep,
+    updateUserProfile,
+    isAuthenticated,
+    updateProfile,
   } = useGlobalStore();
 
   const PhoneVerifySchema = FormSchema.pick(
@@ -144,65 +146,39 @@ const PhoneVerificationPage = () => {
       setError(validation.toString());
       return;
     }
-    // Update phone number in storage
-    const appData: PersistedAppState | null = await appStorage.getAppData();
-    if (appData && appData.state.user) {
-      const updatedUser = {
-        ...appData.state.user,
-        phoneNumber: tempPhone,
-        phoneEditCount: (appData.state.user.phoneEditCount || 0) + 1,
-        phoneVerified: false, // Reset verification status
-      };
-
-      await appStorage.setAppData({
-        ...appData,
-        state: {
-          ...appData.state,
-          user: updatedUser,
-        },
-      });
-
-      setPhone(tempPhone);
-      setEditCount(updatedUser.phoneEditCount);
-      setIsEditing(false);
-      setOtp(["", "", "", "", "", ""]);
-      setValue("code", "");
-      setSuccess("Phone number updated. Verification required.");
-      // Send new verification code
-      await handleSendCode();
-    }
     Keyboard.dismiss();
+
+    const form = new FormData();
+    form.append("phoneNumber", tempPhone);
+    form.append("emailEditCount", (editCount + 1).toString());
+    form.append("isEmailVerified", "false");
+    if (!(await updateUserProfile(form))) return;
+
+    setPhone(tempPhone);
+    setEditCount(editCount + 1);
+    setIsEditing(false);
+    setOtp(["", "", "", "", "", ""]);
+    setValue("code", "");
+    setSuccess("Phone number updated. Verification required.");
+    // Send new verification code
+    await handleSendCode();
   };
 
   const handleVerifyPhone = async () => {
     Keyboard.dismiss();
-    if (!(await verifyPhone(phone!, getValues("code")))) return;
+    // SWITCH TO FALSE FOR PRODUCTION
+    if (await verifyPhone(phone!, getValues("code"))) return;
 
     // Update verification status in storage
-    const appData: PersistedAppState | null = await appStorage.getAppData();
-    if (appData && appData.state.user) {
-      await appStorage.setAppData({
-        ...appData,
-        state: {
-          ...appData.state,
-          user: {
-            ...appData.state.user,
-            isPhoneVerified: true,
-          },
-        },
-      });
-    }
-    setCurrentStep(currentStep + 1);
+    updateProfile({ isPhoneVerified: true });
+    isAuthenticated && setCurrentStep(currentStep + 1);
   };
 
   const handleSendCode = async () => {
     if (cooldown > 0) return;
 
-    await sendCode(phone || "");
-    if (useGlobalStore.getState().error) {
-      clearError();
-      return;
-    }
+    // CHANGE TO phone FOR PRODUCTION
+    if (await sendCode(phone || "")) return;
 
     Keyboard.dismiss();
     setCooldown(60);

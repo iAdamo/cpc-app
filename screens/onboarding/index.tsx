@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import useGlobalStore from "@/store/globalStore";
 import { VStack } from "@/components/ui/vstack";
 import { Text } from "@/components/ui/text";
@@ -14,7 +14,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeftIcon } from "@/components/ui/icon";
 
 export function OnboardingFlow() {
-  const { currentStep, setCurrentStep } = useGlobalStore();
+  const { currentStep, setCurrentStep, isOnboardingComplete } = useGlobalStore();
+
+
+  // move to current last step if not completed
+  
 
   // Map step numbers to components for easier maintenance
   const stepComponents: { [key: number]: React.ComponentType } = {

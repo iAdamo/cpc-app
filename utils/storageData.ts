@@ -17,8 +17,8 @@ export class AppStorage {
 
   getAppData = async (): Promise<PersistedAppState | null> => {
     try {
-      const value = await AsyncStorage.getItem("app-storage")
-      return value ? JSON.parse(value) as PersistedAppState : null;
+      const value = await AsyncStorage.getItem("app-storage");
+      return value ? (JSON.parse(value) as PersistedAppState) : null;
     } catch (error) {
       console.error("Error getting storage data:", error);
       return null;
@@ -27,6 +27,7 @@ export class AppStorage {
 
   setAppData = async (data: PersistedAppState) => {
     try {
+      console.log("Setting app data:", typeof(data));
       await AsyncStorage.setItem("app-storage", JSON.stringify(data));
     } catch (error) {
       console.error("Error setting storage data:", error);

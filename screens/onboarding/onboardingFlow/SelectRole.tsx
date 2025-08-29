@@ -12,8 +12,8 @@ import Providers from "@/assets/Icons/Providers";
 import { UserData, OnboardingData } from "@/types";
 
 const SelectRole = () => {
-  const { setCurrentStep, currentStep, updateProfile, userProfile } = useGlobalStore();
-  const [activeRole, setActiveRole] = useState(userProfile.activeRole);
+  const { setCurrentStep, currentStep, updateProfile, user } = useGlobalStore();
+  const [activeRole, setActiveRole] = useState(user?.activeRole);
 
   const handleSubmit = () => {
     updateProfile({ activeRole });

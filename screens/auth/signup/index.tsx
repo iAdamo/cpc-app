@@ -87,8 +87,6 @@ const SignUpScreen = () => {
       return;
     }
 
-    // UNDO THIS IN PRODUCTION
-
     if (!(await signUp(data))) {
       setValidated({
         emailValid: false,

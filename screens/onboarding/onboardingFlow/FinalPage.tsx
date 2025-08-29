@@ -8,15 +8,21 @@ import { Spinner } from "@/components/ui/spinner";
 // import { Image } from "@/components/ui/image";
 import useGlobalStore from "@/store/globalStore";
 import { Image } from "react-native";
+import { useRouter } from "expo-router";
 
 const FinalPage = () => {
-  const { userProfile, updateUserProfile, completeOnboarding, isLoading } =
+  const { updateUserProfile, completeOnboarding, isLoading, setCurrentStep } =
     useGlobalStore();
+  const router = useRouter();
   // Call updateUserProfile when this component mounts
   useEffect(() => {
     const finalizeProfile = async () => {
-      await updateUserProfile();
-      completeOnboarding();
+      if (await updateUserProfile()) {
+        completeOnboarding();
+        router.replace("/providers");
+      } else {
+        setCurrentStep(1); // Go back to the first step on failure
+      }
     };
     finalizeProfile();
   }, []);

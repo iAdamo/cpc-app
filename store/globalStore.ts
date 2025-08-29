@@ -3,11 +3,13 @@ import { devtools, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { authSlice } from "./authSlice";
 import { globalSlice } from "./globalSlice";
+import { userSlice } from "./userSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createJSONStorage } from "zustand/middleware";
 import { GlobalStore } from "@/types";
 import { StateCreator } from "zustand";
 import { onboardingSlice } from "./onboardingSlice";
+import { current } from "immer";
 
 type MyStateCreator = StateCreator<
   GlobalStore,
@@ -28,6 +30,7 @@ const useGlobalStore = create<GlobalStore>()(
           ...globalSlice(...a),
           ...authSlice(...a),
           ...onboardingSlice(...a),
+          ...userSlice(...a),
         })) as MyStateCreator,
         {
           name: "app-storage",
@@ -35,6 +38,8 @@ const useGlobalStore = create<GlobalStore>()(
           partialize: (state) => ({
             user: state.user,
             isAuthenticated: state.isAuthenticated,
+            currentStep: state.currentStep,
+            isOnboardingComplete: state.isOnboardingComplete,
           }),
         }
       )

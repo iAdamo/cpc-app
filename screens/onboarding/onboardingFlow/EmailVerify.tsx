@@ -6,7 +6,7 @@ import { Heading } from "@/components/ui/heading";
 import { Pressable } from "@/components/ui/pressable";
 import { Text } from "@/components/ui/text";
 import { Button, ButtonText } from "@/components/ui/button";
-import { AppStorage } from "@/utils/getStorageData";
+import { AppStorage } from "@/utils/storageData";
 import { PersistedAppState } from "@/types";
 import {
   FormControl,
@@ -30,7 +30,7 @@ const EmailVerificationPage = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isEditing, setIsEditing] = useState(false);
   const [editCount, setEditCount] = useState(0);
-  const [maxEdits] = useState(2); // Allow only one edit
+  const [maxEdits] = useState(5); // Allow only one edit
   const [tempEmail, setTempEmail] = useState("");
   const {
     verifyEmail,
@@ -41,6 +41,8 @@ const EmailVerificationPage = () => {
     setCurrentStep,
     currentStep,
     isAuthenticated,
+    updateUserProfile,
+    updateProfile
   } = useGlobalStore();
 
   const EmailVerifySchema = FormSchema.pick(
@@ -120,34 +122,38 @@ const EmailVerificationPage = () => {
   };
 
   const handleSaveEdit = async () => {
-    // Update email in storage
-    const appData: PersistedAppState | null = await appStorage.getAppData();
-    if (appData && appData.state.user) {
-      const updatedUser = {
-        ...appData.state.user,
-        email: tempEmail,
-        emailEditCount: (appData.state.user.emailEditCount || 0) + 1,
-        emailVerified: false, // Reset verification status
-      };
-
-      await appStorage.setAppData({
-        ...appData,
-        state: {
-          ...appData.state,
-          user: updatedUser,
-        },
-      });
-
-      setEmail(tempEmail); // <-- update local state
-      setEditCount(updatedUser.emailEditCount);
+    if (tempEmail === email) {
       setIsEditing(false);
-      setOtp(["", "", "", "", "", ""]);
-      setValue("code", "");
-      setSuccess("Email updated. Verification required.");
-
-      // Send new verification code
-      await handleSendCode();
+      return;
     }
+    Keyboard.dismiss();
+    if (editCount >= maxEdits) {
+      setError("No more edits allowed. Contact support for changes.");
+      return;
+    }
+    if (!FormSchema.shape.email.safeParse(tempEmail).success) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    // Fetch current user data to construct a full UserData object
+    const form = new FormData();
+    form.append("email", tempEmail);
+    form.append("emailEditCount", (editCount + 1).toString());
+    form.append("isEmailVerified", "false");
+    if (!(await updateUserProfile(form))) {
+      return;
+    }
+
+    setEmail(tempEmail); // <-- update local state
+    setEditCount(editCount + 1);
+    setIsEditing(false);
+    setOtp(["", "", "", "", "", ""]);
+    setValue("code", "");
+    setSuccess("Email updated. Verification required.");
+
+    // Send new verification code
+    await handleSendCode();
   };
 
   const handleVerifyEmail = async () => {
@@ -156,19 +162,8 @@ const EmailVerificationPage = () => {
     if (!(await verifyEmail(email!, getValues("code")))) return;
 
     // Update verification status in storage
-    const appData: PersistedAppState | null = await appStorage.getAppData();
-    if (appData && appData.state.user) {
-      await appStorage.setAppData({
-        ...appData,
-        state: {
-          ...appData.state,
-          user: {
-            ...appData.state.user,
-            isEmailVerified: true,
-          },
-        },
-      });
-    }
+    updateProfile({ isEmailVerified: true });
+
     isAuthenticated && setCurrentStep(currentStep + 1);
   };
 

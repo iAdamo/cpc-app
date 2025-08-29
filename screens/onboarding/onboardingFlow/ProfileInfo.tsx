@@ -16,15 +16,15 @@ import { Input, InputField } from "@/components/ui/input";
 import useGlobalStore from "@/store/globalStore";
 
 const ProfileInfo = () => {
-  const { setCurrentStep, currentStep, updateProfile, userProfile, setError } =
+  const { setCurrentStep, currentStep, updateProfile, user, setError } =
     useGlobalStore();
 
-  const firstName = userProfile.firstName || "";
-  const lastName = userProfile.lastName || "";
-  const homeAddress = userProfile.homeAddress || "";
+  const firstName = user?.firstName || "";
+  const lastName = user?.lastName || "";
+  const homeAddress = user?.homeAddress || "";
 
   const handleContinue = () => {
-    if (userProfile.activeRole === "Client") {
+    if (user?.activeRole === "Client") {
       if (firstName.length < 2 || lastName.length < 2) {
         setError("First and Last names must be at least 2 characters long.");
         return;
@@ -35,7 +35,7 @@ const ProfileInfo = () => {
       }
       setCurrentStep(0);
       return;
-    } else if (userProfile.activeRole === "Provider") {
+    } else if (user?.activeRole === "Provider") {
       if (firstName.length < 2 || lastName.length < 2) {
         setError("First and Last names must be at least 2 characters long.");
         return;
@@ -105,7 +105,7 @@ const ProfileInfo = () => {
               placeholder="Address"
               autoCapitalize="words"
               value={homeAddress}
-              onChangeText={(text) => updateProfile({ address: text })}
+              onChangeText={(text) => updateProfile({ homeAddress: text })}
               className="border-2 rounded border-brand-primary/30 focus:border-brand-primary focus:bg-blue-50"
             />
           </Input>
