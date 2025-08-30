@@ -84,7 +84,7 @@ export const TopNavbar = ({ title }: { title: string }) => {
           end={{ x: 1, y: 0 }}
         />
       </HStack>
-      <VStack className="pt-10 pb-4 gap-4">
+      <VStack className="pt-10 gap-4">
         <HStack className="w-full p-4 justify-between items-center">
           <Avatar size="md">
             <AvatarFallbackText>{`${user?.firstName} ${user?.lastName}`}</AvatarFallbackText>
@@ -105,7 +105,7 @@ export const TopNavbar = ({ title }: { title: string }) => {
           </HStack>
         </HStack>
         <FormControl className="">
-          <Input className="mx-4 rounded-xl border-gray-300 h-14 data-[focus=true]:border-2 data-[focus=true]:border-brand-primary/60">
+          <Input className="mx-4 rounded-2xl border-gray-300 h-14 data-[focus=true]:border-2 data-[focus=true]:border-brand-primary/60">
             <InputSlot>
               <InputIcon as={SearchIcon} className="text-gray-300 ml-4" />
             </InputSlot>

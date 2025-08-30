@@ -59,10 +59,13 @@ export interface OnboardingState {
 }
 
 export type ProviderView = "Home" | "Updates" | "Chat" | "Profile";
+export type DisplayView = "Grid" | "List";
 
 export interface ProviderViewState {
   currentView: ProviderView;
   setCurrentView: (view: ProviderView) => void;
+  displayView: DisplayView;
+  setDisplayView: (view: DisplayView) => void;
 }
 
 export type GlobalStore = AuthState &
