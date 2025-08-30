@@ -101,7 +101,6 @@ const SignInScreen = () => {
           <Heading size="xl" className="text-brand-primary">
             Welcome Back!
           </Heading>
-
           <VStack className="gap-8">
             {/** Email */}
             <FormControl
@@ -224,7 +223,6 @@ const SignInScreen = () => {
           </Button>
         </VStack>
       </VStack>
-
       {/** Forgot password modal */}
       {showForgotPasswordModal && (
         <ForgotPasswordModal

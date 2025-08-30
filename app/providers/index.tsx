@@ -1,3 +1,3 @@
-import CompaniesScreen from "@/screens/companies";
+import ProvidersScreen from "@/screens/providers";
 
-export default CompaniesScreen;
+export default ProvidersScreen;

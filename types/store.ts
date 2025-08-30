@@ -58,4 +58,15 @@ export interface OnboardingState {
   resetOnboarding: () => void;
 }
 
-export type GlobalStore = AuthState & GlobalState & OnboardingState & UserState;
+export type ProviderView = "Home" | "Updates" | "Chat" | "Profile";
+
+export interface ProviderViewState {
+  currentView: ProviderView;
+  setCurrentView: (view: ProviderView) => void;
+}
+
+export type GlobalStore = AuthState &
+  GlobalState &
+  OnboardingState &
+  UserState &
+  ProviderViewState;

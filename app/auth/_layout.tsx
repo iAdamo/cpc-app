@@ -6,13 +6,15 @@ import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AppLayout() {
-  const { isAuthenticated, isOnboardingComplete } = useGlobalStore();
+  const { user, isAuthenticated, isOnboardingComplete } = useGlobalStore();
 
   useEffect(() => {
     if (isAuthenticated && !isOnboardingComplete) {
       router.replace("/onboarding");
     } else if (isAuthenticated && isOnboardingComplete) {
-      router.replace("/");
+      if (user?.activeRole === "Client") {
+        router.replace("/providers");
+      }
     } else if (!isAuthenticated && !isOnboardingComplete) {
       router.replace("/onboarding");
     } else if (!isAuthenticated && isOnboardingComplete) {

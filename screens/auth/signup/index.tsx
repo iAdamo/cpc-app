@@ -125,7 +125,6 @@ const SignUpScreen = () => {
           <Heading size="xl" className="text-brand-primary">
             Let's get started!
           </Heading>
-
           <VStack className="gap-4">
             {/* Phone Number */}
             <FormControl

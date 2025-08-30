@@ -9,6 +9,8 @@ import { createJSONStorage } from "zustand/middleware";
 import { GlobalStore } from "@/types";
 import { StateCreator } from "zustand";
 import { onboardingSlice } from "./onboardingSlice";
+import { providerViewSlice } from "./providerViewSlice";
+import { act } from "react";
 import { current } from "immer";
 
 type MyStateCreator = StateCreator<
@@ -31,6 +33,7 @@ const useGlobalStore = create<GlobalStore>()(
           ...authSlice(...a),
           ...onboardingSlice(...a),
           ...userSlice(...a),
+          ...providerViewSlice(...a),
         })) as MyStateCreator,
         {
           name: "app-storage",
@@ -40,6 +43,7 @@ const useGlobalStore = create<GlobalStore>()(
             isAuthenticated: state.isAuthenticated,
             currentStep: state.currentStep,
             isOnboardingComplete: state.isOnboardingComplete,
+            currentView: state.currentView,
           }),
         }
       )
