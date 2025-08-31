@@ -1,7 +1,7 @@
-import { updateUserProfile } from "./../axios/user";
 import { SignUpData, LoginData } from "./auth";
 import { UserData } from "./user";
 import { OnboardingData } from "./onboarding";
+import { SearchResultData } from "./search";
 
 export type PersistedAppState = {
   state: {
@@ -59,17 +59,30 @@ export interface OnboardingState {
 }
 
 export type ProviderView = "Home" | "Updates" | "Chat" | "Profile";
-export type DisplayView = "Grid" | "List";
+export type DisplayStyle = "Grid" | "List";
 
-export interface ProviderViewState {
+export interface ProviderState {
   currentView: ProviderView;
   setCurrentView: (view: ProviderView) => void;
-  displayView: DisplayView;
-  setDisplayView: (view: DisplayView) => void;
+  displayStyle: DisplayStyle;
+  setDisplayStyle: (style: DisplayStyle) => void;
+  searchResults: SearchResultData;
+  setSearchResults: (results: SearchResultData) => void;
+  executeSearch: (params: {
+    page: number;
+    limit: number;
+    engine: boolean;
+    searchInput?: string;
+    lat?: number;
+    long?: number;
+    address?: string;
+    sortBy?: string;
+  }) => Promise<boolean | undefined>;
+  clearSearchResults: () => void;
 }
 
 export type GlobalStore = AuthState &
   GlobalState &
   OnboardingState &
   UserState &
-  ProviderViewState;
+  ProviderState;

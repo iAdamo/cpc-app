@@ -1,0 +1,32 @@
+import { ApiClientSingleton } from "./conf";
+import { ProviderData, ServiceData } from "@/types";
+
+const { axiosInstance } = ApiClientSingleton.getInstance();
+
+export const globalSearch = async (
+  page: number,
+  limit: number,
+  engine: boolean,
+  searchInput?: string,
+  lat?: string,
+  long?: string,
+  address?: string,
+  sortBy?: string
+): Promise<{
+  providers: ProviderData[];
+  services?: ServiceData[];
+  totalPages: number;
+}> => {
+  const params: Record<string, any> = {};
+  if (page) params.page = page;
+  if (limit) params.limit = limit;
+  if (engine) params.engine = engine;
+  if (searchInput) params.searchInput = searchInput;
+  if (lat) params.lat = lat;
+  if (long) params.long = long;
+  if (address) params.address = address;
+  if (sortBy) params.sortBy = sortBy;
+
+  const response = await axiosInstance.get("search/providers", { params });
+  return response.data;
+};

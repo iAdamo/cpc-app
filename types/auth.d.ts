@@ -1,5 +1,3 @@
-import { CompanyData } from "./company";
-
 export interface SignUpData {
   email: string;
   phoneNumber: string;
@@ -10,5 +8,3 @@ export interface LoginData {
   email: string;
   password: string;
 }
-
-

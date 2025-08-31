@@ -1,4 +1,4 @@
-import { CompanyData } from "./company";
+import { CompanyData } from "./provider";
 
 export interface UserData {
   id: string;

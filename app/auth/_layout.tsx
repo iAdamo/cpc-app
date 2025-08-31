@@ -28,7 +28,7 @@ export default function AppLayout() {
         translucent={true}
         backgroundColor={"#FFFFFF"}
       />
-      <Stack screenOptions={{ headerShown: false }} />;
+      <Stack screenOptions={{ headerShown: false }} />
     </SafeAreaView>
   );
 }

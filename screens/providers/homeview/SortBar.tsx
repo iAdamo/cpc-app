@@ -12,7 +12,7 @@ import useGlobalStore from "@/store/globalStore";
 
 const SortBar = () => {
   const { width } = Dimensions.get("window");
-  const { displayView, setDisplayView } = useGlobalStore();
+  const { displayStyle, setDisplayStyle } = useGlobalStore();
   return (
     <VStack className="space-y-4 py-4 bg-white">
       <HStack className="justify-between items-center mt-2">
@@ -27,30 +27,30 @@ const SortBar = () => {
         </HStack>
         <HStack space="lg" className="items-center">
           <Pressable
-            onPress={() => setDisplayView("Grid")}
+            onPress={() => setDisplayStyle("Grid")}
             className={`${
-              displayView === "Grid" ? "bg-brand-primary" : "bg-gray-200"
+              displayStyle === "Grid" ? "bg-brand-primary" : "bg-gray-200"
             } rounded-full p-2 h-fit w-fit`}
           >
             <Icon
               size="xl"
               as={Grid2X2Icon}
               className={`${
-                displayView === "Grid" ? "text-white" : "text-brand-primary"
+                displayStyle === "Grid" ? "text-white" : "text-brand-primary"
               } w-6 h-6`}
             />
           </Pressable>
           <Pressable
-            onPress={() => setDisplayView("List")}
+            onPress={() => setDisplayStyle("List")}
             className={`${
-              displayView === "List" ? "bg-brand-primary" : "bg-gray-200"
+              displayStyle === "List" ? "bg-brand-primary" : "bg-gray-200"
             } rounded-full p-2 h-fit w-fit`}
           >
             <Icon
               size="xl"
               as={ListIcon}
               className={`${
-                displayView === "List" ? "text-white" : "text-brand-primary"
+                displayStyle === "List" ? "text-white" : "text-brand-primary"
               } w-6 h-6`}
             />
           </Pressable>

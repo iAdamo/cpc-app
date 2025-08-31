@@ -1,4 +1,6 @@
-export interface CompanyData {
+ // import { SubcategoryData } from "./subcategory";
+
+export interface ProviderData {
   _id: string;
   id: string;
   companyName: string;

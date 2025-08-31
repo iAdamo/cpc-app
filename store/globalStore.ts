@@ -9,7 +9,7 @@ import { createJSONStorage } from "zustand/middleware";
 import { GlobalStore } from "@/types";
 import { StateCreator } from "zustand";
 import { onboardingSlice } from "./onboardingSlice";
-import { providerViewSlice } from "./providerViewSlice";
+import { providerViewSlice } from "./providerSlice";
 import { act } from "react";
 import { current } from "immer";
 
@@ -44,7 +44,7 @@ const useGlobalStore = create<GlobalStore>()(
             currentStep: state.currentStep,
             isOnboardingComplete: state.isOnboardingComplete,
             currentView: state.currentView,
-            displayView: state.displayView,
+            displayStyle: state.displayStyle,
           }),
         }
       )
