@@ -5,3 +5,4 @@ export * from "./store";
 export * from "./onboarding";
 export * from "./service";
 export * from "./search";
+export * from "./location";

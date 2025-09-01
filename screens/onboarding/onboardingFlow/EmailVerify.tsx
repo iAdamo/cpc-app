@@ -6,7 +6,6 @@ import { Heading } from "@/components/ui/heading";
 import { Pressable } from "@/components/ui/pressable";
 import { Text } from "@/components/ui/text";
 import { Button, ButtonText } from "@/components/ui/button";
-import { AppStorage } from "@/utils/storageData";
 import { PersistedAppState } from "@/types";
 import {
   FormControl,
@@ -42,7 +41,8 @@ const EmailVerificationPage = () => {
     currentStep,
     isAuthenticated,
     updateUserProfile,
-    updateProfile
+    updateProfile,
+    user,
   } = useGlobalStore();
 
   const EmailVerifySchema = FormSchema.pick(
@@ -68,17 +68,12 @@ const EmailVerificationPage = () => {
     },
   });
 
-  const appStorage = new AppStorage();
-
   useEffect(() => {
     const fetchEmailData = async () => {
-      const appData: PersistedAppState | null = await appStorage.getAppData();
-      if (appData && appData.state.user) {
-        setEmail(appData.state.user.email);
-        // Load edit count from storage
-        const editCount = appData.state.user.emailEditCount || 0;
-        setEditCount(editCount);
-      }
+      setEmail(user?.email!);
+      // Load edit count from storage
+      const editCount = user?.emailEditCount!;
+      setEditCount(editCount);
     };
     fetchEmailData();
   }, []);

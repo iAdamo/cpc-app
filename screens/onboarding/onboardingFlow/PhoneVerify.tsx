@@ -5,7 +5,6 @@ import { Card } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { Button, ButtonText } from "@/components/ui/button";
-import { AppStorage } from "@/utils/storageData";
 import { PersistedAppState } from "@/types";
 import { useRouter } from "expo-router";
 import {
@@ -48,6 +47,7 @@ const PhoneVerificationPage = () => {
     updateUserProfile,
     isAuthenticated,
     updateProfile,
+    user,
   } = useGlobalStore();
 
   const PhoneVerifySchema = FormSchema.pick(
@@ -75,17 +75,11 @@ const PhoneVerificationPage = () => {
 
   // const phoneNumberValue = watch("phoneNumber");
 
-  const appStorage = new AppStorage();
-
   useEffect(() => {
     const fetchPhoneData = async () => {
-      const appData: PersistedAppState | null = await appStorage.getAppData();
-      if (appData && appData.state.user) {
-        setPhone(appData.state.user.phoneNumber);
-        // Load edit count from storage
-        const editCount = appData.state.user.phoneEditCount || 0;
-        setEditCount(editCount);
-      }
+      setPhone(user?.phoneNumber!);
+      // Load edit count from storage
+      setEditCount(user?.phoneEditCount!);
     };
     fetchPhoneData();
   }, []);

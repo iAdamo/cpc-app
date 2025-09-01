@@ -2,6 +2,8 @@ import { SignUpData, LoginData } from "./auth";
 import { UserData } from "./user";
 import { OnboardingData } from "./onboarding";
 import { SearchResultData } from "./search";
+import { Place, PlaceDetails } from "./location";
+import { LocationObject, LocationSubscription } from "expo-location";
 
 export type PersistedAppState = {
   state: {
@@ -81,8 +83,26 @@ export interface ProviderState {
   clearSearchResults: () => void;
 }
 
+export interface LocationState {
+  currentLocation: LocationObject | null;
+  liveLocation: LocationObject | null;
+  isTracking: boolean;
+  watchId: LocationSubscription | null;
+  places: Place[];
+  locationError: string | null;
+  clearLocationError: () => void;
+  selectedPlace: PlaceDetails | null;
+  getCurrentLocation: () => Promise<LocationObject | undefined>;
+  startLiveTracking: () => Promise<void>;
+  stopLiveTracking: () => void;
+  setSelectedPlace: (place: PlaceDetails) => void;
+  searchPlaces: (query: string) => Promise<void>;
+  getPlaceDetails: (placeId: string) => Promise<PlaceDetails | undefined>;
+}
+
 export type GlobalStore = AuthState &
   GlobalState &
   OnboardingState &
   UserState &
-  ProviderState;
+  ProviderState &
+  LocationState;
