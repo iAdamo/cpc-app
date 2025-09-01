@@ -10,7 +10,7 @@ import { ProviderData } from "@/types";
 
 const TABS = [{ label: "About" }, { label: "Portfolio" }, { label: "Reviews" }];
 
-const MoreInfo = ({provider}: {provider: ProviderData | null}) => {
+const MoreInfo = ({ provider }: { provider: any | null }) => {
   const [selectedTab, setSelectedTab] = useState<string>("About");
 
   return (
@@ -40,6 +40,8 @@ const MoreInfo = ({provider}: {provider: ProviderData | null}) => {
         <VStack className="mt-4">
           <Card variant="filled">
             <Text className="text-justify break-words line-clamp-[9]">
+              {provider.providerDescription ||
+                `
               Hi, I&apos;m Akpan Blessing, a professional painter with over 10
               years of experience transforming homes and offices across Lagos. I
               specialize in creating beautiful, vibrant, and lasting finishes
@@ -50,7 +52,7 @@ const MoreInfo = ({provider}: {provider: ProviderData | null}) => {
               homes and offices across Lagos. I specialize in creating
               beautiful, vibrant, and lasting finishes that bring your spaces to
               life. Whether it&apos;s a modern look, classic design, or artistic
-              touch, I ensure every project is tailored to your style and needs.
+              touch, I ensure every project is tailored to your style and needs.`}
             </Text>
           </Card>
         </VStack>
@@ -61,7 +63,7 @@ const MoreInfo = ({provider}: {provider: ProviderData | null}) => {
             <ScrollView
               showsVerticalScrollIndicator={false}
               className="space-y-4"
-              style={{ height: 400, width: "100%",  }}
+              style={{ height: 400, width: "100%" }}
             >
               {[1, 2, 3, 4, 5].map((item) => (
                 <Image

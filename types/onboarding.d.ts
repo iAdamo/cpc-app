@@ -1,3 +1,5 @@
+import { Subcategory, ServiceCategory } from "./services";
+
 export interface OnboardingData {
   activeRole: string;
   firstName: string;

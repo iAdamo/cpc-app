@@ -11,11 +11,13 @@ import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
 import useGlobalStore from "@/store/globalStore";
 import ProviderCard from "@/components/ProviderCard";
 import { ProviderData } from "@/types";
+import { id } from "zod/v4/locales";
 
 const ContentDisplay = ({ providers }: { providers: ProviderData[] }) => {
   // companies
   const data = [
     {
+      id: 1,
       providerName: "John's Plumbing",
       profilePicture: "https://randomuser.me/api/portraits",
       providerDescription:
@@ -26,6 +28,7 @@ const ContentDisplay = ({ providers }: { providers: ProviderData[] }) => {
       category: "Plumbing",
     },
     {
+      id: 2,
       providerName: "Bright Electricians",
       profilePicture: "https://randomuser.me/api/portraits",
       providerDescription: "Professional electrical installations and repairs.",
@@ -35,6 +38,7 @@ const ContentDisplay = ({ providers }: { providers: ProviderData[] }) => {
       category: "Electrical",
     },
     {
+      id: 3,
       providerName: "Sparkle Cleaners",
       profilePicture: "https://randomuser.me/api/portraits",
       providerDescription: "Top-notch cleaning services for homes and offices.",
@@ -44,6 +48,7 @@ const ContentDisplay = ({ providers }: { providers: ProviderData[] }) => {
       category: "Cleaning",
     },
     {
+      id: 4,
       providerName: "Handy Carpentry",
       profilePicture: "https://randomuser.me/api/portraits",
       providerDescription: "Custom carpentry solutions for all your needs.",
@@ -53,6 +58,7 @@ const ContentDisplay = ({ providers }: { providers: ProviderData[] }) => {
       category: "Carpentry",
     },
     {
+      id: 5,
       providerName: "Pro Painters",
       profilePicture: "https://randomuser.me/api/portraits",
       providerDescription:
@@ -63,6 +69,7 @@ const ContentDisplay = ({ providers }: { providers: ProviderData[] }) => {
       category: "Painting",
     },
     {
+      id: 6,
       providerName: "Green Thumb Landscaping",
       profilePicture: "https://randomuser.me/api/portraits",
       providerDescription: "Beautiful landscaping and lawn care services.",
@@ -72,6 +79,7 @@ const ContentDisplay = ({ providers }: { providers: ProviderData[] }) => {
       category: "Landscaping",
     },
     {
+      id: 7,
       providerName: "Swift Movers",
       profilePicture: "https://randomuser.me/api/portraits",
       providerDescription:
@@ -82,6 +90,7 @@ const ContentDisplay = ({ providers }: { providers: ProviderData[] }) => {
       category: "Moving",
     },
     {
+      id: 8,
       providerName: "PestAway Control",
       profilePicture: "https://randomuser.me/api/portraits",
       providerDescription:
@@ -92,6 +101,7 @@ const ContentDisplay = ({ providers }: { providers: ProviderData[] }) => {
       category: "Pest Control",
     },
     {
+      id: 9,
       providerName: "Cool Air HVAC",
       profilePicture: "https://randomuser.me/api/portraits",
       providerDescription: "Expert HVAC installation and repair services.",
@@ -101,6 +111,7 @@ const ContentDisplay = ({ providers }: { providers: ProviderData[] }) => {
       category: "HVAC",
     },
     {
+      id: 10,
       providerName: "FixIt Appliance Repair",
       profilePicture: "https://randomuser.me/api/portraits",
       providerDescription:
@@ -120,8 +131,8 @@ const ContentDisplay = ({ providers }: { providers: ProviderData[] }) => {
   return (
     <VStack className={`${view}`}>
       {(providers && providers.length > 0 ? providers : data).map(
-        (provider, index) => (
-          <ProviderCard key={index} provider={provider} />
+        (provider) => (
+          <ProviderCard key={provider.id} provider={provider} />
         )
       )}
     </VStack>

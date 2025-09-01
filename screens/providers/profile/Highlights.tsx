@@ -5,8 +5,9 @@ import { Image } from "@/components/ui/image";
 import { Pressable } from "@/components/ui/pressable";
 import { Card } from "@/components/ui/card";
 import { ScrollView } from "react-native";
+import { ProviderData } from "@/types";
 
-const Highlights = () => {
+const Highlights = ({provider}: {provider: any | null}) => {
   const highlights = [
     {
       id: 1,

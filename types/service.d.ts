@@ -1,3 +1,4 @@
+import { ProviderData } from "./provider";
 export interface SubcategoryData {
   _id: string;
   id: string;
@@ -34,7 +35,7 @@ export interface ServiceData {
   category: string;
   ratings: number;
   location: string;
-  provider: CompanyData;
+  provider: ProviderData;
   favoritedBy: string[];
   favoriteCount: number;
   images: string[];

@@ -12,19 +12,22 @@ import {
   MessageSquareTextIcon,
   PhoneIcon,
 } from "lucide-react-native";
+import { ProviderData } from "@/types";
 
-const ProfileInfo = () => {
+const ProfileInfo = ({ provider }: { provider: any | null }) => {
   return (
     <VStack className="bg-white">
       {/* Profile Info Section */}
       <VStack className="">
         <HStack className="justify-between">
           <Card className="w-1/2 gap-2 items-start">
-            <Heading className="font-semibold">Alejandro De'Armas</Heading>
-            <Text>Tree Felling</Text>
+            <Heading className="font-semibold">
+              {provider?.providerName || "Alejandro De'Armas"}
+            </Heading>
+            <Text>{provider.category || "Tree Felling"}</Text>
             <HStack space="xs" className="items-center ">
               <Icon as={MapPinIcon} size="sm" className="text-gray-500" />
-              <Text className="break-words">Florida, United States</Text>
+              <Text className="break-words">{provider.location || "Florida, United States"}</Text>
             </HStack>
           </Card>
           <Card className="gap-2 items-end">

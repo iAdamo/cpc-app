@@ -1,15 +1,15 @@
- // import { SubcategoryData } from "./subcategory";
+import { SubcategoryData } from "./subcategory";
 
 export interface ProviderData {
   _id: string;
   id: string;
-  companyName: string;
-  companyDescription: string;
-  companyEmail: string;
-  companyPhoneNumber: string;
+  providerName: string;
+  providerDescription: string;
+  providerEmail: string;
+  providerPhoneNumber: string;
   subcategories: SubcategoryData[];
   website: string;
-  companySocialMedia: {
+  providerSocialMedia: {
     facebook?: string;
     twitter?: string;
     instagram?: string;
@@ -18,7 +18,7 @@ export interface ProviderData {
   };
   reviewCount: number;
   averageRating: number;
-  companyImages: string[];
+  providerImages: string[];
   services: any[];
   clients: any[];
   latitude: number;

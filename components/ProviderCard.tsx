@@ -14,6 +14,7 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar";
 import { MapPinIcon } from "lucide-react-native";
+import { router } from "expo-router";
 
 const ProviderCard = ({ provider }: { provider: any }) => {
   const { displayStyle } = useGlobalStore();
@@ -22,7 +23,12 @@ const ProviderCard = ({ provider }: { provider: any }) => {
   const isGrid = displayStyle === "Grid";
 
   return (
-    <Pressable className={`${isGrid ? "w-[48%] mb-4" : "w-full mb-4"}`}>
+    <Pressable
+      onPress={() =>
+        router.push({ pathname: "/profile/[id]", params: { id: provider.id } })
+      }
+      className={`${isGrid ? "w-[48%] mb-4" : "w-full mb-4"}`}
+    >
       <Card
         className={`rounded-lg p-0 ${isGrid ? "w-full h-72" : "w-full h-40"}`}
       >

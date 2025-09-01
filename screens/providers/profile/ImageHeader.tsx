@@ -6,8 +6,9 @@ import { Heading } from "@/components/ui/heading";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { ImageBackground, StyleSheet } from "react-native";
 import { ChevronLeftIcon, ThreeDotsIcon } from "@/components/ui/icon";
-// import { router } from "expo-router";
+import { router } from "expo-router";
 import { Divider } from "@/components/ui/divider";
+import { ProviderData } from "@/types";
 
 const styles = StyleSheet.create({
   header: {
@@ -17,7 +18,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
 });
-const ImageHeader = () => {
+const ImageHeader = ({ provider }: { provider: any | null }) => {
   return (
     <VStack className="h-1/3">
       <ImageBackground
@@ -29,7 +30,7 @@ const ImageHeader = () => {
         <HStack className="justify-between items-center pt-14 px-4">
           <Button
             variant="outline"
-            onPress={() => {}}
+            onPress={() => router.back()}
             className="px-2 border-gray-100/30 bg-gray-800/20 rounded-xl blur-md"
           >
             <ButtonIcon as={ChevronLeftIcon} className="text-white w-6 h-6" />

@@ -1,4 +1,4 @@
-import { CompanyData } from "./provider";
+import { ProviderData } from "./provider";
 
 export interface UserData {
   id: string;
@@ -17,7 +17,7 @@ export interface UserData {
   purchasedServices: any[];
   createdAt: string;
   updatedAt: string;
-  activeRoleId?: Partial<CompanyData>;
+  activeRoleId?: Partial<ProviderData>;
   isVerified: boolean;
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
@@ -28,6 +28,6 @@ export interface UserData {
     email: string;
     profilePicture: string;
   }[];
-  hiredCompanies: CompanyData[];
+  hiredCompanies: ProviderData[];
   owner: string;
 }
