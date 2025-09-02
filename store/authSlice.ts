@@ -51,6 +51,7 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
           user: response,
           success: "Logged in successfully!",
           isAuthenticated: true,
+          isOnboardingComplete: true,
           isLoading: false,
         });
         await SecureStore.setItemAsync("accessToken", response.accessToken);

@@ -1,9 +1,17 @@
+import {
+  LocationObjectCoords,
+  LocationGeocodedAddress,
+} from "./../node_modules/expo-location/build/Location.types.d";
 import { SignUpData, LoginData } from "./auth";
 import { UserData } from "./user";
 import { OnboardingData } from "./onboarding";
 import { SearchResultData } from "./search";
 import { Place, PlaceDetails } from "./location";
-import { LocationObject, LocationSubscription } from "expo-location";
+import {
+  LocationObject,
+  LocationSubscription,
+  LocationGeocodedAddress,
+} from "expo-location";
 
 export type PersistedAppState = {
   state: {
@@ -84,7 +92,7 @@ export interface ProviderState {
 }
 
 export interface LocationState {
-  currentLocation: LocationObject | null;
+  currentLocation: (LocationObject & LocationGeocodedAddress) | null;
   liveLocation: LocationObject | null;
   isTracking: boolean;
   watchId: LocationSubscription | null;
@@ -92,7 +100,9 @@ export interface LocationState {
   locationError: string | null;
   clearLocationError: () => void;
   selectedPlace: PlaceDetails | null;
-  getCurrentLocation: () => Promise<LocationObject | undefined>;
+  getCurrentLocation: () => Promise<
+    (LocationObject & LocationGeocodedAddress) | undefined
+  >;
   startLiveTracking: () => Promise<void>;
   stopLiveTracking: () => void;
   setSelectedPlace: (place: PlaceDetails) => void;

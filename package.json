@@ -92,7 +92,8 @@
     "zod": "^3.25.76",
     "zustand": "^5.0.7",
     "expo-camera": "~16.1.11",
-    "expo-media-library": "~17.1.7"
+    "expo-media-library": "~17.1.7",
+    "expo-dev-client": "~5.2.4"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

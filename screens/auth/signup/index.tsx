@@ -47,6 +47,7 @@ const SignUpScreen = () => {
     isLoading,
     setError,
     isAuthenticated,
+    isOnboardingComplete,
     setCurrentStep,
     currentStep,
   } = useGlobalStore();
@@ -54,6 +55,10 @@ const SignUpScreen = () => {
   const router = useRouter();
 
   const switchToSignIn = () => {
+    useGlobalStore.setState({
+      isAuthenticated: false,
+      isOnboardingComplete: true,
+    });
     router.replace("/auth/signin");
   };
 

@@ -18,6 +18,7 @@ export const locationSlice: StateCreator<GlobalStore, [], [], LocationState> = (
   selectedPlace: null,
   getCurrentLocation: async () => {
     try {
+      set({ isLoading: true, locationError: null });
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         set({ locationError: "Permission to access location was denied" });
@@ -27,15 +28,31 @@ export const locationSlice: StateCreator<GlobalStore, [], [], LocationState> = (
         accuracy: Location.Accuracy.Highest,
       });
 
-      set({ currentLocation: location, locationError: null });
-      return location;
+      const addressArr = await Location.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+      const address = addressArr[0];
+
+      set({
+        currentLocation: { ...location, ...address },
+        isLoading: false,
+        locationError: null,
+      });
+      return { ...location, ...address };
     } catch (error) {
       set({
+        isLoading: false,
         locationError:
           (error as Error).message || "Failed to get current location",
       });
     }
   },
+
+  /**
+   * Starts live location tracking, updating the liveLocation state every 5 seconds or 10 meters.
+   * @returns void
+   */
   startLiveTracking: async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();

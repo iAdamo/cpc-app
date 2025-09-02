@@ -45,16 +45,19 @@ const SignInScreen = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
 
-  //const { login } = useSession();
   const router = useRouter();
-  const { login, isLoading, isAuthenticated } = useGlobalStore();
+  const { login, isLoading, isAuthenticated, isOnboardingComplete } =
+    useGlobalStore();
   const switchToSignUp = () => {
+    useGlobalStore.setState({
+      isAuthenticated: false,
+      isOnboardingComplete: false,
+    });
     router.replace("/auth/signup");
   };
-  const toast = useToast();
 
   // handle form submission
-  const SignInSchema = FormSchema.omit({ confirmPassword: true, code: true });
+  const SignInSchema = FormSchema.pick({ email: true, password: true });
   type SignInSchemaType = z.infer<typeof SignInSchema>;
 
   const {

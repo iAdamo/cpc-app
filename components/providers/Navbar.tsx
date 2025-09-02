@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { VStack } from "../ui/vstack";
 import { HStack } from "../ui/hstack";
 import { Pressable } from "../ui/pressable";
@@ -13,7 +13,7 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar";
 import { BellDotIcon, NavigationIcon } from "lucide-react-native";
-import { Button, ButtonText, ButtonIcon } from "../ui/button";
+import { Button, ButtonText, ButtonIcon, ButtonSpinner } from "../ui/button";
 import { Input, InputField, InputIcon, InputSlot } from "../ui/input";
 import { FormControl } from "../ui/form-control";
 import {
@@ -68,7 +68,12 @@ export const BottomNavbar = () => {
 };
 
 export const TopNavbar = ({ title }: { title: string }) => {
-  const { user } = useGlobalStore();
+  const { user, currentLocation, getCurrentLocation, isLoading } =
+    useGlobalStore();
+
+  useEffect(() => {
+    getCurrentLocation();
+  }, []);
 
   return (
     <VStack className="bg-white">
@@ -94,9 +99,20 @@ export const TopNavbar = ({ title }: { title: string }) => {
             <Button
               size="sm"
               className="h-10 bg-brand-primary data-[active=true]:bg-brand-secondary rounded-full "
+              onPress={getCurrentLocation}
             >
               <ButtonIcon as={NavigationIcon} />
-              <ButtonText>Florida, United States</ButtonText>
+              {isLoading ? (
+                <ButtonSpinner />
+              ) : (
+                <ButtonText className="line-clamp-1 max-w-32">
+                  {currentLocation?.city}
+                  {", "}
+                  {currentLocation?.region}
+                  {", "}
+                  {currentLocation?.isoCountryCode}
+                </ButtonText>
+              )}
               <ButtonIcon as={ChevronDownIcon} />
             </Button>
             <Button className="rounded-full h-0 w-0 p-5 bg-brand-primary/30">

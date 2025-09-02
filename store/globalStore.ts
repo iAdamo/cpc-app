@@ -11,6 +11,7 @@ import { StateCreator } from "zustand";
 import { onboardingSlice } from "./onboardingSlice";
 import { providerViewSlice } from "./providerSlice";
 import { locationSlice } from "./locationSlice";
+import { current } from "immer";
 
 type MyStateCreator = StateCreator<
   GlobalStore,
