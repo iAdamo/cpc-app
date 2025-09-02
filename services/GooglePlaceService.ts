@@ -37,8 +37,6 @@ export class GooglePlaceService {
     }
   }
 
-  
-
   static async getPlaceDetails(placeId: string): Promise<PlaceDetails> {
     try {
       const response = await axios.get(PLACE_DETAILS_URL, {

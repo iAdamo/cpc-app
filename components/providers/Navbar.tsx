@@ -24,6 +24,7 @@ import {
 } from "lucide-react-native";
 import useGlobalStore from "@/store/globalStore";
 import { LinearGradient } from "expo-linear-gradient";
+import SearchBar from "../SearchEngine";
 
 export const BottomNavbar = () => {
   const { currentView, setCurrentView } = useGlobalStore();
@@ -73,6 +74,7 @@ export const TopNavbar = ({ title }: { title: string }) => {
 
   useEffect(() => {
     getCurrentLocation();
+    console.log(currentLocation);
   }, []);
 
   return (
@@ -98,7 +100,7 @@ export const TopNavbar = ({ title }: { title: string }) => {
           <HStack className="items-center gap-2">
             <Button
               size="sm"
-              className="h-10 bg-brand-primary data-[active=true]:bg-brand-secondary rounded-full "
+              className="h-10 bg-brand-primary data-[active=true]:bg-brand-secondary rounded-full"
               onPress={getCurrentLocation}
             >
               <ButtonIcon as={NavigationIcon} />
@@ -106,11 +108,11 @@ export const TopNavbar = ({ title }: { title: string }) => {
                 <ButtonSpinner />
               ) : (
                 <ButtonText className="line-clamp-1 max-w-32">
-                  {currentLocation?.city}
-                  {", "}
-                  {currentLocation?.region}
-                  {", "}
-                  {currentLocation?.isoCountryCode}
+                  {`${
+                    currentLocation
+                      ? `${currentLocation.city}, ${currentLocation.region}, ${currentLocation.isoCountryCode}`
+                      : "Get Location"
+                  }`}
                 </ButtonText>
               )}
               <ButtonIcon as={ChevronDownIcon} />
@@ -120,31 +122,9 @@ export const TopNavbar = ({ title }: { title: string }) => {
             </Button>
           </HStack>
         </HStack>
-        <FormControl className="">
-          <Input className="mx-4 rounded-2xl border-gray-300 h-14 data-[focus=true]:border-2 data-[focus=true]:border-brand-primary/60">
-            <InputSlot>
-              <InputIcon as={SearchIcon} className="text-gray-300 ml-4" />
-            </InputSlot>
-            <InputField
-              placeholder="Search"
-              className="placeholder:text-xl placeholder:text-gray-300"
-            />
-          </Input>
-        </FormControl>
+        {/** Search bar */}
+        <SearchBar />
       </VStack>
     </VStack>
   );
 };
-
-//  <LinearGradient
-//    colors={["#ffffff20", "#2563eb70"]}
-//    style={{
-//      position: "absolute",
-//      width: "100%",
-//      height: "auto",
-//      borderRadius: 8,
-//      zIndex: 10,
-//    }}
-//    start={{ x: 1, y: 1 }}
-//    end={{ x: 1, y: 0 }}
-//  />;

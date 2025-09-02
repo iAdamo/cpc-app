@@ -108,9 +108,10 @@ export const locationSlice: StateCreator<GlobalStore, [], [], LocationState> = (
     try {
       const results = await GooglePlaceService.autocomplete(query);
       set({ places: results, locationError: null });
-    } catch (error) {
+    } catch (err) {
       set({
-        locationError: (error as Error).message || "Failed to search places",
+        locationError: (err as Error).message || "Failed to search places",
+        error: (err as Error).message,
       });
     }
   },
