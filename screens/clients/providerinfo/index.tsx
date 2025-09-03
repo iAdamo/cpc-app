@@ -6,7 +6,7 @@ import MoreInfo from "./MoreInfo";
 import useGlobalStore from "@/store/globalStore";
 import { useLocalSearchParams } from "expo-router";
 
-const ProfileScreen = () => {
+const ProviderInfo = () => {
   const { searchResults } = useGlobalStore();
   console.log("Search Results in Profile Screen:", searchResults);
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -137,4 +137,4 @@ const data = [
   );
 };
 
-export default ProfileScreen;
+export default ProviderInfo;

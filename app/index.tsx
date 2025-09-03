@@ -37,3 +37,7 @@ export default function App() {
 // import ProfileScreen from "@/screens/providers/profile";
 
 // export default ProfileScreen;
+
+// import Profile from "@/screens/profile";
+
+// export default Profile;

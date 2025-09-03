@@ -20,6 +20,8 @@ export type PersistedAppState = {
   };
 };
 
+export type ActiveRole = "Client" | "Provider";
+
 export interface GlobalState {
   isLoading: boolean;
   error: string | null;
@@ -27,6 +29,8 @@ export interface GlobalState {
   setSuccess: (success: string | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+  switchRole: ActiveRole;
+  setSwitchRole: (role: ActiveRole) => void;
 }
 
 export interface AuthState {
@@ -60,10 +64,7 @@ export interface OnboardingState {
   currentStep: number;
   totalSteps: number;
   isOnboardingComplete: boolean;
-  // userProfile: OnboardingData;
   setCurrentStep: (step: number) => void;
-  // updateProfile: (updates: Partial<OnboardingData>) => void;
-  // updateUserProfile: () => Promise<void>;
   completeOnboarding: () => void;
   resetOnboarding: () => void;
 }

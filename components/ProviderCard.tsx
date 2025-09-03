@@ -25,7 +25,7 @@ const ProviderCard = ({ provider }: { provider: any }) => {
   return (
     <Pressable
       onPress={() =>
-        router.push({ pathname: "/profile/[id]", params: { id: provider.id } })
+        router.push({ pathname: "/providers/[id]", params: { id: provider.id } })
       }
       className={`${isGrid ? "w-[48%] mb-4" : "w-full mb-4"}`}
     >

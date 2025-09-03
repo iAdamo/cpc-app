@@ -1,28 +1,21 @@
 import { Card } from "../ui/card";
 import { Image } from "../ui/image";
-import { Button, ButtonText, ButtonIcon, ButtonSpinner } from "../ui/button";
+import { Button, ButtonText, ButtonIcon } from "../ui/button";
 import * as ImagePicker from "expo-image-picker";
 // import * as Camera from "expo-camera";
 import { Box } from "../ui/box";
 import { VStack } from "../ui/vstack";
-import { HStack } from "../ui/hstack";
 import { Text } from "../ui/text";
-import { Heading } from "../ui/heading";
 import { useState, useEffect, useRef } from "react";
 import {
   Icon,
   CameraIcon,
-  EditIcon,
-  CheckIcon,
   CloseIcon,
   SmileyIcon,
-  LoaderIcon,
 } from "../ui/icon";
 import {
   ActivityIndicator,
   Alert,
-  Modal,
-  TouchableOpacity,
 } from "react-native";
 import {
   Actionsheet,

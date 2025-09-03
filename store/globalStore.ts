@@ -47,6 +47,7 @@ const useGlobalStore = create<GlobalStore>()(
             currentView: state.currentView,
             displayStyle: state.displayStyle,
             currentLocation: state.currentLocation,
+            switchRole: state.switchRole,
           }),
         }
       )

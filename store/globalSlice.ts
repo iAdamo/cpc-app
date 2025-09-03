@@ -1,5 +1,5 @@
 import { StateCreator } from "zustand";
-import { GlobalStore, GlobalState } from "@/types";
+import { GlobalStore, GlobalState, ActiveRole } from "@/types";
 
 export const globalSlice: StateCreator<GlobalStore, [], [], GlobalState> = (
   set
@@ -10,4 +10,6 @@ export const globalSlice: StateCreator<GlobalStore, [], [], GlobalState> = (
   setSuccess: (success) => set({ success }),
   setLoading: (loading) => set({ isLoading: loading }),
   setError: (error) => set({ error }),
+  switchRole: "Client",
+  setSwitchRole: (role) => set({ switchRole: role }),
 });
