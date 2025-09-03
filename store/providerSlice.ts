@@ -5,6 +5,7 @@ import {
   ProviderView,
   DisplayStyle,
   SearchResultData,
+  SortBy,
 } from "@/types";
 import { globalSearch } from "@/axios/search";
 
@@ -13,9 +14,11 @@ export const providerViewSlice: StateCreator<
   [],
   [],
   ProviderState
-> = (set) => ({
+> = (set, get) => ({
   currentView: "Home",
   displayStyle: "Grid",
+  sortBy: "Relevance",
+  setSortBy: (sortBy: SortBy) => set({ sortBy }),
   setDisplayStyle: (style: DisplayStyle) => set({ displayStyle: style }),
   setCurrentView: (view: ProviderView) => set({ currentView: view }),
 
@@ -36,8 +39,8 @@ export const providerViewSlice: StateCreator<
   }) => {
     set({ isLoading: true, error: null, success: null });
     try {
-      const { page, limit, engine, searchInput, lat, long, address, sortBy } =
-        params;
+      const { page, limit, engine, searchInput, lat, long, address } = params;
+      const sortBy = get().sortBy;
       const response = await globalSearch(
         page,
         limit,

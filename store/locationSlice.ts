@@ -28,6 +28,18 @@ export const locationSlice: StateCreator<GlobalStore, [], [], LocationState> = (
         accuracy: Location.Accuracy.Highest,
       });
 
+      const prevLocation = get().currentLocation;
+      if (
+        prevLocation &&
+        prevLocation.coords &&
+        location.coords &&
+        prevLocation.coords.latitude === location.coords.latitude &&
+        prevLocation.coords.longitude === location.coords.longitude
+      ) {
+        set({ isLoading: false, locationError: null });
+        return prevLocation;
+      }
+
       const addressArr = await Location.reverseGeocodeAsync({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,

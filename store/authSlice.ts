@@ -23,7 +23,6 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
     set({ isLoading: true, error: null });
     try {
       const response = await signUpUser(userData);
-      console.log("response", response);
       if (response) {
         set({
           user: response,

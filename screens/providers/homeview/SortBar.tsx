@@ -9,21 +9,48 @@ import { ChevronRightIcon } from "@/components/ui/icon";
 import { ChevronDownIcon, ListIcon, Grid2X2Icon } from "lucide-react-native";
 import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
 import useGlobalStore from "@/store/globalStore";
+import { Menu, MenuItem, MenuItemLabel } from "@/components/ui/menu";
+import { SortBy } from "@/types";
 
 const SortBar = () => {
-  const { width } = Dimensions.get("window");
-  const { displayStyle, setDisplayStyle } = useGlobalStore();
+  const { displayStyle, setDisplayStyle, sortBy, setSortBy } = useGlobalStore();
+  const sorts: SortBy[] = ["Relevance", "Newest", "Oldest"];
   return (
     <VStack className="space-y-4 py-4 bg-white">
       <HStack className="justify-between items-center mt-2">
         <HStack space="xs" className="items-center">
           <Text size="lg">Sort by:</Text>
-          <Button size="lg" variant="link" className="gap-0.5">
-            <ButtonText className="text-brand-primary active:no-underline">
-              Relevance
-            </ButtonText>
-            <ButtonIcon as={ChevronDownIcon} />
-          </Button>
+          <Menu
+            placement="bottom"
+            className="w-36"
+            crossOffset={15}
+            trigger={({ ...triggerProps }) => {
+              return (
+                <Button
+                  {...triggerProps}
+                  size="lg"
+                  variant="link"
+                  className="gap-0.5"
+                >
+                  <ButtonText className="text-brand-primary data-[active=true]:no-underline">
+                    {sortBy}
+                  </ButtonText>
+                  <ButtonIcon as={ChevronDownIcon} />
+                </Button>
+              );
+            }}
+          >
+            {sorts.map((sort, index) => (
+              <MenuItem
+                key={index}
+                onPress={() => setSortBy(sort)}
+                textValue={sort}
+                className=""
+              >
+                <MenuItemLabel>{sort}</MenuItemLabel>
+              </MenuItem>
+            ))}
+          </Menu>
         </HStack>
         <HStack space="lg" className="items-center">
           <Pressable

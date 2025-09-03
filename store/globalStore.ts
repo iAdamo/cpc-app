@@ -46,6 +46,7 @@ const useGlobalStore = create<GlobalStore>()(
             isOnboardingComplete: state.isOnboardingComplete,
             currentView: state.currentView,
             displayStyle: state.displayStyle,
+            currentLocation: state.currentLocation,
           }),
         }
       )

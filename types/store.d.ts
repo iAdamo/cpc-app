@@ -70,12 +70,15 @@ export interface OnboardingState {
 
 export type ProviderView = "Home" | "Updates" | "Chat" | "Profile";
 export type DisplayStyle = "Grid" | "List";
+export type SortBy = "Relevance" | "Newest" | "Oldest";
 
 export interface ProviderState {
   currentView: ProviderView;
   setCurrentView: (view: ProviderView) => void;
   displayStyle: DisplayStyle;
   setDisplayStyle: (style: DisplayStyle) => void;
+  sortBy: sortByType;
+  setSortBy: (sortBy: SortBy) => void;
   searchResults: SearchResultData;
   setSearchResults: (results: SearchResultData) => void;
   executeSearch: (params: {

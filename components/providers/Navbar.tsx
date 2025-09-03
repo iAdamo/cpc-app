@@ -3,10 +3,7 @@ import { VStack } from "../ui/vstack";
 import { HStack } from "../ui/hstack";
 import { Pressable } from "../ui/pressable";
 import { Text } from "../ui/text";
-import { Heading } from "../ui/heading";
-import { Icon, CheckIcon, ChevronDownIcon, SearchIcon } from "../ui/icon";
-import { Card } from "../ui/card";
-import { Image } from "../ui/image";
+import { Icon, ChevronDownIcon } from "../ui/icon";
 import {
   Avatar,
   AvatarFallbackText,
@@ -14,8 +11,6 @@ import {
 } from "@/components/ui/avatar";
 import { BellDotIcon, NavigationIcon } from "lucide-react-native";
 import { Button, ButtonText, ButtonIcon, ButtonSpinner } from "../ui/button";
-import { Input, InputField, InputIcon, InputSlot } from "../ui/input";
-import { FormControl } from "../ui/form-control";
 import {
   HouseIcon,
   CircleDotDashedIcon,
@@ -74,7 +69,6 @@ export const TopNavbar = ({ title }: { title: string }) => {
 
   useEffect(() => {
     getCurrentLocation();
-    console.log(currentLocation);
   }, []);
 
   return (
