@@ -4,7 +4,7 @@ import { Text } from "@/components/ui/text";
 import { BottomNavbar, TopNavbar } from "@/components/providers/Navbar";
 import useGlobalStore from "@/store/globalStore";
 import HomeView from "./homeview";
-// import Profile from "../profile";
+import Profile from "./profile";
 
 const ProvidersScreen = () => {
   const { currentView, setCurrentView } = useGlobalStore();
@@ -16,7 +16,7 @@ const ProvidersScreen = () => {
         {currentView === "Home" && <HomeView />}
         {currentView === "Updates" && <Text>Updates View</Text>}
         {currentView === "Chat" && <Text>Chat View</Text>}
-        {/* {currentView === "Profile" && <Profile />} */}
+        {currentView === "Profile" && <Profile />}
       </VStack>
       <BottomNavbar />
     </VStack>
