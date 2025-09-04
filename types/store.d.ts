@@ -12,6 +12,7 @@ import {
   LocationSubscription,
   LocationGeocodedAddress,
 } from "expo-location";
+import { ProviderData } from "./provider";
 
 export type PersistedAppState = {
   state: {
@@ -81,6 +82,8 @@ export interface ProviderState {
   sortBy: sortByType;
   setSortBy: (sortBy: SortBy) => void;
   searchResults: SearchResultData;
+  savedProviders: ProviderData[];
+  setSavedProviders: (providers: ProviderData[]) => void;
   setSearchResults: (results: SearchResultData) => void;
   executeSearch: (params: {
     page: number;

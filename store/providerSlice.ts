@@ -1,3 +1,4 @@
+import { ProviderData } from "./../types/provider.d";
 import { StateCreator } from "zustand";
 import {
   GlobalStore,
@@ -26,6 +27,10 @@ export const providerViewSlice: StateCreator<
   searchResults: { providers: [], services: [] },
   setSearchResults: (results: SearchResultData) =>
     set({ searchResults: results }),
+
+  savedProviders: [],
+  setSavedProviders: (providers: ProviderData[]) =>
+    set({ savedProviders: providers }),
 
   executeSearch: async (params: {
     page: number;
