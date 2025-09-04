@@ -1,4 +1,4 @@
-import { ProviderData } from "./../types/provider.d";
+import { ProviderData } from "@/types";
 import { StateCreator } from "zustand";
 import {
   GlobalStore,
@@ -9,6 +9,7 @@ import {
   SortBy,
 } from "@/types";
 import { globalSearch } from "@/axios/search";
+import { setUserFavourites } from "@/axios/user";
 
 export const providerViewSlice: StateCreator<
   GlobalStore,
@@ -29,8 +30,38 @@ export const providerViewSlice: StateCreator<
     set({ searchResults: results }),
 
   savedProviders: [],
-  setSavedProviders: (providers: ProviderData[]) =>
-    set({ savedProviders: providers }),
+  setSavedProviders: (providers: ProviderData[]) => {
+    set({ savedProviders: providers });
+
+    // sync with backend
+    // send the id of the latest provider in the list
+    const latestProvider = providers[providers.length - 1];
+    if (latestProvider) {
+      const response = setUserFavourites(latestProvider.id);
+      response
+        .then((data) => {
+          set({ success: "Favourites updated successfully!" });
+          // if the backend returns the updated list and the length is different, update the state
+          if (
+            data &&
+            data.favoritedBy &&
+            data.favoritedBy.length !== providers.length
+          ) {
+            // Map provider IDs to ProviderData objects using the current providers list
+            const updatedProviders = data.favoritedBy
+              .map((id: string) =>
+                providers.find((p: ProviderData) => p.id === id)
+              )
+              .filter((p: ProviderData | undefined): p is ProviderData => !!p);
+            set({ savedProviders: updatedProviders });
+          }
+        })
+        .catch((error) => {
+          set({ error: "Failed to update favourites." });
+          console.error("Failed to update favourites:", error);
+        });
+    }
+  },
 
   executeSearch: async (params: {
     page: number;

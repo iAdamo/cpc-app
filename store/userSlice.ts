@@ -1,5 +1,5 @@
 import { UserData } from "./../types/user";
-import { updateUserProfile } from "./../axios/user";
+import { updateUserProfile, setUserFavourites } from "./../axios/user";
 import { StateCreator } from "zustand";
 import {
   GlobalStore,
