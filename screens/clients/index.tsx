@@ -11,7 +11,7 @@ const ProvidersScreen = () => {
 
   return (
     <VStack className="flex-1 bg-white">
-      {currentView === "Home" && <TopNavbar title="Service Providers" />}
+      {currentView === "Home" && <TopNavbar />}
       <VStack className="flex-1">
         {currentView === "Home" && <HomeView />}
         {currentView === "Updates" && <Text>Updates View</Text>}

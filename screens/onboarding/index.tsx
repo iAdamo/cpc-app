@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, { useEffect } from "react";
 import useGlobalStore from "@/store/globalStore";
 import { VStack } from "@/components/ui/vstack";
 import { Text } from "@/components/ui/text";
@@ -6,7 +6,7 @@ import EmailVerificationPage from "./onboardingFlow/EmailVerify";
 import FirstOnboardingPage from "./onboardingFlow/00FirstPage";
 import PhoneVerificationPage from "./onboardingFlow/PhoneVerify";
 import SelectRole from "./onboardingFlow/SelectRole";
-import ProfileInfo from "./onboardingFlow/ProfileInfo";
+import ProfileInfo from "../clients/profile/sections/ProfileInfo";
 import FinalPage from "./onboardingFlow/FinalPage";
 import SignUpScreen from "@/screens/auth/signup";
 import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
@@ -14,11 +14,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeftIcon } from "@/components/ui/icon";
 
 export function OnboardingFlow() {
-  const { currentStep, setCurrentStep, isOnboardingComplete } = useGlobalStore();
-
+  const { currentStep, setCurrentStep, isOnboardingComplete } =
+    useGlobalStore();
 
   // move to current last step if not completed
-  
 
   // Map step numbers to components for easier maintenance
   const stepComponents: { [key: number]: React.ComponentType } = {

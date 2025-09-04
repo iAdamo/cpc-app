@@ -38,7 +38,7 @@ const createClient = () => {
         console.warn("Forbidden - maybe token expired, redirect to login");
         // handle logout / redirect here for mobile
       } else if (error.message === "Network Error") {
-        console.error(error.message, "Network Error: Please check your internet connection.");
+        throw "Please check your internet connection.";
       } else if (!error.response) {
         console.error("Server is unavailable. Please try again later.");
       }

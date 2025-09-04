@@ -27,7 +27,7 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
       if (data) {
         const response = await updateUserProfile(data);
         if (response) {
-          set({ user: response, isLoading: false });
+          set({ user: { ...response }, isLoading: false });
           return true;
         }
       }
@@ -57,7 +57,7 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
       }
     } catch (error: any) {
       set({
-        error: error?.response.data.message || "Profile update failed",
+        error: error || "Profile update failed",
         isLoading: false,
       });
     }

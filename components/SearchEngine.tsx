@@ -53,20 +53,20 @@ const SearchBar = () => {
     }
   }, [locationQuery, debouncedFetchPredictions]);
 
-  useEffect(() => {
-    const fetchPredictions = async () => {
-      if (locationQuery.length > 2) {
-        const results = await GooglePlaceService.autocomplete(locationQuery);
-        setPredictions(results);
-      } else if (searchQuery.length > 2) {
-        await handleSearchExecute();
-      } else {
-        setPredictions([]);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchPredictions = async () => {
+  //     if (locationQuery.length > 2) {
+  //       const results = await GooglePlaceService.autocomplete(locationQuery);
+  //       setPredictions(results);
+  //     } else if (searchQuery.length > 2) {
+  //       await handleSearchExecute();
+  //     } else {
+  //       setPredictions([]);
+  //     }
+  //   };
 
-    fetchPredictions();
-  }, [locationQuery, searchQuery]);
+  //   fetchPredictions();
+  // }, [locationQuery, searchQuery]);
 
   const handleSearchExecute = useCallback(async () => {
     if (searchQuery.length > 0) {
@@ -139,7 +139,7 @@ const SearchBar = () => {
             );
           }}
         >
-          {predictions.length > 0 ? (
+          {predictions.length > 0 &&
             predictions.map((prediction) => (
               <MenuItem
                 key={prediction.place_id}
@@ -148,12 +148,7 @@ const SearchBar = () => {
               >
                 <MenuItemLabel>{prediction.description}</MenuItemLabel>
               </MenuItem>
-            ))
-          ) : locationQuery.length > 2 ? (
-            <MenuItem key="no-results" textValue="No results" className="p-4">
-              <MenuItemLabel>No locations found</MenuItemLabel>
-            </MenuItem>
-          ) : null}
+            ))}
         </Menu>
       )}
       <Input className="mx-4 rounded-2xl border-gray-300 h-14 data-[focus=true]:border-2 data-[focus=true]:border-brand-primary/60">

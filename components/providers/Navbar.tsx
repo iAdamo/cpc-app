@@ -63,13 +63,9 @@ export const BottomNavbar = () => {
   );
 };
 
-export const TopNavbar = ({ title }: { title: string }) => {
+export const TopNavbar = () => {
   const { user, currentLocation, getCurrentLocation, isLoading } =
     useGlobalStore();
-
-  useEffect(() => {
-    getCurrentLocation();
-  }, []);
 
   return (
     <VStack className="bg-white">

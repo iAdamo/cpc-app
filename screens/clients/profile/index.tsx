@@ -10,7 +10,7 @@ import {
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { Button, ButtonIcon } from "@/components/ui/button";
-import { ThreeDotsIcon } from "@/components/ui/icon";
+import { Icon, ThreeDotsIcon } from "@/components/ui/icon";
 import { MapPinIcon } from "lucide-react-native";
 import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
@@ -37,7 +37,7 @@ const Profile = () => {
       title: "Companies Center",
       items: [
         {
-          text: "Personal itemsrmation",
+          text: "Personal Information",
           icon: UserRoundIcon,
           action: () => router.push("/profile/personal-info"),
         },
@@ -106,7 +106,7 @@ const Profile = () => {
               <VStack>
                 <Heading className="text-yellow-900">{`${user?.firstName} ${user?.lastName}`}</Heading>
                 <HStack space="xs" className="items-center">
-                  <MapPinIcon className="w-4 h-4 text-yellow-900" />
+                  <Icon size="sm" as={MapPinIcon} className="text-yellow-900" />
                   <Text className="text-yellow-900">
                     {`${currentLocation?.region} ${currentLocation?.country}`}
                   </Text>

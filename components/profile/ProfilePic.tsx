@@ -7,16 +7,8 @@ import { Box } from "../ui/box";
 import { VStack } from "../ui/vstack";
 import { Text } from "../ui/text";
 import { useState, useEffect, useRef } from "react";
-import {
-  Icon,
-  CameraIcon,
-  CloseIcon,
-  SmileyIcon,
-} from "../ui/icon";
-import {
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import { Icon, CameraIcon, CloseIcon, SmileyIcon } from "../ui/icon";
+import { ActivityIndicator, Alert } from "react-native";
 import {
   Actionsheet,
   ActionsheetContent,
@@ -30,6 +22,7 @@ import { Pressable } from "../ui/pressable";
 import { Camera } from "lucide-react-native";
 import { Image as Gallery } from "lucide-react-native";
 import { Spinner } from "../ui/spinner";
+import { Center } from "../ui/center";
 
 interface ProfilePicProps {
   imageUri?: string | null;
@@ -146,21 +139,13 @@ const ProfilePic = ({
     setShowOptionsModal(true);
   };
 
-  if (isLoading) {
-    return (
-      <VStack className="items-center justify-center p-4">
-        <Box
-          className={`rounded-full bg-gray-200 items-center justify-center`}
-          style={{
-            width: currentSize.container,
-            height: currentSize.container,
-          }}
-        >
-          <ActivityIndicator size="large" color="#3b82f6" />
-        </Box>
-      </VStack>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <Center className="">
+  //       <ActivityIndicator size="large" color="#3b82f6" />
+  //     </Center>
+  //   );
+  // }
 
   const handleClose = () => {
     setShowOptionsModal(false);
@@ -171,7 +156,7 @@ const ProfilePic = ({
       {/* Profile Image Container */}
       <Box className="relative">
         <Card
-          className="rounded-2xl overflow-hidden items-center justify-center bg-brand-primary/50"
+          className="rounded-2xl p-0 overflow-hidden items-center justify-center bg-brand-primary/50"
           style={{
             width: currentSize.container,
             height: currentSize.container,
