@@ -1,17 +1,16 @@
 import React from "react";
 import { Stack } from "expo-router";
 import { StatusBar } from "react-native";
-import { LocationPermission } from "@/components/LocationPermission";
 
 export default function AppLayout() {
   return (
-    <LocationPermission>
+    <>
       <StatusBar
         barStyle="dark-content"
         translucent={true}
         backgroundColor={"transparent"}
       />
       <Stack screenOptions={{ headerShown: false }} />
-    </LocationPermission>
+    </>
   );
 }
