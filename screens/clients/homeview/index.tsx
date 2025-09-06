@@ -12,7 +12,7 @@ const HomeView = () => {
   console.log("Search Results in Home View:", searchResults);
 
   return (
-    <VStack className="p-4">
+    <VStack className="px-4">
       {/* <SearchBar /> */}
       <ScrollView
         showsVerticalScrollIndicator={false}

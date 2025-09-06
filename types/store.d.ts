@@ -82,6 +82,8 @@ export interface ProviderState {
   sortBy: sortByType;
   setSortBy: (sortBy: SortBy) => void;
   searchResults: SearchResultData;
+  filteredProviders: ProviderData[];
+  setFilteredProviders: (providers: ProviderData[]) => void;
   savedProviders: ProviderData[];
   setSavedProviders: (providers: ProviderData[]) => void;
   setSearchResults: (results: SearchResultData) => void;

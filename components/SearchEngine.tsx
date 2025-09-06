@@ -8,20 +8,27 @@ import {
 } from "@/components/ui/button";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { FormControl } from "@/components/ui/form-control";
-import { MapPinIcon } from "lucide-react-native";
+import { MapPinIcon, SlidersHorizontalIcon } from "lucide-react-native";
 import useGlobalStore from "@/store/globalStore";
 import { GooglePlaceService } from "@/services/GooglePlaceService";
 import { Menu, MenuItem, MenuItemLabel } from "@/components/ui/menu";
-import { Place } from "@/types";
+import { Place, ProviderData } from "@/types";
 import { debounce } from "lodash";
+import { usePathname } from "expo-router";
 
-const SearchBar = () => {
+const SearchBar = ({ providers }: { providers?: ProviderData[] }) => {
   const [locationInput, setLocationInput] = useState<boolean>(false);
   const [locationQuery, setLocationQuery] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [predictions, setPredictions] = useState<Place[]>([]);
+  const [filterQuery, setFilterQuery] = useState<string>("");
+
+  const pathname = usePathname();
+  const isHomeView = pathname === "/providers";
 
   const {
+    filteredProviders,
+    setFilteredProviders,
     selectedPlace,
     setSelectedPlace,
     currentLocation,
@@ -29,6 +36,8 @@ const SearchBar = () => {
     isLoading,
     setError,
   } = useGlobalStore();
+
+  const handleLocalSearch = () => {};
 
   const debouncedFetchPredictions = useRef(
     debounce(async (query: string) => {
@@ -45,6 +54,27 @@ const SearchBar = () => {
     }, 300)
   ).current;
 
+  // Filter providers locally if providers prop is passed
+  useEffect(() => {
+    if (providers && filterQuery.length > 0) {
+      const q = filterQuery.toLowerCase();
+      setFilteredProviders(
+        providers.filter(
+          (p) => p.providerName && p.providerName.toLowerCase().includes(q)
+          // (p.subcategories && p.subcategories.toLowerCase().includes(q)) ||
+          // (typeof p.ratings === "number" &&
+          //   p.ratings.toString().includes(q)) ||
+          // (p.location &&
+          //   p.location.primary.address.address.toLowerCase().includes(q)) ||
+          // (p.providerDescription &&
+          //   p.providerDescription.toLowerCase().includes(q))
+        )
+      );
+    } else {
+      setFilteredProviders([]);
+    }
+  }, [providers, filterQuery]);
+
   useEffect(() => {
     if (locationQuery) {
       debouncedFetchPredictions(locationQuery);
@@ -53,23 +83,8 @@ const SearchBar = () => {
     }
   }, [locationQuery, debouncedFetchPredictions]);
 
-  // useEffect(() => {
-  //   const fetchPredictions = async () => {
-  //     if (locationQuery.length > 2) {
-  //       const results = await GooglePlaceService.autocomplete(locationQuery);
-  //       setPredictions(results);
-  //     } else if (searchQuery.length > 2) {
-  //       await handleSearchExecute();
-  //     } else {
-  //       setPredictions([]);
-  //     }
-  //   };
-
-  //   fetchPredictions();
-  // }, [locationQuery, searchQuery]);
-
   const handleSearchExecute = useCallback(async () => {
-    if (searchQuery.length > 0) {
+    if (searchQuery.length > 0 && !providers) {
       await executeSearch({
         page: 1,
         limit: 10,
@@ -82,7 +97,7 @@ const SearchBar = () => {
           : currentLocation?.formattedAddress ?? undefined,
       });
     }
-  }, [executeSearch, searchQuery, selectedPlace, currentLocation]);
+  }, [executeSearch, searchQuery, selectedPlace, currentLocation, providers]);
 
   const handleLocationSelect = useCallback(
     async (prediction: Place) => {
@@ -95,14 +110,14 @@ const SearchBar = () => {
         setPredictions([]);
 
         // Trigger search if there's already a search query
-        if (searchQuery.length > 0) {
+        if (searchQuery.length > 0 && !providers) {
           await handleSearchExecute();
         }
       } catch (err: any) {
         setError(`Place details error: ${err.message}`);
       }
     },
-    [setSelectedPlace, searchQuery, handleSearchExecute]
+    [setSelectedPlace, searchQuery, handleSearchExecute, providers]
   );
 
   const currentLocationText = selectedPlace
@@ -115,7 +130,7 @@ const SearchBar = () => {
 
   return (
     <FormControl className="gap-4">
-      {locationInput && (
+      {locationInput && isHomeView && (
         <Menu
           placement="bottom"
           className="max-h-96 w-[23.5rem]"
@@ -151,24 +166,42 @@ const SearchBar = () => {
             ))}
         </Menu>
       )}
-      <Input className="mx-4 rounded-2xl border-gray-300 h-14 data-[focus=true]:border-2 data-[focus=true]:border-brand-primary/60">
-        <InputSlot>
-          <InputIcon as={SearchIcon} className="text-gray-400 ml-4" />
-        </InputSlot>
-        <InputField
-          placeholder="Search... e.g., tree felling, plumbing"
-          className="placeholder:text-lg placeholder:text-gray-400"
-          onChangeText={(text) => setSearchQuery(text)}
-          value={searchQuery}
-          onFocus={handleFocus}
-          onBlur={handleSearchExecute}
-        />
-        {isLoading && (
-          <InputSlot className="pr-3">
-            <ButtonSpinner />
+      {isHomeView && (
+        <Input className="mx-4 rounded-2xl border-gray-300 h-14 data-[focus=true]:border-2 data-[focus=true]:border-brand-primary/60">
+          <InputSlot>
+            <InputIcon as={SearchIcon} className="text-gray-400 ml-4" />
           </InputSlot>
-        )}
-      </Input>
+          <InputField
+            placeholder="Search... e.g., tree felling, plumbing"
+            className="placeholder:text-lg placeholder:text-gray-400"
+            onChangeText={(text) => setSearchQuery(text)}
+            value={searchQuery}
+            onFocus={handleFocus}
+            onBlur={handleSearchExecute}
+          />
+          {isLoading && (
+            <InputSlot className="pr-3">
+              <ButtonSpinner />
+            </InputSlot>
+          )}
+        </Input>
+      )}
+      {!isHomeView && (
+        <Input className="m-4 rounded-2xl border-gray-300 h-14 data-[focus=true]:border-2 data-[focus=true]:border-brand-primary/60">
+          <InputSlot className="pl-4">
+            <InputIcon
+              size="xl"
+              as={SlidersHorizontalIcon}
+              className="text-gray-400"
+            />
+          </InputSlot>
+          <InputField
+            placeholder="Filter..."
+            className="placeholder:text-lg placeholder:text-gray-400"
+            onChangeText={(text) => setFilterQuery(text)}
+          />
+        </Input>
+      )}
     </FormControl>
   );
 };

@@ -46,7 +46,7 @@ const ProviderCard = ({ provider }: { provider: any }) => {
   return (
     <Card
       className={`rounded-lg p-0 ${
-        isGrid ? "w-[48%] mb-4 h-72" : "w-full mb-4 h-40"
+        isGrid ? "w-[49%] mb-4 h-72" : "w-full mb-4 h-40"
       }`}
     >
       {isGrid ? (

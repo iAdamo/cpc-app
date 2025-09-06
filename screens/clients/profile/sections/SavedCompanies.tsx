@@ -1,20 +1,14 @@
 import { VStack } from "@/components/ui/vstack";
-import { HStack } from "@/components/ui/hstack";
-import { Text } from "@/components/ui/text";
-import { Card } from "@/components/ui/card";
 import { ChevronLeftIcon, Icon } from "@/components/ui/icon";
-import { Heading } from "@/components/ui/heading";
 import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
 import SearchBar from "@/components/SearchEngine";
 import { ScrollView } from "react-native";
 import ProviderCard from "@/components/ProviderCard";
-import { ProviderData } from "@/types";
 import { router } from "expo-router";
 import useGlobalStore from "@/store/globalStore";
-import { useEffect, useState } from "react";
 
 const SavedCompanies = () => {
-  const { savedProviders } = useGlobalStore();
+  const { savedProviders, filteredProviders } = useGlobalStore();
 
   return (
     <VStack className="flex-1 bg-white">
@@ -33,10 +27,13 @@ const SavedCompanies = () => {
             Saved Companies
           </ButtonText>
         </Button>
-        <SearchBar />
+        <SearchBar providers={savedProviders} />
       </VStack>
       <ScrollView showsVerticalScrollIndicator={false} style={{ padding: 16 }}>
-        {savedProviders?.map((provider) => (
+        {(filteredProviders && filteredProviders.length > 0
+          ? filteredProviders
+          : savedProviders
+        ).map((provider) => (
           <ProviderCard key={provider.id} provider={provider} />
         ))}
       </ScrollView>

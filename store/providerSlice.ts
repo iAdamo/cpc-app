@@ -29,6 +29,10 @@ export const providerViewSlice: StateCreator<
   setSearchResults: (results: SearchResultData) =>
     set({ searchResults: results }),
 
+  filteredProviders: [],
+  setFilteredProviders: (providers: ProviderData[]) => {
+    set({ filteredProviders: providers });
+  },
   savedProviders: [],
   setSavedProviders: (providers: ProviderData[]) => {
     set({ savedProviders: providers });

@@ -116,7 +116,8 @@ const ProfileInfo = () => {
           size="lg"
           isEditable={true}
           showChangeButton={false}
-          onImageSelected={(uri) => setProfilePicUri(uri || user?.profilePicture || "")}
+          imageUri={user?.profilePicture}
+          onImageSelected={(uri) => setProfilePicUri(uri)}
         />
       </VStack>
       <VStack className="mt-6 h-64 justify-between">
