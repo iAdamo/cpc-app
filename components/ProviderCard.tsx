@@ -21,7 +21,7 @@ import { HeartIcon, StarIcon } from "lucide-react-native";
 import { usePathname } from "expo-router";
 import { fill } from "lodash";
 import { ProviderData } from "@/types";
-// ...existing imports...
+import RatingSection from "./RatingFunction";
 
 const ProviderCard = ({ provider }: { provider: any }) => {
   const { displayStyle, setDisplayStyle, setSavedProviders, savedProviders } =
@@ -134,12 +134,17 @@ const ProviderCard = ({ provider }: { provider: any }) => {
                   />
                 </Button>
                 {/* Star icon and rating at top-right */}
-                <Box className="flex flex-row items-center">
-                  <Icon as={StarIcon} className="w-6 h-6 text-yellow-500" />
-                  <Text className="ml-1 text-yellow-500 font-bold">
-                    {provider.rating}
-                  </Text>
-                </Box>
+                <Pressable
+                  onPress={() =>
+                    router.push({
+                      pathname: "/profile/reviews-ratings/[id]",
+                      params: { id: provider.id },
+                    })
+                  }
+                  className="flex flex-row items-center"
+                >
+                  <RatingSection rating={provider.rating} />
+                </Pressable>
               </HStack>
             </HStack>
           </Box>
@@ -160,18 +165,18 @@ const ProviderCard = ({ provider }: { provider: any }) => {
               <Text className="mt-2 text-gray-600 break-words line-clamp-2">
                 {provider.providerDescription}
               </Text>
-              <HStack className="items-center">
-                <Icon
-                  as={ChevronRightIcon}
-                  size="sm"
-                  className="text-yellow-500 w-4 h-4"
-                />
-                <Text className="ml-1 text-yellow-500">
-                  {provider.rating} ({provider.reviews} reviews)
-                </Text>
-              </HStack>
+              {/* <Pressable onPress={() => console.log("An Apple")} className="z-50">
+                <HStack className="items-center">
+                  <RatingSection reviewCount={provider.reviews} />
+                  <Icon
+                    size="sm"
+                    as={ChevronRightIcon}
+                    className="text-yellow-500"
+                  />
+                </HStack>
+              </Pressable> */}
               <HStack space="xs" className="items-center">
-                <Icon as={MapPinIcon} size="sm" className="text-gray-500" />
+                <Icon as={MapPinIcon} size="sm" className="text-red-500" />
                 <Text className=" text-gray-500">{provider.location}</Text>
               </HStack>
             </VStack>

@@ -27,7 +27,6 @@ const SearchBar = ({ providers }: { providers?: ProviderData[] }) => {
   const isHomeView = pathname === "/providers";
 
   const {
-    filteredProviders,
     setFilteredProviders,
     selectedPlace,
     setSelectedPlace,
@@ -36,8 +35,6 @@ const SearchBar = ({ providers }: { providers?: ProviderData[] }) => {
     isLoading,
     setError,
   } = useGlobalStore();
-
-  const handleLocalSearch = () => {};
 
   const debouncedFetchPredictions = useRef(
     debounce(async (query: string) => {
