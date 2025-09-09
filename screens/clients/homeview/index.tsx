@@ -8,9 +8,6 @@ import SortBar from "./SortBar";
 import useGlobalStore from "@/store/globalStore";
 
 const HomeView = () => {
-  const { searchResults } = useGlobalStore();
-  console.log("Search Results in Home View:", searchResults);
-
   return (
     <VStack className="px-4">
       {/* <SearchBar /> */}
@@ -20,7 +17,7 @@ const HomeView = () => {
       >
         <Categories />
         <SortBar />
-        <ContentDisplay providers={searchResults.providers} />
+        <ContentDisplay/>
       </ScrollView>
     </VStack>
   );

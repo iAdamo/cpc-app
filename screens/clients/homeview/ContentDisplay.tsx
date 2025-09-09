@@ -1,8 +1,8 @@
+import { useEffect, useState } from "react";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { ScrollView, View, Dimensions, Pressable } from "react-native";
-import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import { ChevronRightIcon } from "@/components/ui/icon";
@@ -13,7 +13,7 @@ import ProviderCard from "@/components/ProviderCard";
 import { ProviderData } from "@/types";
 import { id } from "zod/v4/locales";
 
-const ContentDisplay = ({ providers }: { providers: ProviderData[] }) => {
+const ContentDisplay = () => {
   // companies
   const data = [
     {
@@ -123,18 +123,45 @@ const ContentDisplay = ({ providers }: { providers: ProviderData[] }) => {
     },
   ];
   const { width } = Dimensions.get("window");
-  const { displayStyle } = useGlobalStore();
+  const {
+    displayStyle,
+    searchResults,
+    sortBy,
+    executeSearch,
+    currentLocation,
+  } = useGlobalStore();
+  useEffect(() => {
+    const handleProvidersSearch = async () => {
+      if (
+        !(await executeSearch({
+          page: 1,
+          limit: 30,
+          engine: false,
+          sortBy: sortBy,
+          lat: currentLocation?.coords.latitude,
+          long: currentLocation?.coords.longitude,
+        }))
+      )
+        return;
+    };
+
+    handleProvidersSearch();
+  }, [sortBy, currentLocation]);
+
+  console.log("Search Results in Home View:", searchResults);
+
   const view =
     displayStyle === "Grid"
       ? "flex-row flex-wrap justify-between"
       : "flex flex-col";
   return (
     <VStack className={`${view}`}>
-      {(providers && providers.length > 0 ? providers : data).map(
-        (provider) => (
-          <ProviderCard key={provider.id} provider={provider} />
-        )
-      )}
+      {(searchResults.providers && searchResults.providers.length > 0
+        ? searchResults.providers
+        : data
+      ).map((provider) => (
+        <ProviderCard key={provider.id} provider={provider} />
+      ))}
     </VStack>
   );
 };

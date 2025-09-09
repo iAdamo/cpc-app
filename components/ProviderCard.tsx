@@ -47,8 +47,6 @@ const ProviderCard = ({ provider }: { provider: any }) => {
     }
   };
 
-  console.log(user);
-
   return (
     <Card
       className={`rounded-lg p-0 ${
@@ -56,48 +54,136 @@ const ProviderCard = ({ provider }: { provider: any }) => {
       }`}
     >
       {isGrid ? (
-        <VStack className="flex-1">
-          <Box className="relative w-full h-1/2 mb-2">
-            <Image
-              source={{ uri: provider.profilePicture }}
-              alt={provider.providerName}
-              className="w-full h-full rounded-xl bg-gray-200"
-            />
-            {/* Heart icon at top-left */}
-            <HStack className="absolute">
-              <HStack className="justify-between items-center w-full px-3">
-                <Button variant="link" onPress={handleSaveToggle} className="">
-                  <ButtonIcon
-                    as={HeartIcon}
-                    className={`w-6 h-6 text-black/40 ${
-                      isSaved && "fill-red-600 text-red-400"
-                    }`}
-                  />
-                </Button>
-                {/* Star icon and rating at top-right */}
-                <Box className="flex flex-row items-center">
-                  <Icon as={StarIcon} className="w-6 h-6 text-yellow-500" />
-                  <Text className="ml-1 text-yellow-500 font-bold">
-                    {provider.rating}
-                  </Text>
-                </Box>
+        <Pressable
+        className="flex-1"
+          onLongPress={() =>
+            ShareService.shareContent(user ? user._id : "", {
+              providerName: provider.providerName,
+              contentType: "providers",
+              contentId: provider.id,
+              contentName: provider.providerName,
+            })
+          }
+        >
+          <VStack className="flex-1">
+            <Box className="relative w-full h-1/2 mb-2">
+              <Image
+                source={{ uri: provider.profilePicture }}
+                alt={provider.providerName}
+                className="w-full h-full rounded-xl bg-gray-200"
+              />
+              {/* Heart icon at top-left */}
+              <HStack className="absolute">
+                <HStack className="justify-between items-center w-full px-3">
+                  <Button
+                    variant="link"
+                    onPress={handleSaveToggle}
+                    className=""
+                  >
+                    <ButtonIcon
+                      as={HeartIcon}
+                      className={`w-6 h-6 text-black/40 ${
+                        isSaved && "fill-red-600 text-red-400"
+                      }`}
+                    />
+                  </Button>
+                  {/* Star icon and rating at top-right */}
+                  <Box className="flex flex-row items-center">
+                    <Icon as={StarIcon} className="w-6 h-6 text-yellow-500" />
+                    <Text className="ml-1 text-yellow-500 font-bold">
+                      {provider.rating}
+                    </Text>
+                  </Box>
+                </HStack>
               </HStack>
-            </HStack>
-          </Box>
+            </Box>
 
-          <VStack className="flex-1 justify-between">
+            <VStack className="flex-1 justify-between">
+              <Pressable
+                onPress={() =>
+                  router.push({
+                    pathname: "/providers/[id]",
+                    params: { id: provider.id },
+                  })
+                }
+                className="flex-1"
+              >
+                <HStack space="sm" className="items-center">
+                  <Avatar size="sm">
+                    <AvatarFallbackText>
+                      {provider.providerName}
+                    </AvatarFallbackText>
+                    <AvatarImage source={{ uri: provider.profilePicture }} />
+                  </Avatar>
+                  <Heading
+                    size="md"
+                    className="font-medium break-words text-brand-primary"
+                  >
+                    {provider.providerName}
+                  </Heading>
+                </HStack>
+                <Text className="mt-2 text-gray-600 line-clamp-2">
+                  {provider.providerDescription}
+                </Text>
+                <Text className="text-gray-500">{provider.category}</Text>
+                <HStack space="xs" className="items-center">
+                  <Icon as={MapPinIcon} size="sm" className="text-gray-500" />
+                  <Text className=" text-gray-500">{provider.location}</Text>
+                </HStack>
+              </Pressable>
+            </VStack>
+          </VStack>
+        </Pressable>
+      ) : (
+        <Pressable
+        className="flex-1"
+          onLongPress={() =>
+            ShareService.shareContent(user ? user._id : "", {
+              providerName: provider.providerName,
+              contentType: "providers",
+              contentId: provider.id,
+              contentName: provider.providerName,
+            })
+          }
+        >
+          <HStack className="h-full">
+            <Box className="relative w-1/2 h-full mr-4">
+              <Image
+                source={{ uri: provider.profilePicture }}
+                alt={provider.providerName}
+                className="w-full h-full rounded-xl bg-gray-200"
+              />
+              {/* Heart icon at top-left */}
+              <HStack className="absolute">
+                <HStack className="justify-between items-center w-full px-3">
+                  <Button
+                    variant="link"
+                    onPress={handleSaveToggle}
+                    className=""
+                  >
+                    <ButtonIcon
+                      as={HeartIcon}
+                      className={`w-6 h-6 text-black/40 ${
+                        isSaved && "fill-red-600 text-red-400"
+                      }`}
+                    />
+                  </Button>
+                  {/* Star icon and rating at top-right */}
+                  <Pressable
+                    onPress={() =>
+                      router.push({
+                        pathname: "/profile/reviews-ratings/[id]",
+                        params: { id: provider.id },
+                      })
+                    }
+                    className="flex flex-row items-center"
+                  >
+                    <RatingSection rating={provider.rating} />
+                  </Pressable>
+                </HStack>
+              </HStack>
+            </Box>
             <Pressable
-              onLongPress={() =>
-                ShareService.shareContent(
-                  user ? user._id : "",
-                  {
-                    providerName: provider.providerName,
-                    contentType: "providers",
-                    contentId: provider.id,
-                    contentName: provider.providerName,
-                  }
-                )
-              }
               onPress={() =>
                 router.push({
                   pathname: "/providers/[id]",
@@ -106,83 +192,15 @@ const ProviderCard = ({ provider }: { provider: any }) => {
               }
               className="flex-1"
             >
-              <HStack space="sm" className="items-center">
-                <Avatar size="sm">
-                  <AvatarFallbackText>
-                    {provider.providerName}
-                  </AvatarFallbackText>
-                  <AvatarImage source={{ uri: provider.profilePicture }} />
-                </Avatar>
-                <Heading
-                  size="md"
-                  className="font-medium break-words text-brand-primary"
-                >
+              <VStack className="flex-1 gap-1">
+                <Heading size="md" className="font-medium">
                   {provider.providerName}
                 </Heading>
-              </HStack>
-              <Text className="mt-2 text-gray-600 line-clamp-2">
-                {provider.providerDescription}
-              </Text>
-              <Text className="text-gray-500">{provider.category}</Text>
-              <HStack space="xs" className="items-center">
-                <Icon as={MapPinIcon} size="sm" className="text-gray-500" />
-                <Text className=" text-gray-500">{provider.location}</Text>
-              </HStack>
-            </Pressable>
-          </VStack>
-        </VStack>
-      ) : (
-        <HStack className="h-full">
-          <Box className="relative w-1/2 h-full mr-4">
-            <Image
-              source={{ uri: provider.profilePicture }}
-              alt={provider.providerName}
-              className="w-full h-full rounded-xl bg-gray-200"
-            />
-            {/* Heart icon at top-left */}
-            <HStack className="absolute">
-              <HStack className="justify-between items-center w-full px-3">
-                <Button variant="link" onPress={handleSaveToggle} className="">
-                  <ButtonIcon
-                    as={HeartIcon}
-                    className={`w-6 h-6 text-black/40 ${
-                      isSaved && "fill-red-600 text-red-400"
-                    }`}
-                  />
-                </Button>
-                {/* Star icon and rating at top-right */}
-                <Pressable
-                  onPress={() =>
-                    router.push({
-                      pathname: "/profile/reviews-ratings/[id]",
-                      params: { id: provider.id },
-                    })
-                  }
-                  className="flex flex-row items-center"
-                >
-                  <RatingSection rating={provider.rating} />
-                </Pressable>
-              </HStack>
-            </HStack>
-          </Box>
-          <Pressable
-            onPress={() =>
-              router.push({
-                pathname: "/providers/[id]",
-                params: { id: provider.id },
-              })
-            }
-            className="flex-1"
-          >
-            <VStack className="flex-1 gap-1">
-              <Heading size="md" className="font-medium">
-                {provider.providerName}
-              </Heading>
-              <Text className="text-gray-500">{provider.category}</Text>
-              <Text className="mt-2 text-gray-600 break-words line-clamp-2">
-                {provider.providerDescription}
-              </Text>
-              {/* <Pressable onPress={() => console.log("An Apple")} className="z-50">
+                <Text className="text-gray-500">{provider.category}</Text>
+                <Text className="mt-2 text-gray-600 break-words line-clamp-2">
+                  {provider.providerDescription}
+                </Text>
+                {/* <Pressable onPress={() => console.log("An Apple")} className="z-50">
                 <HStack className="items-center">
                   <RatingSection reviewCount={provider.reviews} />
                   <Icon
@@ -192,13 +210,14 @@ const ProviderCard = ({ provider }: { provider: any }) => {
                   />
                 </HStack>
               </Pressable> */}
-              <HStack space="xs" className="items-center">
-                <Icon as={MapPinIcon} size="sm" className="text-red-500" />
-                <Text className=" text-gray-500">{provider.location}</Text>
-              </HStack>
-            </VStack>
-          </Pressable>
-        </HStack>
+                <HStack space="xs" className="items-center">
+                  <Icon as={MapPinIcon} size="sm" className="text-red-500" />
+                  <Text className=" text-gray-500">{provider.location}</Text>
+                </HStack>
+              </VStack>
+            </Pressable>
+          </HStack>
+        </Pressable>
       )}
     </Card>
   );

@@ -77,10 +77,10 @@ export const providerViewSlice: StateCreator<
     address?: string;
     sortBy?: string;
   }) => {
-    set({ isLoading: true, error: null, success: null });
+    set({ error: null, success: null });
     try {
-      const { page, limit, engine, searchInput, lat, long, address } = params;
-      const sortBy = get().sortBy;
+      const { page, limit, engine, searchInput, lat, long, address, sortBy } =
+        params;
       const response = await globalSearch(
         page,
         limit,
@@ -96,14 +96,11 @@ export const providerViewSlice: StateCreator<
           providers: response.providers,
           services: response.services || [],
         },
-        isLoading: false,
       });
       return true;
     } catch (error: any) {
-      set({
-        error: error.message || "An error occurred during search.",
-        isLoading: false,
-      });
+      console.error("Search error:", error);
+      set({ error: error.message || "An error occurred during search." });
     }
   },
   clearSearchResults: () =>

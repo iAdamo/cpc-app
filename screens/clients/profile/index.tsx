@@ -64,7 +64,7 @@ const Profile = () => {
         {
           text: "Account",
           icon: SettingsIcon,
-          action: () => router.push("/profile/account"),
+          action: () => router.push("/profile/settings"),
         },
         {
           text: "Notifications",

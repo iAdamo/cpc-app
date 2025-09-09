@@ -139,7 +139,12 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
   },
 
   logout: async () => {
-    set({ user: null, isAuthenticated: false, error: null });
+    set({
+      user: null,
+      isAuthenticated: false,
+      error: null,
+      success: "Logged out successfully",
+    });
     await SecureStore.deleteItemAsync("accessToken");
   },
 
