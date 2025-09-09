@@ -1,3 +1,4 @@
+import { current } from "immer";
 import { ApiClientSingleton } from "./conf";
 import { UserData, SignUpData } from "@/types";
 
@@ -54,5 +55,13 @@ export const resetPassword = async (data: {
   password: string;
 }) => {
   const response = await axiosInstance.post("/auth/reset-password", data);
+  return response.data;
+};
+
+export const changePassword = async (data: {
+  currentPassword: string;
+  password: string;
+}) => {
+  const response = await axiosInstance.post("/auth/password", data);
   return response.data;
 };

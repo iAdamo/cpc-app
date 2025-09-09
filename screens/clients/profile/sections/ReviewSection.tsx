@@ -42,7 +42,7 @@ const ReviewAndRating = () => {
 
   return (
     <VStack className="flex-1 bg-white">
-      <VStack className="mt-14 mb-4">
+      <VStack className="mt-14 mb-2">
         <Button
           size="xl"
           variant="link"
@@ -60,9 +60,9 @@ const ReviewAndRating = () => {
       </VStack>
       <VStack className="">
         {!id && (
-          <Card className="mx-4 border p-2 border-brand-primary flex-row gap-4 items-center bg-brand-primary/40">
-            <Icon as={MegaphoneIcon} className="text-brand-primary w-7 h-7" />
-            <Text size="sm" className="flex-1 text-brand-primary">
+          <Card className="mx-4 border p-2 border-brand-secondary flex-row gap-4 items-center bg-brand-secondary/40">
+            <Icon as={MegaphoneIcon} className="text-brand-secondary w-7 h-7" />
+            <Text className="flex-1 text-brand-secondary">
               You can edit your reviews within 24 hours of giving that review.
               Reviews can also be deleted permanently
             </Text>

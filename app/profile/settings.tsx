@@ -1,3 +1,3 @@
-import AccountSettings from "@/screens/clients/profile/sections/AccountSettings";
+import AccountSettings from "@/screens/clients/profile/sections/settings";
 
 export default AccountSettings;

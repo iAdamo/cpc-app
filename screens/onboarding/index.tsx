@@ -1,4 +1,3 @@
-import React, { useEffect } from "react";
 import useGlobalStore from "@/store/globalStore";
 import { VStack } from "@/components/ui/vstack";
 import { Text } from "@/components/ui/text";

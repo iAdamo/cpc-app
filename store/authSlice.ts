@@ -1,3 +1,4 @@
+import { current } from "immer";
 import { StateCreator } from "zustand";
 import * as SecureStore from "expo-secure-store";
 import { GlobalStore, AuthState, SignUpData, LoginData } from "@/types";
@@ -9,6 +10,7 @@ import {
   verifyPhoneNumber,
   resetPassword,
   sendCode,
+  changePassword,
 } from "@/axios/auth";
 
 export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
@@ -128,11 +130,31 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
   resetPassword: async (password: string, email?: string) => {
     set({ isLoading: true, error: null });
     try {
-      await resetPassword({ email: email || get().user!.email, password });
-      set({ isLoading: false });
+      if (
+        await resetPassword({ email: email || get().user!.email, password })
+      ) {
+        set({ isLoading: false, success: "Password reset successfull!" });
+        return true;
+      }
     } catch (error: any) {
       set({
         error: error?.response.data.message || "Reset password failed",
+        isLoading: false,
+      });
+    }
+  },
+
+  changePassword: async (currentPassword: string, password: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await changePassword({ currentPassword, password });
+      if (response) {
+        set({ isLoading: false, success: "Password Change successfull!" });
+        return true;
+      }
+    } catch (error: any) {
+      set({
+        error: error?.response.data.message || "Password change failed",
         isLoading: false,
       });
     }

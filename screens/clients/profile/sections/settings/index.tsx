@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import { ScrollView } from "react-native";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
@@ -13,10 +13,13 @@ import { Card } from "@/components/ui/card";
 import useGlobalStore from "@/store/globalStore";
 import { LogOutIcon } from "lucide-react-native";
 import { router } from "expo-router";
+import ChangePassword from "./ChangePassword";
 
 const AccountSettings = () => {
   const { user, currentLocation, switchRole, setSwitchRole, logout } =
     useGlobalStore();
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [view, setView] = useState<string>("");
 
   const settings = [
     {
@@ -24,7 +27,7 @@ const AccountSettings = () => {
       items: [
         {
           text: "Change Password",
-          action: () => router.push("/profile/personal-info"),
+          action: () => setView("Password Management"),
         },
         {
           text: "Retrieve Password",
@@ -111,6 +114,10 @@ const AccountSettings = () => {
           </HStack>
         </Pressable>
       </ScrollView>
+      <ChangePassword
+        isOpen={view === "Password Management"}
+        onClose={() => setView("")}
+      />
     </VStack>
   );
 };

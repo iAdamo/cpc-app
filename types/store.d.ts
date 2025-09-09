@@ -1,3 +1,4 @@
+import { current } from "immer";
 import {
   LocationObjectCoords,
   LocationGeocodedAddress,
@@ -49,7 +50,14 @@ export interface AuthState {
   ) => Promise<boolean | undefined>;
   verifyEmail: (email: string, code: string) => Promise<boolean | undefined>;
   sendCode: (email: string) => Promise<boolean | undefined>;
-  resetPassword: (password: string, email?: string) => Promise<void>;
+  resetPassword: (
+    password: string,
+    email?: string
+  ) => Promise<boolean | undefined>;
+  changePassword: (
+    currentPassword: string,
+    password: string
+  ) => Promise<boolean | undefined>;
   logout: () => Promise<void>;
   clearError: () => void;
   clearSuccess: () => void;
