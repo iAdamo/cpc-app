@@ -7,8 +7,8 @@ import { Icon, CheckIcon } from "@/components/ui/icon";
 import { Button, ButtonText } from "@/components/ui/button";
 import { Pressable } from "@/components/ui/pressable";
 import useGlobalStore from "@/store/globalStore";
-import Clients from "@/assets/Icons/Clients";
-import Providers from "@/assets/Icons/Providers";
+import Clients from "@/assets/icons/Clients";
+import Providers from "@/assets/icons/Providers";
 import { UserData, OnboardingData } from "@/types";
 
 const SelectRole = () => {

@@ -19,13 +19,17 @@ import { MapPinIcon } from "lucide-react-native";
 import { router } from "expo-router";
 import { HeartIcon, StarIcon } from "lucide-react-native";
 import { usePathname } from "expo-router";
-import { fill } from "lodash";
-import { ProviderData } from "@/types";
 import RatingSection from "./RatingFunction";
+import { ShareService } from "@/services/ShareService";
 
 const ProviderCard = ({ provider }: { provider: any }) => {
-  const { displayStyle, setDisplayStyle, setSavedProviders, savedProviders } =
-    useGlobalStore();
+  const {
+    user,
+    displayStyle,
+    setDisplayStyle,
+    setSavedProviders,
+    savedProviders,
+  } = useGlobalStore();
   const pathname = usePathname();
 
   const isSavedPro = pathname === "/profile/saved-companies";
@@ -42,6 +46,8 @@ const ProviderCard = ({ provider }: { provider: any }) => {
       setSavedProviders([...savedProviders, provider]);
     }
   };
+
+  console.log(user);
 
   return (
     <Card
@@ -81,6 +87,17 @@ const ProviderCard = ({ provider }: { provider: any }) => {
 
           <VStack className="flex-1 justify-between">
             <Pressable
+              onLongPress={() =>
+                ShareService.shareContent(
+                  user ? user._id : "",
+                  {
+                    providerName: provider.providerName,
+                    contentType: "providers",
+                    contentId: provider.id,
+                    contentName: provider.providerName,
+                  }
+                )
+              }
               onPress={() =>
                 router.push({
                   pathname: "/providers/[id]",

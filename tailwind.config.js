@@ -1,15 +1,15 @@
-import gluestackPlugin from "@gluestack-ui/nativewind-utils/tailwind-plugin";
+/** @type {import('tailwindcss').Config} */
 import { Colors } from "./constants/Colors";
 
-/** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: "class",
+  darkMode: process.env.DARK_MODE ? process.env.DARK_MODE : "class",
   content: [
-    "app/**/*.{tsx,jsx,ts,js}",
-    "components/**/*.{tsx,jsx,ts,js}",
-    "screens/**/*.{tsx,jsx,ts,js}",
+    "./app/**/*.{html,js,jsx,ts,tsx,mdx}",
+    "./components/**/*.{html,js,jsx,ts,tsx,mdx}",
+    "./screens/**/*.{html,js,jsx,ts,tsx,mdx}",
   ],
   presets: [require("nativewind/preset")],
+  important: "html",
   safelist: [
     {
       pattern:
@@ -179,7 +179,11 @@ module.exports = {
         heading: undefined,
         body: undefined,
         mono: undefined,
-        roboto: ["Roboto", "sans-serif"],
+        jakarta: ["var(--font-plus-jakarta-sans)"],
+        roboto: ["var(--font-roboto)"],
+        code: ["var(--font-source-code-pro)"],
+        inter: ["var(--font-inter)"],
+        "space-mono": ["var(--font-space-mono)"],
       },
       fontWeight: {
         extrablack: "950",
@@ -200,5 +204,4 @@ module.exports = {
       },
     },
   },
-  plugins: [gluestackPlugin],
 };

@@ -78,7 +78,7 @@ const SignInScreen = () => {
   // handle form submission
   const onSubmit = async (data: SignInSchemaType) => {
     Keyboard.dismiss();
-    await login(data);
+    if (!(await login(data))) return;
     if (!isAuthenticated) {
       setValidated({ emailValid: false, passwordValid: false });
       return;

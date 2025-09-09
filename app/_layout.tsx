@@ -1,35 +1,19 @@
-import { useCallback } from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { Slot } from "expo-router";
-import { StatusBar } from "react-native";
+import { StatusBar, Platform } from "react-native"; // Added Platform
 import Toast from "react-native-toast-message";
-import { SafeAreaView } from "react-native-safe-area-context";
 import useGlobalStore from "@/store/globalStore";
 import { router } from "expo-router";
-// import { useRouter } from "expo-router";
-
+import { ShareService } from "@/services/ShareService";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import "../global.css";
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from "expo-router";
+export { ErrorBoundary } from "expo-router";
 
-// export const unstable_settings = {
-//   // Ensure that reloading on `/modal` keeps a back button present.
-//   initialRouteName: "gluestack",
-// };
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -38,27 +22,45 @@ export default function RootLayout() {
     ...FontAwesome.font,
   });
 
-  const [styleLoaded, setStyleLoaded] = useState(false);
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
+  const checkForReferral = async () => {
+    try {
+      // Only check on Android
+      if (Platform.OS === "android") {
+        const referrerId = await ShareService.getInstallReferrer();
+
+        if (referrerId) {
+          await AsyncStorage.setItem("referrerId", referrerId);
+          console.log("Found referrer:", referrerId);
+        }
+      }
+    } catch (error) {
+      console.error("Error checking for referral:", error);
+      // Don't throw - we don't want to block app startup for referral errors
+    }
+  };
+
   useEffect(() => {
     if (error) throw error;
   }, [error]);
 
   useEffect(() => {
     if (loaded) {
-      SplashScreen.hideAsync().then(() => {
-        router.push("/");
-      });
+      // Use proper error handling for the splash screen
+      const prepare = async () => {
+        try {
+          await checkForReferral();
+        } catch (e) {
+          // Handle error but don't block app
+          console.warn("Referral check failed, continuing anyway");
+        } finally {
+          // Always hide splash screen regardless of referral result
+          await SplashScreen.hideAsync();
+        }
+      };
+
+      prepare();
     }
   }, [loaded]);
-
-  // useLayoutEffect(() => {
-  //   setStyleLoaded(true);
-  // }, [styleLoaded]);
-
-  // if (!loaded || !styleLoaded) {
-  //   return null;
-  // }
 
   return <RootLayoutNav />;
 }
@@ -72,19 +74,21 @@ function RootLayoutNav() {
         type: "error",
         text1: error,
         visibilityTime: 3000,
+        onHide: clearError, // Clear error after toast hides
       });
-    } else if (success) {
+    }
+  }, [error, clearError]);
+
+  useEffect(() => {
+    if (success) {
       Toast.show({
         type: "success",
         text1: success,
         visibilityTime: 3000,
+        onHide: clearSuccess, // Clear success after toast hides
       });
     }
-    return () => {
-      clearError();
-      clearSuccess();
-    };
-  }, [success, error, clearError]);
+  }, [success, clearSuccess]);
 
   return (
     <GluestackUIProvider>

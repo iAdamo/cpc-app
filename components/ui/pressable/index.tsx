@@ -1,11 +1,11 @@
 'use client';
 import React from 'react';
-import { createPressable } from '@gluestack-ui/pressable';
+import { createPressable } from '@gluestack-ui/core/pressable/creator';
 import { Pressable as RNPressable } from 'react-native';
 
-import { tva } from '@gluestack-ui/nativewind-utils/tva';
-import { withStyleContext } from '@gluestack-ui/nativewind-utils/withStyleContext';
-import type { VariantProps } from '@gluestack-ui/nativewind-utils';
+import { tva } from '@gluestack-ui/utils/nativewind-utils';
+import { withStyleContext } from '@gluestack-ui/utils/nativewind-utils';
+import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
 
 const UIPressable = createPressable({
   Root: withStyleContext(RNPressable),
@@ -21,9 +21,9 @@ type IPressableProps = Omit<
 > &
   VariantProps<typeof pressableStyle>;
 const Pressable = React.forwardRef<
-  React.ElementRef<typeof UIPressable>,
+  React.ComponentRef<typeof UIPressable>,
   IPressableProps
->(({ className, ...props }, ref) => {
+>(function Pressable({ className, ...props }, ref) {
   return (
     <UIPressable
       {...props}

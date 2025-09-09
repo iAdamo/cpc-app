@@ -285,7 +285,7 @@ const EmailVerificationPage = () => {
                     {otp.map((digit: string, index: number) => (
                       <Input key={index} className="w-12 h-12 border-0">
                         <InputField
-                          ref={(el) => {
+                          ref={(el: any) => {
                             inputRefs.current[index] = el;
                           }}
                           placeholder="•"
@@ -293,7 +293,7 @@ const EmailVerificationPage = () => {
                           maxLength={1}
                           className="text-center text-xl border-2 border-gray-300 rounded-lg focus:border-blue-500"
                           value={digit}
-                          onChangeText={(text) => {
+                          onChangeText={(text: string) => {
                             const newOtp = [...otp];
                             newOtp[index] = text;
                             setOtp(newOtp);
@@ -312,6 +312,7 @@ const EmailVerificationPage = () => {
                           onKeyPress={({ nativeEvent: { key } }) =>
                             handleKeyPress(index, key)
                           }
+                          
                           onBlur={onBlur}
                         />
                       </Input>

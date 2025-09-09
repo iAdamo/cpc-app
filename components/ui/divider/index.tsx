@@ -1,8 +1,8 @@
 'use client';
 import React from 'react';
-import { tva } from '@gluestack-ui/nativewind-utils/tva';
+import { tva } from '@gluestack-ui/utils/nativewind-utils';
 import { Platform, View } from 'react-native';
-import type { VariantProps } from '@gluestack-ui/nativewind-utils';
+import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
 
 const dividerStyle = tva({
   base: 'bg-background-200',
@@ -18,9 +18,9 @@ type IUIDividerProps = React.ComponentPropsWithoutRef<typeof View> &
   VariantProps<typeof dividerStyle>;
 
 const Divider = React.forwardRef<
-  React.ElementRef<typeof View>,
+  React.ComponentRef<typeof View>,
   IUIDividerProps
->(({ className, orientation = 'horizontal', ...props }, ref) => {
+>(function Divider({ className, orientation = 'horizontal', ...props }, ref) {
   return (
     <View
       ref={ref}

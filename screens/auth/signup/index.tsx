@@ -23,6 +23,7 @@ import { Button, ButtonText } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import useGlobalStore from "@/store/globalStore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type ControllerRenderType = {
   field: {
@@ -46,8 +47,6 @@ const SignUpScreen = () => {
     signUp,
     isLoading,
     setError,
-    isAuthenticated,
-    isOnboardingComplete,
     setCurrentStep,
     currentStep,
   } = useGlobalStore();
@@ -63,9 +62,10 @@ const SignUpScreen = () => {
   };
 
   // Define a type that matches the schema after omitting "code"
-  type SignUpFormType = z.infer<
-    ReturnType<typeof FormSchema.omit<{ code: true }>>
-  >;
+
+  type SignUpFormType = Omit<z.infer<typeof FormSchema>, "code"> & {
+    referrerId?: string;
+  };
 
   const {
     control,
@@ -90,6 +90,10 @@ const SignUpScreen = () => {
     if (data.password !== data.confirmPassword) {
       setError("Passwords do not match");
       return;
+    }
+    const referrerId = await AsyncStorage.getItem("referrerId");
+    if (referrerId) {
+      data = { ...data, referrerId };
     }
 
     if (!(await signUp(data))) {
