@@ -14,6 +14,7 @@ import {
   LocationGeocodedAddress,
 } from "expo-location";
 import { ProviderData } from "./provider";
+import { ServiceCategory, Subcategory } from "./service";
 
 export type PersistedAppState = {
   state: {
@@ -33,6 +34,8 @@ export interface GlobalState {
   setError: (error: string | null) => void;
   switchRole: ActiveRole;
   setSwitchRole: (role: ActiveRole) => void;
+  paramsFrom: string | null;
+  setParamsFrom: (params: string | null) => void;
 }
 
 export interface AuthState {
@@ -44,11 +47,8 @@ export interface AuthState {
   signUp: (userData: SignUpData) => Promise<boolean | undefined>;
   login: (credentials: LoginData) => Promise<boolean | undefined>;
   forgotPassword: (email: string) => Promise<void>;
-  verifyPhone: (
-    phoneNumber: string,
-    code: string
-  ) => Promise<boolean | undefined>;
-  verifyEmail: (email: string, code: string) => Promise<boolean | undefined>;
+  verifyPhone: (code: string) => Promise<boolean | undefined>;
+  verifyEmail: (code: string) => Promise<boolean | undefined>;
   sendCode: (email: string) => Promise<boolean | undefined>;
   resetPassword: (
     password: string,
@@ -127,9 +127,18 @@ export interface LocationState {
   getPlaceDetails: (placeId: string) => Promise<PlaceDetails | undefined>;
 }
 
+export interface ServiceState {
+  availableCategories: ServiceCategory[];
+  setAvailableCategories: (categories: ServiceCategory[]) => void;
+  selectedServices: Subcategory[];
+  setSelectedServices: (services: Subcategory[]) => void;
+
+}
+
 export type GlobalStore = AuthState &
   GlobalState &
   OnboardingState &
   UserState &
   ProviderState &
-  LocationState;
+  LocationState &
+  ServiceState;

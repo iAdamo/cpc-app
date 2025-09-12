@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect } from "react";
 import { ScrollView } from "react-native";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
@@ -26,11 +26,21 @@ import {
   BellDotIcon,
   SirenIcon,
   HandshakeIcon,
+  MessageCircleQuestionMarkIcon,
+  UserStarIcon,
 } from "lucide-react-native";
 import { router } from "expo-router";
 
 const Profile = () => {
-  const { user, currentLocation, switchRole, setSwitchRole } = useGlobalStore();
+  const {
+    user,
+    currentLocation,
+    switchRole,
+    setSwitchRole,
+    setCurrentStep,
+    resetOnboarding,
+    setParamsFrom,
+  } = useGlobalStore();
 
   const profileSections = [
     {
@@ -77,6 +87,16 @@ const Profile = () => {
       title: "Resources",
       items: [
         {
+          text: "Customer Support",
+          icon: MessageCircleQuestionMarkIcon,
+          action: () => router.push("/profile/privacy-policy"),
+        },
+        {
+          text: "Rate Us",
+          icon: UserStarIcon,
+          action: () => router.push("/profile/privacy-policy"),
+        },
+        {
           text: "Privacy Policy",
           icon: SirenIcon,
           action: () => router.push("/profile/privacy-policy"),
@@ -89,6 +109,30 @@ const Profile = () => {
       ],
     },
   ];
+
+  const handleCompanyOnboarding = () => {
+    if (user?.activeRoleId && switchRole === "Client") {
+      setSwitchRole("Provider");
+      router.push("/clients");
+      return;
+    } else if (user?.activeRoleId && switchRole === "Provider") {
+      setSwitchRole("Client");
+      router.push("/providers");
+      return;
+    } else if (!user?.activeRoleId && switchRole === "Client") {
+      resetOnboarding();
+      setCurrentStep(7);
+      setParamsFrom("/providers");
+      router.push({
+        pathname: "/onboarding",
+        params: { from: "/providers" },
+      });
+      return;
+    }
+    return;
+  };
+
+  console.log(switchRole);
 
   return (
     <VStack className="flex-1 bg-white">
@@ -126,14 +170,12 @@ const Profile = () => {
         </VStack>
         <Card className="flex-row rounded-xl justify-between items-center p-0 px-4 mx-4 bottom-6 shadow-lg bg-white">
           <Text size="lg" className="font-medium">
-            Switch to Company
+            Switch to {switchRole === "Client" ? "Company" : "Client"}
           </Text>
           <Switch
             size="md"
-            value={switchRole === "Provider"}
-            onToggle={() =>
-              setSwitchRole(user?.activeRoleId ? "Provider" : switchRole)
-            }
+            value={false}
+            onToggle={() => handleCompanyOnboarding()}
           />
         </Card>
       </VStack>

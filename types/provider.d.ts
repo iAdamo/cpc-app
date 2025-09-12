@@ -2,7 +2,7 @@ import { SubcategoryData } from "./subcategory";
 
 export interface ProviderData {
   _id: string;
-  id: string;
+  // id: string;
   providerName: string;
   providerDescription: string;
   providerEmail: string;

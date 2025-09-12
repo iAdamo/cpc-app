@@ -41,7 +41,7 @@ export const providerViewSlice: StateCreator<
     // send the id of the latest provider in the list
     const latestProvider = providers[providers.length - 1];
     if (latestProvider) {
-      const response = setUserFavourites(latestProvider.id);
+      const response = setUserFavourites(latestProvider._id);
       response
         .then((data) => {
           set({ success: "Favourites updated successfully!" });
@@ -54,7 +54,7 @@ export const providerViewSlice: StateCreator<
             // Map provider IDs to ProviderData objects using the current providers list
             const updatedProviders = data.favoritedBy
               .map((id: string) =>
-                providers.find((p: ProviderData) => p.id === id)
+                providers.find((p: ProviderData) => p._id === id)
               )
               .filter((p: ProviderData | undefined): p is ProviderData => !!p);
             set({ savedProviders: updatedProviders });

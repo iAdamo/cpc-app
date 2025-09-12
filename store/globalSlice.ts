@@ -12,4 +12,6 @@ export const globalSlice: StateCreator<GlobalStore, [], [], GlobalState> = (
   setError: (error) => set({ error }),
   switchRole: "Client",
   setSwitchRole: (role) => set({ switchRole: role }),
+  paramsFrom: null,
+  setParamsFrom: (params) => set({ paramsFrom: params }),
 });

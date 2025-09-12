@@ -88,7 +88,7 @@ const ProfileInfo = () => {
   };
 
   return (
-    <VStack className="flex-1 px-6 mt-4 gap-10">
+    <VStack className="px-6 mt-4 gap-10">
       {isProfileEdit && (
         <HStack className="mt-12 w-full justify-start">
           <Button variant="link" onPress={() => router.back()}>

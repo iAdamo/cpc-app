@@ -11,7 +11,7 @@ export default function AppLayout() {
         translucent={true}
         backgroundColor={"transparent"}
       />
-      <Stack screenOptions={{ headerShown: false }} />;
+      <Stack screenOptions={{ headerShown: false }} />
     </>
   );
 }

@@ -49,6 +49,7 @@ const useGlobalStore = create<GlobalStore>()(
             currentLocation: state.currentLocation,
             switchRole: state.switchRole,
             savedProviders: state.savedProviders,
+            paramsFrom: state.paramsFrom,
           }),
         }
       )

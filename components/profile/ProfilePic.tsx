@@ -7,8 +7,9 @@ import { Box } from "../ui/box";
 import { VStack } from "../ui/vstack";
 import { Text } from "../ui/text";
 import { useState, useEffect, useRef } from "react";
-import { Icon, CameraIcon, CloseIcon, SmileyIcon } from "../ui/icon";
+import { Icon, CloseIcon } from "../ui/icon";
 import { ActivityIndicator, Alert } from "react-native";
+import { CameraIcon, SmileIcon } from "lucide-react-native";
 import {
   Actionsheet,
   ActionsheetContent,
@@ -175,8 +176,8 @@ const ProfilePic = ({
             />
           ) : (
             <Icon
-              as={SmileyIcon}
-              className="w-14 h-14 text-red-500 fill-green-500 stroke-yellow-600"
+              as={SmileIcon}
+              className="w-14 h-14 text-black/20"
             />
             // <Text className="text-gray-500 text-4xl font-bold">
             //   {size === "sm" ? "U" : "USER"}

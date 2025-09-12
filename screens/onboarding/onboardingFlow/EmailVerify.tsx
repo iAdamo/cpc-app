@@ -154,7 +154,7 @@ const EmailVerificationPage = () => {
   const handleVerifyEmail = async () => {
     Keyboard.dismiss();
     //console.log("Verifying email with code:", code);
-    if (!(await verifyEmail(email!, getValues("code")))) return;
+    if (!(await verifyEmail(getValues("code")))) return;
 
     // Update verification status in storage
     updateProfile({ isEmailVerified: true });
@@ -312,7 +312,7 @@ const EmailVerificationPage = () => {
                           onKeyPress={({ nativeEvent: { key } }) =>
                             handleKeyPress(index, key)
                           }
-                          
+
                           onBlur={onBlur}
                         />
                       </Input>

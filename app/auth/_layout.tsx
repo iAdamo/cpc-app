@@ -7,13 +7,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AppLayout() {
   const { user, isAuthenticated, isOnboardingComplete } = useGlobalStore();
-
   useEffect(() => {
     if (isAuthenticated && !isOnboardingComplete) {
       router.replace("/onboarding");
     } else if (isAuthenticated && isOnboardingComplete) {
       if (user?.activeRole === "Client") {
         router.replace("/providers");
+      } else {
+        router.replace("/clients");
       }
     } else if (!isAuthenticated && !isOnboardingComplete) {
       router.replace("/onboarding");

@@ -1,20 +1,22 @@
 import useGlobalStore from "@/store/globalStore";
 import { VStack } from "@/components/ui/vstack";
-import { Text } from "@/components/ui/text";
 import EmailVerificationPage from "./onboardingFlow/EmailVerify";
 import FirstOnboardingPage from "./onboardingFlow/00FirstPage";
 import PhoneVerificationPage from "./onboardingFlow/PhoneVerify";
 import SelectRole from "./onboardingFlow/SelectRole";
-import ProfileInfo from "../clients/profile/sections/ProfileInfo";
+import ProfileInfo from "../../components/profile/ProfileInfo";
+import ChooseService from "./onboardingFlow/ChooseService";
 import FinalPage from "./onboardingFlow/FinalPage";
 import SignUpScreen from "@/screens/auth/signup";
-import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Button, ButtonIcon } from "@/components/ui/button";
 import { ChevronLeftIcon } from "@/components/ui/icon";
+import { useLocalSearchParams, router } from "expo-router";
 
 export function OnboardingFlow() {
-  const { currentStep, setCurrentStep, isOnboardingComplete } =
+  const { currentStep, setCurrentStep, completeOnboarding, paramsFrom } =
     useGlobalStore();
+  const params = useLocalSearchParams();
+  const from = params.from as string;
 
   // move to current last step if not completed
 
@@ -26,6 +28,7 @@ export function OnboardingFlow() {
     4: PhoneVerificationPage,
     5: SelectRole,
     6: ProfileInfo,
+    7: ChooseService,
   };
   const StepComponent: React.ComponentType =
     stepComponents[currentStep] || FinalPage;
@@ -36,11 +39,16 @@ export function OnboardingFlow() {
     !noBackButtonSteps.has(currentStep) && currentStep < 10;
 
   const handleBack = () => {
+    if (paramsFrom === "/providers") {
+      completeOnboarding();
+      router.replace("/providers");
+      return;
+    }
     setCurrentStep(currentStep > 1 ? currentStep - 1 : 1);
   };
 
   return (
-    <VStack className="bg-white">
+    <VStack className="flex-1 bg-white">
       <VStack className="bg-white h-full mt-8">
         {/* <OnboardingProgess /> */}
         {showBackButton && (

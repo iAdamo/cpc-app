@@ -1,6 +1,4 @@
 import { VStack } from "@/components/ui/vstack";
-import { Text } from "@/components/ui/text";
-import { Image } from "@/components/ui/image";
 import { ChevronLeftIcon, Icon } from "@/components/ui/icon";
 import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
 import SearchBar from "@/components/SearchEngine";

@@ -161,7 +161,7 @@ const PhoneVerificationPage = () => {
   const handleVerifyPhone = async () => {
     Keyboard.dismiss();
     // SWITCH TO FALSE FOR PRODUCTION
-    if (await verifyPhone(phone!, getValues("code"))) return;
+    if (await verifyPhone(getValues("code"))) return;
 
     // Update verification status in storage
     updateProfile({ isPhoneVerified: true });

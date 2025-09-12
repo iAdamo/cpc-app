@@ -49,7 +49,7 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       const response = await loginUser(credentials);
       if (response) {
         set({
-          user: response,
+          user: { ...response, accessToken: "" },
           success: "Logged in successfully!",
           isAuthenticated: true,
           isOnboardingComplete: true,
@@ -60,7 +60,8 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       }
     } catch (error: any) {
       set({
-        error: error?.response.data.message || "Login failed",
+        error:
+          error?.response?.data?.message || error?.message || "Login failed",
         isLoading: false,
       });
     }
@@ -79,10 +80,10 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
     }
   },
 
-  verifyPhone: async (phoneNumber: string, code: string) => {
+  verifyPhone: async (code: string) => {
     set({ isLoading: true, error: null });
     try {
-      await verifyPhoneNumber({ phoneNumber, code });
+      await verifyPhoneNumber({ code });
       set({ isLoading: false, success: "Phone number verified successfully" });
       return true;
     } catch (error: any) {
@@ -94,10 +95,10 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
     }
   },
 
-  verifyEmail: async (email: string, code: string) => {
+  verifyEmail: async (code: string) => {
     set({ isLoading: true, error: null });
     try {
-      await verifyEmail({ email, code });
+      await verifyEmail({ code });
       set({ isLoading: false, success: "Email verified successfully" });
       return true;
     } catch (error: any) {

@@ -32,13 +32,12 @@ export const sendCode = async (data: { email: string }) => {
   return response.data;
 };
 
-export const verifyEmail = async (data: { email: string; code: string }) => {
+export const verifyEmail = async (data: { code: string }) => {
   const response = await axiosInstance.post("/auth/verify-email", data);
   return response.data;
 };
 
 export const verifyPhoneNumber = async (data: {
-  phoneNumber: string;
   code: string;
 }) => {
   const response = await axiosInstance.post("auth/verify-phone", data);

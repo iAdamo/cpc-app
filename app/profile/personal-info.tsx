@@ -1,3 +1,3 @@
-import ProfileInfo from "@/screens/clients/profile/sections/ProfileInfo";
+import ProfileInfo from "@/components/profile/ProfileInfo";
 
 export default ProfileInfo;

@@ -84,6 +84,7 @@ const SignInScreen = () => {
       return;
     }
     reset();
+    router.replace("/providers");
   };
 
   // handle password visibility

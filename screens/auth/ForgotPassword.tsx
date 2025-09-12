@@ -174,6 +174,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
           handleSendCode({
             email: email!,
             code: "",
+            phoneNumber: "",
             password: "",
             confirmPassword: "",
           })

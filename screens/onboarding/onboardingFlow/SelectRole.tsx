@@ -10,12 +10,16 @@ import useGlobalStore from "@/store/globalStore";
 import Clients from "@/assets/icons/Clients";
 import Providers from "@/assets/icons/Providers";
 import { UserData, OnboardingData } from "@/types";
+import { router } from "expo-router";
 
 const SelectRole = () => {
-  const { setCurrentStep, currentStep, updateProfile, user } = useGlobalStore();
+  const { setCurrentStep, currentStep, updateProfile, user, setSwitchRole } = useGlobalStore();
   const [activeRole, setActiveRole] = useState(user?.activeRole);
 
   const handleSubmit = () => {
+    //  setSwitchRole("Client");
+    // router.replace("/providers");
+
     updateProfile({ activeRole });
     setCurrentStep(currentStep + 1);
     return;

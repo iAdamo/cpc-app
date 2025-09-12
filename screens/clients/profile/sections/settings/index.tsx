@@ -76,7 +76,7 @@ const AccountSettings = () => {
               {setting.items.map((item, indx) => (
                 <Pressable
                   key={indx}
-                  className="flex flex-row items-center gap-4 pl-4 bg-gray-100 data-[active=true]:bg-transparent"
+                  className="flex flex-row items-center gap-4 pl-4 bg-gray-50 data-[active=true]:bg-transparent"
                   onPress={item.action}
                 >
                   <HStack
