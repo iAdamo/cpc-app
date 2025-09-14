@@ -20,13 +20,13 @@ export interface SubcategoryData {
 }
 
 export interface Subcategory {
-  id: string;
+  _id: string;
   name: string;
   description?: string;
 }
 
-export interface ServiceCategory {
-  id: string;
+export interface Category {
+  _id: string;
   name: string;
   description?: string;
   subcategories: Subcategory[];

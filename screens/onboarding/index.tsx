@@ -10,6 +10,7 @@ import ProfileInfo from "../../components/profile/ProfileInfo";
 import ChooseService from "./onboardingFlow/ChooseService";
 import FinalPage from "./onboardingFlow/FinalPage";
 import SignUpScreen from "@/screens/auth/signup";
+import WelcomeScreen from "./onboardingFlow/ProviderStart";
 import { Button, ButtonIcon } from "@/components/ui/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "@/components/ui/icon";
 import { useLocalSearchParams, router, usePathname } from "expo-router";
@@ -37,7 +38,8 @@ export function OnboardingFlow() {
     4: PhoneVerificationPage,
     5: SelectRole,
     6: ProfileInfo,
-    7: ChooseService,
+    7: WelcomeScreen,
+    8: ChooseService,
   };
   const StepComponent: React.ComponentType =
     stepComponents[currentStep] || FinalPage;
@@ -51,6 +53,10 @@ export function OnboardingFlow() {
     setBackPressed(true);
     if (paramsFrom === "/providers") {
       completeOnboarding();
+      if (currentStep > 7) {
+        setCurrentStep(currentStep > 1 ? currentStep - 1 : 1);
+        return;
+      }
       router.replace("/providers");
       return;
     }

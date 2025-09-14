@@ -1,6 +1,6 @@
 import { StateCreator } from "zustand";
 import { getAllCategoriesWithSubcategories } from "@/axios/service";
-import { ServiceCategory, Subcategory } from "@/types";
+import { Category, Subcategory } from "@/types";
 import { GlobalStore, ServiceState } from "@/types";
 
 export const serviceSlice: StateCreator<GlobalStore, [], [], ServiceState> = (
@@ -8,7 +8,7 @@ export const serviceSlice: StateCreator<GlobalStore, [], [], ServiceState> = (
   get
 ) => ({
   availableCategories: [],
-  setAvailableCategories: (categories: ServiceCategory[]) =>
+  setAvailableCategories: (categories: Category[]) =>
     set({ availableCategories: categories }),
   selectedServices: [],
   setSelectedServices: (services: Subcategory[]) =>

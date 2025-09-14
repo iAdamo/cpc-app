@@ -111,15 +111,15 @@ const Profile = () => {
   ];
 
   const handleCompanyOnboarding = () => {
-    if (user?.activeRoleId && switchRole === "Client") {
+    if (user?.activeRoleId?.owner && switchRole === "Client") {
       setSwitchRole("Provider");
       router.push("/clients");
       return;
-    } else if (user?.activeRoleId && switchRole === "Provider") {
+    } else if (user?.activeRoleId?.owner && switchRole === "Provider") {
       setSwitchRole("Client");
       router.push("/providers");
       return;
-    } else if (!user?.activeRoleId && switchRole === "Client") {
+    } else if (!user?.activeRoleId?.owner && switchRole === "Client") {
       resetOnboarding();
       setCurrentStep(7);
       router.push({

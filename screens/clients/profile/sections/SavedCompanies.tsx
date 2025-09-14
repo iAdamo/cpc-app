@@ -39,7 +39,7 @@ const SavedCompanies = () => {
             ? filteredProviders
             : savedProviders
           ).map((provider) => (
-            <ProviderCard key={provider.id} provider={provider} />
+            <ProviderCard key={provider._id} provider={provider} />
           ))}
         </ScrollView>
       ) : (
