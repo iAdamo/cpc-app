@@ -2,15 +2,18 @@ import { useState } from "react";
 import useGlobalStore from "@/store/globalStore";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
-import EmailVerificationPage from "./onboardingFlow/EmailVerify";
-import FirstOnboardingPage from "./onboardingFlow/00FirstPage";
-import PhoneVerificationPage from "./onboardingFlow/PhoneVerify";
-import SelectRole from "./onboardingFlow/SelectRole";
-import ProfileInfo from "../../components/profile/ProfileInfo";
-import ChooseService from "./onboardingFlow/ChooseService";
-import FinalPage from "./onboardingFlow/FinalPage";
-import SignUpScreen from "@/screens/auth/signup";
-import WelcomeScreen from "./onboardingFlow/ProviderStart";
+import {
+  EmailVerificationPage,
+  FirstOnboardingPage,
+  SignUpScreen,
+  PhoneVerificationPage,
+  SelectRole,
+  ProfileInfo,
+  ChooseService,
+  FinalPage,
+  WelcomeScreen,
+  CompanyBasicInfo,
+} from "./onboardingFlow";
 import { Button, ButtonIcon } from "@/components/ui/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "@/components/ui/icon";
 import { useLocalSearchParams, router, usePathname } from "expo-router";
@@ -40,6 +43,7 @@ export function OnboardingFlow() {
     6: ProfileInfo,
     7: WelcomeScreen,
     8: ChooseService,
+    9: CompanyBasicInfo,
   };
   const StepComponent: React.ComponentType =
     stepComponents[currentStep] || FinalPage;
@@ -47,7 +51,7 @@ export function OnboardingFlow() {
   // Use a set for steps that should NOT show the back button
   const noBackButtonSteps = new Set([0, 1, 2, 5]);
   const showBackButton =
-    !noBackButtonSteps.has(currentStep) && currentStep < 10;
+    !noBackButtonSteps.has(currentStep) && currentStep < 12;
   console.log(paramsFrom, currentStep);
   const handleBack = () => {
     setBackPressed(true);
