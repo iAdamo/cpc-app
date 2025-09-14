@@ -37,7 +37,7 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       }
     } catch (error: any) {
       set({
-        error: error?.response.data.message || "Signup failed",
+        error: error?.response?.data?.message || "Signup failed",
         isLoading: false,
       });
     }
@@ -48,6 +48,7 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
     try {
       const response = await loginUser(credentials);
       if (response) {
+        await SecureStore.setItemAsync("accessToken", response.accessToken);
         set({
           user: { ...response, accessToken: "" },
           success: "Logged in successfully!",
@@ -55,10 +56,10 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
           isOnboardingComplete: true,
           isLoading: false,
         });
-        await SecureStore.setItemAsync("accessToken", response.accessToken);
         return true;
       }
     } catch (error: any) {
+      console.log(error);
       set({
         error:
           error?.response?.data?.message || error?.message || "Login failed",
@@ -74,7 +75,7 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       set({ isLoading: false });
     } catch (error: any) {
       set({
-        error: error?.response.data.message || "Forgot password failed",
+        error: error?.response?.data?.message || "Forgot password failed",
         isLoading: false,
       });
     }
@@ -89,7 +90,7 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
     } catch (error: any) {
       set({
         error:
-          error?.response.data.message || "Phone number verification failed",
+          error?.response?.data?.message || "Phone number verification failed",
         isLoading: false,
       });
     }
@@ -103,8 +104,8 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       return true;
     } catch (error: any) {
       set({
-        error: error?.response.data.message || "Email verification failed",
         isLoading: false,
+        error: error?.response?.data?.message || "Email verification failed",
       });
     }
   },
@@ -122,7 +123,7 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
     } catch (error: any) {
       set({
         error:
-          error?.response.data.message || "Failed to send verification code",
+          error?.response?.data?.message || "Failed to send verification code",
         isLoading: false,
       });
     }
@@ -139,7 +140,7 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       }
     } catch (error: any) {
       set({
-        error: error?.response.data.message || "Reset password failed",
+        error: error?.response?.data?.message || "Reset password failed",
         isLoading: false,
       });
     }
@@ -155,7 +156,7 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       }
     } catch (error: any) {
       set({
-        error: error?.response.data.message || "Password change failed",
+        error: error?.response?.data?.message || "Password change failed",
         isLoading: false,
       });
     }

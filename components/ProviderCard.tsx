@@ -40,12 +40,8 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
   const savedProviderIds = savedProviders.map((p) => p._id);
   const isSaved = savedProviderIds.includes(provider._id);
 
-  const handleSaveToggle = () => {
-    if (isSaved) {
-      setSavedProviders(savedProviders.filter((p) => p._id !== provider._id));
-    } else {
-      setSavedProviders([...savedProviders, provider]);
-    }
+  const handleSaveToggle = async () => {
+    await setSavedProviders(provider._id);
   };
 
   return (
@@ -84,7 +80,9 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
                     <ButtonIcon
                       as={HeartIcon}
                       className={`w-6 h-6 text-black/40 ${
-                        isSaved && "fill-red-600 text-red-400"
+                        isSaved
+                          ? "fill-red-600 text-red-400"
+                          : "fill-white text-white"
                       }`}
                     />
                   </Button>
@@ -118,17 +116,14 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
                     <AvatarFallbackText>
                       {provider.providerName}
                     </AvatarFallbackText>
-                    <AvatarImage source={{ uri: provider.providerImages[0] }} />
+                    <AvatarImage source={{ uri: user?.profilePicture }} />
                   </Avatar>
-                  <Heading
-                    size="md"
-                    className="font-medium break-words text-brand-primary"
-                  >
+                  <Heading size="md" className="break-words text-brand-primary">
                     {provider.providerName}
                   </Heading>
                 </HStack>
-                <Text className="text-gray-500 font-medium">
-                  {provider?.subcategories[0]}
+                <Text className="font-medium">
+                  {provider?.subcategories[0].name}
                 </Text>
                 <Text className="text-gray-600 line-clamp-2">
                   {provider.providerDescription}
@@ -173,7 +168,9 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
                     <ButtonIcon
                       as={HeartIcon}
                       className={`w-6 h-6 text-black/40 ${
-                        isSaved && "fill-red-600 text-red-400"
+                        isSaved
+                          ? "fill-red-600 text-red-400"
+                          : "fill-white text-white"
                       }`}
                     />
                   </Button>
@@ -202,11 +199,20 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
               className="flex-1"
             >
               <VStack className="flex-1 gap-1">
-                <Heading size="md" className="font-medium">
-                  {provider.providerName}
-                </Heading>
-                <Text className="text-gray-500 font-medium">
-                  {provider.subcategories[0]}
+                <HStack space="sm" className="items-center">
+                  <Avatar size="sm">
+                    <AvatarFallbackText>
+                      {provider.providerName}
+                    </AvatarFallbackText>
+                    <AvatarImage source={{ uri: user?.profilePicture }} />
+                  </Avatar>
+                  <Heading size="md" className="break-words text-brand-primary">
+                    {provider.providerName}
+                  </Heading>
+                </HStack>
+
+                <Text className="font-medium">
+                  {provider.subcategories[0].name}
                 </Text>
                 <Text className="text-gray-600 break-words line-clamp-2">
                   {provider.providerDescription}

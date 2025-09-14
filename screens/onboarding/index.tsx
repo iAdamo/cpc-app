@@ -1,5 +1,7 @@
+import { useState } from "react";
 import useGlobalStore from "@/store/globalStore";
 import { VStack } from "@/components/ui/vstack";
+import { HStack } from "@/components/ui/hstack";
 import EmailVerificationPage from "./onboardingFlow/EmailVerify";
 import FirstOnboardingPage from "./onboardingFlow/00FirstPage";
 import PhoneVerificationPage from "./onboardingFlow/PhoneVerify";
@@ -9,14 +11,21 @@ import ChooseService from "./onboardingFlow/ChooseService";
 import FinalPage from "./onboardingFlow/FinalPage";
 import SignUpScreen from "@/screens/auth/signup";
 import { Button, ButtonIcon } from "@/components/ui/button";
-import { ChevronLeftIcon } from "@/components/ui/icon";
-import { useLocalSearchParams, router } from "expo-router";
+import { ChevronLeftIcon, ChevronRightIcon } from "@/components/ui/icon";
+import { useLocalSearchParams, router, usePathname } from "expo-router";
 
 export function OnboardingFlow() {
+  const [backPressed, setBackPressed] = useState(false);
   const { currentStep, setCurrentStep, completeOnboarding, paramsFrom } =
     useGlobalStore();
   const params = useLocalSearchParams();
   const from = params.from as string;
+  const pathname = usePathname();
+  const showForwardButton = backPressed && currentStep !== 2;
+
+  // If the user navigated here with a "from" parameter, set it in the store
+  if (from && paramsFrom !== from)
+    useGlobalStore.setState({ paramsFrom: from });
 
   // move to current last step if not completed
 
@@ -34,11 +43,12 @@ export function OnboardingFlow() {
     stepComponents[currentStep] || FinalPage;
 
   // Use a set for steps that should NOT show the back button
-  const noBackButtonSteps = new Set([0, 1, 5]);
+  const noBackButtonSteps = new Set([0, 1, 2, 5]);
   const showBackButton =
     !noBackButtonSteps.has(currentStep) && currentStep < 10;
-
+  console.log(paramsFrom, currentStep);
   const handleBack = () => {
+    setBackPressed(true);
     if (paramsFrom === "/providers") {
       completeOnboarding();
       router.replace("/providers");
@@ -46,28 +56,44 @@ export function OnboardingFlow() {
     }
     setCurrentStep(currentStep > 1 ? currentStep - 1 : 1);
   };
-
+  const handleForward = () => {
+    setBackPressed(false);
+    setCurrentStep(currentStep + 1);
+  };
   return (
     <VStack className="flex-1 bg-white">
-      <VStack className="bg-white h-full mt-8">
-        {/* <OnboardingProgess /> */}
-        {showBackButton && (
-          <Button
-            size="xl"
-            variant="link"
-            className="self-start ml-6 mt-6"
-            onPress={handleBack}
-          >
-            <ButtonIcon
-              as={ChevronLeftIcon}
-              className="text-brand-secondary w-7 h-7"
-            />
-          </Button>
-        )}
-        <VStack className="">
-          <StepComponent />
-        </VStack>
-      </VStack>
+      {(showBackButton || showForwardButton) && (
+        <HStack className="w-full items-center mt-16 px-6">
+          {showBackButton && (
+            <Button
+              size="xl"
+              variant="link"
+              className="self-start"
+              onPress={handleBack}
+            >
+              <ButtonIcon
+                as={ChevronLeftIcon}
+                className="text-brand-secondary w-7 h-7"
+              />
+            </Button>
+          )}
+          {showForwardButton && (
+            <Button
+              size="xl"
+              variant="link"
+              className="ml-auto"
+              onPress={handleForward}
+            >
+              <ButtonIcon
+                as={ChevronRightIcon}
+                className="text-brand-secondary w-7 h-7"
+              />
+            </Button>
+          )}
+        </HStack>
+      )}
+      {/* Render the current step component */}
+      <StepComponent />
     </VStack>
   );
 }

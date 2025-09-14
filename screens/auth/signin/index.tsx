@@ -23,6 +23,7 @@ import { Button, ButtonText } from "@/components/ui/button";
 import ForgotPasswordModal from "@/screens/auth/ForgotPassword";
 import { Spinner } from "@/components/ui/spinner";
 import useGlobalStore from "@/store/globalStore";
+import { fr } from "zod/v4/locales";
 
 type ControllerRenderType = {
   field: {
@@ -46,14 +47,17 @@ const SignInScreen = () => {
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
 
   const router = useRouter();
-  const { login, isLoading, isAuthenticated, isOnboardingComplete } =
-    useGlobalStore();
+  const { login, isLoading, isAuthenticated, setParamsFrom } = useGlobalStore();
+
   const switchToSignUp = () => {
     useGlobalStore.setState({
       isAuthenticated: false,
       isOnboardingComplete: false,
     });
-    router.replace("/auth/signup");
+    router.replace({
+      pathname: "/auth/signup",
+      params: { from: "/auth/signin" },
+    });
   };
 
   // handle form submission

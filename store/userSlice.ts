@@ -57,7 +57,7 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
       }
     } catch (error: any) {
       set({
-        error: error || "Profile update failed",
+        error: error?.response?.data?.message || "Profile update failed",
         isLoading: false,
       });
     }

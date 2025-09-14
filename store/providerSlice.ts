@@ -10,6 +10,7 @@ import {
 } from "@/types";
 import { globalSearch } from "@/axios/search";
 import { setUserFavourites } from "@/axios/user";
+import { P } from "@expo/html-elements";
 
 export const providerViewSlice: StateCreator<
   GlobalStore,
@@ -34,36 +35,24 @@ export const providerViewSlice: StateCreator<
     set({ filteredProviders: providers });
   },
   savedProviders: [],
-  setSavedProviders: (providers: ProviderData[]) => {
-    set({ savedProviders: providers });
-
-    // sync with backend
-    // send the id of the latest provider in the list
-    const latestProvider = providers[providers.length - 1];
-    if (latestProvider) {
-      const response = setUserFavourites(latestProvider._id);
-      response
-        .then((data) => {
-          set({ success: "Favourites updated successfully!" });
-          // if the backend returns the updated list and the length is different, update the state
-          if (
-            data &&
-            data.favoritedBy &&
-            data.favoritedBy.length !== providers.length
-          ) {
-            // Map provider IDs to ProviderData objects using the current providers list
-            const updatedProviders = data.favoritedBy
-              .map((id: string) =>
-                providers.find((p: ProviderData) => p._id === id)
-              )
-              .filter((p: ProviderData | undefined): p is ProviderData => !!p);
-            set({ savedProviders: updatedProviders });
-          }
-        })
-        .catch((error) => {
-          set({ error: "Failed to update favourites." });
-          console.error("Failed to update favourites:", error);
-        });
+  setSavedProviders: async (providerId) => {
+    try {
+      const data = await setUserFavourites(providerId);
+      if (data) {
+        if (data.favoritedBy.includes(get().user?._id || "")) {
+          set({ savedProviders: [data], success: "Added to Saved Companies" });
+        } else {
+          set({
+            savedProviders: get().savedProviders.filter(
+              (provider) => provider._id !== providerId
+            ),
+            success: "Removed from Saved Companies",
+          });
+        }
+      }
+    } catch (error) {
+      set({ error: "Failed to update favourites." });
+      console.error("Failed to update favourites:", error);
     }
   },
 

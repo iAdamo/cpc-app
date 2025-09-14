@@ -70,7 +70,7 @@ const FirstOnboardingPage = () => {
   ];
 
   return (
-    <VStack className="h-full -mt-8">
+    <VStack className="h-full">
       <PagerView
         ref={pagerRef}
         style={{ flex: 1 }}

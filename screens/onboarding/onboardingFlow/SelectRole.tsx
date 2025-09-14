@@ -25,9 +25,9 @@ const SelectRole = () => {
     return;
   };
   return (
-    <VStack className="p-4 h-full justify-between">
+    <VStack className="p-4 h-full justify-between mt-16">
       <Box className="gap-20">
-        <VStack className="gap-4 mt-8">
+        <VStack className="gap-4 ">
           <Heading size="2xl" className="text-brand-primary">
             Tell Us How You'll Use Companies Center
           </Heading>

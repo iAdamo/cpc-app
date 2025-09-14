@@ -122,7 +122,6 @@ const Profile = () => {
     } else if (!user?.activeRoleId && switchRole === "Client") {
       resetOnboarding();
       setCurrentStep(7);
-      setParamsFrom("/providers");
       router.push({
         pathname: "/onboarding",
         params: { from: "/providers" },

@@ -4,16 +4,27 @@ import { StatusBar } from "react-native";
 import useGlobalStore from "@/store/globalStore";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { current } from "immer";
 
 export default function AppLayout() {
   const { user, isAuthenticated, isOnboardingComplete } = useGlobalStore();
   useEffect(() => {
     if (isAuthenticated && !isOnboardingComplete) {
       router.replace("/onboarding");
+    } else if (
+      isAuthenticated &&
+      isOnboardingComplete &&
+      !user?.isEmailVerified
+    ) {
+      useGlobalStore.setState({ currentStep: 3 });
+      router.replace("/onboarding");
     } else if (isAuthenticated && isOnboardingComplete) {
       if (user?.activeRole === "Client") {
+        // remove the comment if clients route is done
+        // setSwitchRole("Client");
         router.replace("/providers");
       } else {
+        // setSwitchRole("Provider");
         router.replace("/clients");
       }
     } else if (!isAuthenticated && !isOnboardingComplete) {

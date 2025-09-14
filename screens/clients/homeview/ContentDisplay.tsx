@@ -39,6 +39,15 @@ const ContentDisplay = () => {
     handleProvidersSearch();
   }, [sortBy, currentLocation]);
 
+  // console.log("Search Results in Home View:", searchResults.providers);
+  // // show subcategories
+  // console.log(
+  //   "First Provider's Subcategories:",
+  //   searchResults.providers && searchResults.providers.length > 0
+  //     ? searchResults.providers[0].subcategories
+  //     : "No providers available"
+  // );
+
   const view =
     displayStyle === "Grid"
       ? "flex-row flex-wrap justify-between"

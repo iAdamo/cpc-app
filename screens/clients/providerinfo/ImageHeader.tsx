@@ -18,12 +18,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
 });
-const ImageHeader = ({ provider }: { provider: any | null }) => {
+const ImageHeader = ({ provider }: { provider: ProviderData }) => {
   return (
-    <VStack className="h-1/3">
+    <VStack className="h-[30%]">
       <ImageBackground
         source={{
-          uri: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+          uri: provider.providerImages[0] || "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
         }}
         style={styles.header}
       >

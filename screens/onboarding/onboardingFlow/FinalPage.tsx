@@ -19,7 +19,9 @@ const FinalPage = () => {
     const finalizeProfile = async () => {
       if (await updateUserProfile()) {
         completeOnboarding();
-        router.replace("/providers");
+        setTimeout(() => {
+          router.replace("/providers");
+        }, 3000); // Wait 3 seconds before navigating
       } else {
         setCurrentStep(1); // Go back to the first step on failure
       }

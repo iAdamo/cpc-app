@@ -93,7 +93,7 @@ export interface ProviderState {
   filteredProviders: ProviderData[];
   setFilteredProviders: (providers: ProviderData[]) => void;
   savedProviders: ProviderData[];
-  setSavedProviders: (providers: ProviderData[]) => void;
+  setSavedProviders: (providerId: string) => Promise<ProviderData[] | void>;
   setSearchResults: (results: SearchResultData) => void;
   executeSearch: (params: {
     page: number;
@@ -132,7 +132,6 @@ export interface ServiceState {
   setAvailableCategories: (categories: ServiceCategory[]) => void;
   selectedServices: Subcategory[];
   setSelectedServices: (services: Subcategory[]) => void;
-
 }
 
 export type GlobalStore = AuthState &

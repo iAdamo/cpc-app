@@ -127,7 +127,7 @@ const SignUpScreen = () => {
   };
 
   return (
-    <VStack className="bg-white p-4">
+    <VStack className="bg-white p-4 mt-28">
       <VStack className="justify-end">
         <Card className="shadow-xl gap-8">
           <Heading size="xl" className="text-brand-primary">

@@ -1,15 +1,22 @@
 import { ProviderData } from "./provider";
+// export interface SubcategoryData {
+//   _id: string;
+//   id: string;
+//   name: string;
+//   description?: string;
+//   category: {
+//     _id: string;
+//     id: string;
+//     name: string;
+//     description?: string;
+//   };
+// }
+
 export interface SubcategoryData {
   _id: string;
-  id: string;
   name: string;
   description?: string;
-  category: {
-    _id: string;
-    id: string;
-    name: string;
-    description?: string;
-  };
+  categoryId: string;
 }
 
 export interface Subcategory {

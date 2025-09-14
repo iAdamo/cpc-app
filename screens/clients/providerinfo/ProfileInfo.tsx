@@ -14,20 +14,25 @@ import {
 } from "lucide-react-native";
 import { ProviderData } from "@/types";
 
-const ProfileInfo = ({ provider }: { provider: any | null }) => {
+const ProfileInfo = ({ provider }: { provider: ProviderData }) => {
   return (
     <VStack className="bg-white">
       {/* Profile Info Section */}
       <VStack className="">
         <HStack className="justify-between">
           <Card className="w-1/2 gap-2 items-start">
-            <Heading className="font-semibold">
+            <Heading size="xl" className="">
               {provider?.providerName || "Alejandro De'Armas"}
             </Heading>
-            <Text>{provider.category || "Tree Felling"}</Text>
+            <Text size="lg" className="font-bold">
+              {provider.subcategories[0].name || "Tree Felling"}
+            </Text>
             <HStack space="xs" className="items-center ">
-              <Icon as={MapPinIcon} size="sm" className="text-gray-500" />
-              <Text className="break-words">{provider.location || "Florida, United States"}</Text>
+              <Icon as={MapPinIcon} size="md" className="text-red-600" />
+              <Text className="break-words">
+                {provider.location.primary.address.address ||
+                  "Florida, United States"}
+              </Text>
             </HStack>
           </Card>
           <Card className="gap-2 items-end">
@@ -40,6 +45,7 @@ const ProfileInfo = ({ provider }: { provider: any | null }) => {
               <Button
                 size="sm"
                 variant="outline"
+                onPress={() => {}}
                 className="border-0 bg-gray-200/50 px-2"
               >
                 <ButtonIcon as={PhoneIcon} className="text-brand-primary" />
