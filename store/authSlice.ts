@@ -1,4 +1,3 @@
-import { current } from "immer";
 import { StateCreator } from "zustand";
 import * as SecureStore from "expo-secure-store";
 import { GlobalStore, AuthState, SignUpData, LoginData } from "@/types";
@@ -33,7 +32,6 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
           isLoading: false,
         });
         await SecureStore.setItemAsync("accessToken", response.accessToken);
-        return true;
       }
     } catch (error: any) {
       set({
@@ -56,7 +54,6 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
           isOnboardingComplete: true,
           isLoading: false,
         });
-        return true;
       }
     } catch (error: any) {
       console.log(error);
@@ -86,7 +83,6 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
     try {
       await verifyPhoneNumber({ code });
       set({ isLoading: false, success: "Phone number verified successfully" });
-      return true;
     } catch (error: any) {
       set({
         error:
@@ -101,7 +97,6 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
     try {
       await verifyEmail({ code });
       set({ isLoading: false, success: "Email verified successfully" });
-      return true;
     } catch (error: any) {
       set({
         isLoading: false,
@@ -119,7 +114,6 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       }
       await sendCode({ email });
       set({ isLoading: false, success: "Verification code sent" });
-      return true;
     } catch (error: any) {
       set({
         error:
@@ -136,7 +130,6 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
         await resetPassword({ email: email || get().user!.email, password })
       ) {
         set({ isLoading: false, success: "Password reset successfull!" });
-        return true;
       }
     } catch (error: any) {
       set({
@@ -152,7 +145,6 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       const response = await changePassword({ currentPassword, password });
       if (response) {
         set({ isLoading: false, success: "Password Change successfull!" });
-        return true;
       }
     } catch (error: any) {
       set({

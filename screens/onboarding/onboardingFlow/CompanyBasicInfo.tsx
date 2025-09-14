@@ -23,12 +23,10 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { ScrollView } from "@/components/ui/scroll-view";
-import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
+import MediaPicker from "@/components/media/MediaPicker";
+import { FileType } from "@/types";
 
 const CompanyBasicInfo = () => {
-  const [selectedImages, setSelectedImages] = useState<FileType[]>([]);
-  const [status, requestPermission] = ImagePicker.useCameraPermissions();
   const {
     user,
     updateProfile,
@@ -37,14 +35,6 @@ const CompanyBasicInfo = () => {
     setError: setGError,
   } = useGlobalStore();
   if (!user) return;
-
-  type FileType = {
-    uri: string;
-    name?: string;
-    type: string;
-    size?: number;
-  };
-  let files: FileType[] = [];
 
   const {
     control,
@@ -60,89 +50,46 @@ const CompanyBasicInfo = () => {
       providerDescription: user.activeRoleId?.providerDescription || "",
       providerEmail: user.activeRoleId?.providerEmail || "",
       providerPhoneNumber: user.activeRoleId?.providerPhoneNumber || "",
-      providerImages: files,
+      providerImages: [],
     },
   });
 
-  useEffect(() => {
-    (async () => {
-      if (!status?.granted) {
-        const response = await requestPermission();
-        if (!response.granted) {
-          setGError("Camera permission is required to take photos!");
-          return;
-        }
-      }
-    })();
-  }, []);
-
-  const pickImages = async (source: "gallery" | "camera") => {
-    let result;
-    if (source === "gallery") {
-      result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"],
-        allowsMultipleSelection: true,
-        quality: 1,
-        selectionLimit: 5 - selectedImages.length, // Limit to remaining slots
-      });
-    } else if (source === "camera") {
-      if (!status?.granted) {
-        const response = await requestPermission();
-        if (!response.granted) {
-          setGError("Camera permission is required to take photos!");
-          return;
-        }
-        result = await ImagePicker.launchCameraAsync({
-          mediaTypes: ["images"],
-          allowsEditing: true,
-          aspect: [1, 1],
-          quality: 0.8,
-        });
-      }
-      result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ["images"],
-        quality: 1,
-      });
-    }
-    if (result && !result.canceled && result.assets.length > 0) {
-      files = await Promise.all(
-        result.assets.map(async (asset) => {
-          const info = await FileSystem.getInfoAsync(asset.uri);
-          return {
-            uri: asset.uri,
-            name: asset.fileName ?? asset.uri.split("/").pop() ?? undefined,
-            type: asset.type ?? "image",
-            size: info.exists && "size" in info ? info.size : undefined,
-          };
-        })
-      );
-      const uris = result.assets.map((asset) => asset.uri);
-      const validUris: string[] = [];
-      const newSelectedImages = [...selectedImages, ...files].slice(0, 5);
-      setSelectedImages(newSelectedImages);
-      setValue(
-        "providerImages",
-        newSelectedImages.map((file) => ({
-          uri: file.uri,
-          name: file.name ?? "",
-          type: file.type,
-          size: file.size,
-        }))
-      );
+  const handleFilesChange = (files: FileType[]) => {
+    const mappedFiles = files.map((file) => ({
+      ...file,
+      name: file.name ?? "", // Ensure name is always a string
+    }));
+    setValue("providerImages", mappedFiles);
+    if (files.length > 0) {
       clearErrors("providerImages");
-
     }
   };
-  const removeImage = (uri: string) => {
-    const updatedImages = selectedImages.filter((img) => img !== uri);
-    setSelectedImages(updatedImages);
-    setValue(
-      "providerImages",
-      updatedImages.map((uri) => ({ uri }))
-    );
-  };
 
-  return <VStack></VStack>;
+  return (
+    <VStack className="flex-1 p-4">
+      <Heading className="text-2xl font-bold mb-4">
+        Company Basic Information
+      </Heading>
+      <FormControl className="flex-1" isInvalid={!!errors.providerImages}>
+        <FormControlLabel>
+          <FormControlLabelText>Company Images</FormControlLabelText>
+        </FormControlLabel>
+        <Controller
+          control={control}
+          name="providerImages"
+          render={({ field: { value } }) => (
+            <MediaPicker
+              maxFiles={4}
+              maxSize={10}
+              initialFiles={value}
+              onFilesChange={handleFilesChange}
+            />
+          )}
+        />
+        {errors.providerImages && <Text>{errors.providerImages.message}</Text>}
+      </FormControl>
+    </VStack>
+  );
 };
 
 export default CompanyBasicInfo;

@@ -146,7 +146,7 @@ const PhoneVerificationPage = () => {
     form.append("phoneNumber", tempPhone);
     form.append("emailEditCount", (editCount + 1).toString());
     form.append("isEmailVerified", "false");
-    if (!(await updateUserProfile(form))) return;
+    await updateUserProfile(form);
 
     setPhone(tempPhone);
     setEditCount(editCount + 1);
@@ -161,7 +161,7 @@ const PhoneVerificationPage = () => {
   const handleVerifyPhone = async () => {
     Keyboard.dismiss();
     // SWITCH TO FALSE FOR PRODUCTION
-    if (await verifyPhone(getValues("code"))) return;
+    await verifyPhone(getValues("code"));
 
     // Update verification status in storage
     updateProfile({ isPhoneVerified: true });
@@ -172,7 +172,7 @@ const PhoneVerificationPage = () => {
     if (cooldown > 0) return;
 
     // CHANGE TO phone FOR PRODUCTION
-    if (await sendCode(phone || "")) return;
+    await sendCode(phone || "");
 
     Keyboard.dismiss();
     setCooldown(60);

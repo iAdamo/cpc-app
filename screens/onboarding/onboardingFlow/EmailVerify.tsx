@@ -136,9 +136,7 @@ const EmailVerificationPage = () => {
     form.append("email", tempEmail);
     form.append("emailEditCount", (editCount + 1).toString());
     form.append("isEmailVerified", "false");
-    if (!(await updateUserProfile(form))) {
-      return;
-    }
+    await updateUserProfile(form);
 
     setEmail(tempEmail); // <-- update local state
     setEditCount(editCount + 1);
@@ -154,7 +152,7 @@ const EmailVerificationPage = () => {
   const handleVerifyEmail = async () => {
     Keyboard.dismiss();
     //console.log("Verifying email with code:", code);
-    if (!(await verifyEmail(getValues("code")))) return;
+    await verifyEmail(getValues("code"));
 
     // Update verification status in storage
     updateProfile({ isEmailVerified: true });
@@ -165,7 +163,7 @@ const EmailVerificationPage = () => {
   const handleSendCode = async () => {
     if (cooldown > 0) return;
 
-    if (!(await sendCode(email!))) return;
+    await sendCode(email!);
 
     Keyboard.dismiss();
     setCooldown(30);
@@ -312,7 +310,6 @@ const EmailVerificationPage = () => {
                           onKeyPress={({ nativeEvent: { key } }) =>
                             handleKeyPress(index, key)
                           }
-
                           onBlur={onBlur}
                         />
                       </Input>

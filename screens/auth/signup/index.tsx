@@ -42,13 +42,8 @@ const SignUpScreen = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const {
-    signUp,
-    isLoading,
-    setError,
-    setCurrentStep,
-    currentStep,
-  } = useGlobalStore();
+  const { signUp, isLoading, setError, setCurrentStep, currentStep } =
+    useGlobalStore();
 
   const router = useRouter();
 
@@ -95,14 +90,7 @@ const SignUpScreen = () => {
       data = { ...data, referrerId };
     }
 
-    if (!(await signUp(data))) {
-      setValidated({
-        emailValid: false,
-        phoneNumberValid: false,
-        passwordValid: false,
-      });
-      return;
-    }
+    await signUp(data);
     reset();
     setCurrentStep(currentStep + 1);
   };

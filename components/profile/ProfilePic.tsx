@@ -20,10 +20,8 @@ import {
   ActionsheetBackdrop,
 } from "@/components/ui/actionsheet";
 import { Pressable } from "../ui/pressable";
-import { Camera } from "lucide-react-native";
-import { Image as Gallery } from "lucide-react-native";
+import { Camera, Image as Gallery } from "lucide-react-native";
 import { Spinner } from "../ui/spinner";
-import { Center } from "../ui/center";
 
 interface ProfilePicProps {
   imageUri?: string | null;

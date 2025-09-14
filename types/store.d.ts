@@ -1,8 +1,3 @@
-import { current } from "immer";
-import {
-  LocationObjectCoords,
-  LocationGeocodedAddress,
-} from "./../node_modules/expo-location/build/Location.types.d";
 import { SignUpData, LoginData } from "./auth";
 import { UserData } from "./user";
 import { OnboardingData } from "./onboarding";
@@ -15,6 +10,7 @@ import {
 } from "expo-location";
 import { ProviderData } from "./provider";
 import { ServiceCategory, Subcategory } from "./service";
+import { FileType, MediaSource, MediaPickerOptions } from "./media";
 
 export type PersistedAppState = {
   state: {
@@ -44,20 +40,14 @@ export interface AuthState {
   isAuthenticated: boolean;
 
   // Actions
-  signUp: (userData: SignUpData) => Promise<boolean | undefined>;
-  login: (credentials: LoginData) => Promise<boolean | undefined>;
+  signUp: (userData: SignUpData) => Promise<void>;
+  login: (credentials: LoginData) => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
-  verifyPhone: (code: string) => Promise<boolean | undefined>;
-  verifyEmail: (code: string) => Promise<boolean | undefined>;
-  sendCode: (email: string) => Promise<boolean | undefined>;
-  resetPassword: (
-    password: string,
-    email?: string
-  ) => Promise<boolean | undefined>;
-  changePassword: (
-    currentPassword: string,
-    password: string
-  ) => Promise<boolean | undefined>;
+  verifyPhone: (code: string) => Promise<void>;
+  verifyEmail: (code: string) => Promise<void>;
+  sendCode: (email: string) => Promise<void>;
+  resetPassword: (password: string, email?: string) => Promise<void>;
+  changePassword: (currentPassword: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
   clearSuccess: () => void;
@@ -66,7 +56,7 @@ export interface AuthState {
 export interface UserState {
   // Actions
   updateProfile: (updates: Partial<UserData>) => void;
-  updateUserProfile: (data?: FormData) => Promise<boolean | undefined>;
+  updateUserProfile: (data?: FormData) => Promise<void>;
 }
 
 export interface OnboardingState {
@@ -104,7 +94,7 @@ export interface ProviderState {
     long?: number;
     address?: string;
     sortBy?: string;
-  }) => Promise<boolean | undefined>;
+  }) => Promise<void>;
   clearSearchResults: () => void;
 }
 
@@ -133,6 +123,22 @@ export interface ServiceState {
   selectedServices: Subcategory[];
   setSelectedServices: (services: Subcategory[]) => void;
 }
+//  selectedFiles,
+//     isLoading,
+//     pickMedia,
+//     removeFile,
+//     clearFiles,
+export interface MediaState {
+  selectedFiles: FileType[];
+  pickMedia: (
+    source: MediaSource,
+    options?: any,
+    maxFiles?: number,
+    maxSize?: number
+  ) => Promise<void>;
+  removeFile: (uri: string) => void;
+  clearFiles: () => void;
+}
 
 export type GlobalStore = AuthState &
   GlobalState &
@@ -140,4 +146,5 @@ export type GlobalStore = AuthState &
   UserState &
   ProviderState &
   LocationState &
-  ServiceState;
+  ServiceState &
+  MediaState;

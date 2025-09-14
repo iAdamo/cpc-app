@@ -28,7 +28,7 @@ const WelcomeScreen = () => {
       />
       <Button
         size="xl"
-        className="bg-brand-primary mt-6"
+        className="bg-brand-secondary mt-6"
         onPress={() => setCurrentStep(currentStep + 1)}
       >
         <ButtonText>Let's Get Started</ButtonText>

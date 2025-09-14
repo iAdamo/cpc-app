@@ -7,3 +7,4 @@ export * from "./service";
 export * from "./search";
 export * from "./location";
 export * from "./review";
+export * from "./media";

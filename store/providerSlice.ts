@@ -10,7 +10,6 @@ import {
 } from "@/types";
 import { globalSearch } from "@/axios/search";
 import { setUserFavourites } from "@/axios/user";
-import { P } from "@expo/html-elements";
 
 export const providerViewSlice: StateCreator<
   GlobalStore,
@@ -86,10 +85,12 @@ export const providerViewSlice: StateCreator<
           services: response.services || [],
         },
       });
-      return true;
     } catch (error: any) {
       console.error("Search error:", error);
-      set({ error: error.message || "An error occurred during search." });
+      set({
+        error:
+          error?.response?.data?.message || "An error occurred during search.",
+      });
     }
   },
   clearSearchResults: () =>
