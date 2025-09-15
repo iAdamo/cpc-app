@@ -11,6 +11,9 @@ export interface PlaceDetails {
   place_id: string;
   name: string;
   formatted_address: string;
+  address_components: {
+    types?: string[];
+  }[];
   geometry: {
     location: {
       lat: number;

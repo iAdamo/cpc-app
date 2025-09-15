@@ -3,7 +3,7 @@ import { ImagePickerOptions } from "expo-image-picker";
 export type FileType = {
   uri: string;
   name?: string;
-  type: string;
+  type?: string;
   size?: number;
 };
 
@@ -34,4 +34,5 @@ export interface MediaPickerProps {
   onFilesChange?: (files: FileType[]) => void;
   initialFiles?: FileType[];
   label?: string;
+  classname?: string; // Additional class names for styling
 }

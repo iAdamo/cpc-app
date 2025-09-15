@@ -4,6 +4,8 @@ export interface ProviderData {
   _id: string;
   // id: string;
   providerName: string;
+  providerLogo?: string;
+  providerTagline?: string;
   providerDescription: string;
   providerEmail: string;
   providerPhoneNumber: string;
@@ -30,43 +32,43 @@ export interface ProviderData {
   createdAt: string;
   updatedAt: string;
   location: {
-    primary: {
-      coordinates: {
-        lat: number;
-        long: number;
+    primary?: {
+      coordinates?: {
+        lat?: number;
+        long?: number;
       };
-      address: {
-        zip: string;
-        city: string;
-        state: string;
-        country: string;
-        address: string;
-      };
-    };
-    secondary: {
-      coordinates: {
-        lat: number;
-        long: number;
-      };
-      address: {
-        zip: string;
-        city: string;
-        state: string;
-        country: string;
-        address: string;
+      address?: {
+        zip?: string;
+        city?: string;
+        state?: string;
+        country?: string;
+        address?: string;
       };
     };
-    tertiary: {
-      coordinates: {
-        lat: number;
-        long: number;
+    secondary?: {
+      coordinates?: {
+        lat?: number;
+        long?: number;
       };
-      address: {
-        zip: string;
-        city: string;
-        state: string;
-        country: string;
-        address: string;
+      address?: {
+        zip?: string;
+        city?: string;
+        state?: string;
+        country?: string;
+        address?: string;
+      };
+    };
+    tertiary?: {
+      coordinates?: {
+        lat?: number;
+        long?: number;
+      };
+      address?: {
+        zip?: string;
+        city?: string;
+        state?: string;
+        country?: string;
+        address?: string;
       };
     };
   };

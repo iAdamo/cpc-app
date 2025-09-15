@@ -2,6 +2,8 @@ import { z } from "zod";
 
 const MAX_IMAGE_SIZE_MB = 10;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
+const MAX_LOGO_SIZE_MB = 5;
+const MAX_LOGO_SIZE_BYTES = MAX_LOGO_SIZE_MB * 1024 * 1024;
 
 export const companyFormSchema = z.object({
   providerEmail: z
@@ -23,30 +25,38 @@ export const companyFormSchema = z.object({
     ),
   providerLocation: z
     .object({
-      address: z.string().min(1, "Address is required"),
-      city: z.string().min(1, "City is required"),
-      state: z.string().min(1, "State is required"),
-      country: z.string().min(1, "Country is required"),
-      zip: z.string().min(1, "Zip code is required"),
+      coordinates: z
+        .object({
+          lat: z.number().optional(),
+          long: z.number().optional(),
+        })
+        .optional(),
+      address: z.object({
+        address: z.string().min(1, "Address is required"),
+        state: z.string().optional(),
+        zip: z.string().optional(),
+        city: z.string().optional(),
+        country: z.string().optional(),
+      }),
     })
-    .refine(
-      (location) =>
-        location.address &&
-        location.city &&
-        location.state &&
-        location.country &&
-        location.zip,
-      {
-        message: "All address fields are required",
-      }
-    )
     .optional(),
+  providerLogo: z
+    .object({
+      uri: z.string().min(1, "Logo URI is required"),
+      name: z.string().optional(),
+      type: z.string().optional(),
+      size: z.number().optional(), // Add size property for validation
+      // Optionally, you can add width, height, etc.
+    })
+    .refine((file) => !file || !file.size || file.size <= MAX_LOGO_SIZE_BYTES, {
+      message: `Logo must be less than ${MAX_LOGO_SIZE_MB}MB`,
+    }),
   providerImages: z
     .array(
       z.object({
         uri: z.string().min(1, "Image URI is required"),
-        name: z.string().min(1, "Image name is required"),
-        type: z.string().min(1, "Image type is required"),
+        name: z.string().optional(),
+        type: z.string().optional(),
         size: z.number().optional(), // Add size property for validation
         // Optionally, you can add width, height, etc.
       })
@@ -54,10 +64,7 @@ export const companyFormSchema = z.object({
     .min(1, "Images are required")
     .refine(
       (files) =>
-        files.every(
-          (file) =>
-            !file.size || file.size <= MAX_IMAGE_SIZE_BYTES
-        ),
+        files.every((file) => !file.size || file.size <= MAX_IMAGE_SIZE_BYTES),
       {
         message: `Each image must be less than ${MAX_IMAGE_SIZE_MB}MB`,
       }

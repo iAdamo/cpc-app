@@ -8,6 +8,7 @@ import {
   LoginData,
   UserState,
 } from "@/types";
+import appendFormData from "@/utils/AppendFormData";
 
 export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
   set,
@@ -28,33 +29,21 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
         const response = await updateUserProfile(data);
         if (response) {
           set({ user: { ...response }, isLoading: false });
-          return true;
         }
       }
       const { user } = get();
       const formData = new FormData();
-      if (user)
-        Object.entries(user).forEach(([key, value]) => {
-          if (
-            value !== undefined &&
-            value !== null &&
-            value !== "" &&
-            !(typeof value === "object" && Object.keys(value).length === 0)
-          ) {
-            // Convert boolean to string for FormData
-            if (typeof value === "boolean") {
-              formData.append(key, String(value));
-            } else {
-              formData.append(key, value as any);
-            }
-          }
-        });
+      if (user)   appendFormData(formData, user.activeRoleId);
 
-      const response = await updateUserProfile(formData);
-      if (response) {
-        set({ user: response, isLoading: false });
-        return true;
+      // print the formData contents for debugging
+      for (const pair of formData.entries()) {
+        console.log(`${pair[0]}: ${pair[1]}`);
       }
+
+      //const response = await updateUserProfile(formData);
+      // if (response) {
+      //   set({ user: response, isLoading: false });
+      // }
     } catch (error: any) {
       set({
         error: error?.response?.data?.message || "Profile update failed",

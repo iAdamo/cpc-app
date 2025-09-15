@@ -131,7 +131,7 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
                 <HStack space="xs" className="items-center">
                   <Icon as={MapPinIcon} size="sm" className="text-red-500" />
                   <Text className=" text-gray-500 line-clamp-1">
-                    {provider.location.primary.address.address}
+                    {provider?.location?.primary?.address?.address}
                   </Text>
                 </HStack>
               </Pressable>
@@ -230,7 +230,7 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
                 <HStack space="xs" className="items-center">
                   <Icon as={MapPinIcon} size="sm" className="text-red-500" />
                   <Text className=" text-gray-500 line-clamp-1">
-                    {provider.location.primary.address.address}
+                    {provider?.location?.primary?.address?.address}
                   </Text>
                 </HStack>
               </VStack>

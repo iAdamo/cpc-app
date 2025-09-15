@@ -70,4 +70,38 @@ export class GooglePlaceService {
   static getDirectionsUrl(origin: string, destination: string): string {
     return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`;
   }
+
+  static parseAddressComponents(components: any[]) {
+    let state = "";
+    let zip = "";
+    let city = "";
+    let country = "";
+    let address = "";
+
+    components.forEach((component) => {
+      if (component.types.includes("administrative_area_level_1")) {
+        state = component.long_name;
+      }
+      if (component.types.includes("postal_code")) {
+        zip = component.long_name;
+      }
+      if (
+        component.types.includes("locality") ||
+        component.types.includes("administrative_area_level_2")
+      ) {
+        city = component.long_name;
+      }
+      if (component.types.includes("country")) {
+        country = component.long_name;
+      }
+      if (component.types.includes("street_number")) {
+        address = component.long_name + " " + address;
+      }
+      if (component.types.includes("route")) {
+        address += component.long_name;
+      }
+    });
+
+    return { state, zip, city, country, address };
+  }
 }

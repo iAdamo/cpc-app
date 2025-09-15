@@ -95,10 +95,7 @@ const ChangePassword = ({
       return;
     }
 
-    if (!(await changePassword(data?.currentPassword, data?.password))) {
-      onClose();
-      return;
-    }
+    await changePassword(data?.currentPassword, data?.password);
     onClose();
     reset();
   };
@@ -141,7 +138,10 @@ const ChangePassword = ({
         <ModalBody className="gap-20 flex flex-col">
           <VStack className="mt-4 gap-4 items-center justify-center">
             <Card className="p-2 flex-row gap-4 items-center bg-brand-secondary/40">
-              <Icon as={MegaphoneIcon} className="text-brand-secondary w-7 h-7" />
+              <Icon
+                as={MegaphoneIcon}
+                className="text-brand-secondary w-7 h-7"
+              />
               <Text className="flex-1 text-brand-secondary">
                 You can only change your password once in three months.
               </Text>

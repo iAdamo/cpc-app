@@ -17,15 +17,13 @@ const FinalPage = () => {
   // Call updateUserProfile when this component mounts
   useEffect(() => {
     const finalizeProfile = async () => {
-      if (await updateUserProfile()) {
-        completeOnboarding();
-        setTimeout(() => {
-          router.replace("/providers");
-        }, 3000); // Wait 3 seconds before navigating
-      } else {
-        setCurrentStep(1); // Go back to the first step on failure
-      }
+      await updateUserProfile();
+      completeOnboarding();
+      setTimeout(() => {
+        router.replace("/providers");
+      }, 3000); // Wait 3 seconds before navigating
     };
+
     finalizeProfile();
   }, []);
 

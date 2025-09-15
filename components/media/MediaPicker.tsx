@@ -19,7 +19,8 @@ const MediaPicker: React.FC<MediaPickerProps> = ({
   maxSize = 5,
   onFilesChange,
   initialFiles = [],
-  label = "Add Media",
+  label = "",
+  classname = "",
 }) => {
   const { selectedFiles, isLoading, pickMedia, removeFile } = useGlobalStore();
 
@@ -49,20 +50,39 @@ const MediaPicker: React.FC<MediaPickerProps> = ({
   const remainingSlots = maxFiles - selectedFiles.length;
 
   return (
-    <VStack className="">
-      {label && <Text className="font-bold mb-2">{label}</Text>}
-      <HStack className="flex-wrap justify-between gap-y-6">
+    <VStack className="flex-1">
+      {label && <Text className="font-semibold text-center">{label}</Text>}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        className="bg-red-600"
+        contentContainerStyle={{
+          alignItems: "center",
+          gap: 16,
+          justifyContent: remainingSlots > 0 ? "flex-start" : "center",
+        }}
+      >
+        {remainingSlots > 0 && (
+          <Pressable
+            className={`w-44 h-44 rounded-md border-2 border-dashed border-gray-300 items-center justify-center ${classname}`}
+            onPress={() => handlePickMedia("gallery")}
+            disabled={isLoading}
+          >
+            <Icon as={Gallery} className="w-8 h-8 text-gray-400" />
+            <Text className="text-gray-400 mt-1">Gallery</Text>
+          </Pressable>
+        )}
         {selectedFiles.map((file, index) => (
-          <Box key={file.uri} className="relative">
+          <Box key={file.uri} className="relative mr-2">
             <Image
               source={{ uri: file.uri }}
               alt={file.name || `Selected media ${index + 1}`}
-              className="w-44 h-44 rounded-md"
+              className={`w-44 h-44 rounded-md ${classname}`}
               resizeMode="cover"
             />
             <Button
               size="md"
-              className="absolute -top-4 right-0 w-10 h-10 rounded-full bg-white shadow-md bg-red-800/20"
+              className="absolute -top-8 right-0 w-10 h-10 rounded-full shadow-md bg-red-800/20"
               onPress={() => removeFile(file.uri)}
             >
               <ButtonIcon
@@ -72,17 +92,7 @@ const MediaPicker: React.FC<MediaPickerProps> = ({
             </Button>
           </Box>
         ))}
-        {remainingSlots > 0 && (
-          <Pressable
-            className="w-44 h-44 rounded-md border-2 border-dashed border-gray-300 items-center justify-center"
-            onPress={() => handlePickMedia("gallery")}
-            disabled={isLoading}
-          >
-            <Icon as={Gallery} className="w-8 h-8 text-gray-400" />
-            <Text className="text-gray-400 mt-1">Gallery</Text>
-          </Pressable>
-        )}
-      </HStack>
+      </ScrollView>
       {remainingSlots > 0 && (
         <Text className="text-red-500 text-sm mt-1">
           You can add {remainingSlots} more file

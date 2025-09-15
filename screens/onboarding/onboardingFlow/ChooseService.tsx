@@ -17,7 +17,9 @@ interface SelectedSubcategory extends Subcategory {
   categoryId: string;
 }
 
-const MAX_SERVICES = 1;
+type SelectedService = { _id: string; categoryId: string };
+
+const MAX_SERVICES = 3;
 
 const ChooseService = () => {
   const [selectionLimitReached, setSelectionLimitReached] = useState(false);
@@ -41,13 +43,10 @@ const ChooseService = () => {
 
   // console.log("787", user.activeRoleId?.subcategories);
 
-  const [selectedServices, setSelectedServices] = useState<
-    SelectedSubcategory[]
-  >(
+  const [selectedServices, setSelectedServices] = useState<SelectedService[]>(
     user.activeRoleId?.subcategories?.map((sub) => ({
-      ...sub,
+      _id: sub._id,
       categoryId: sub.category?._id,
-      categoryName: sub.category?.name,
     })) || []
   );
 
@@ -57,36 +56,24 @@ const ChooseService = () => {
 
   const handleToggleSubcategory = (
     subcategory: Subcategory,
-    categoryName: string,
+    _categoryName: string, // not needed
     categoryId: string
   ) => {
     const isSelected = selectedServices.some(
       (service) => service._id === subcategory._id
     );
-    let updatedSelections: SelectedSubcategory[] = [];
+    let updatedSelections: SelectedService[] = [];
     if (isSelected) {
-      setSelectedServices((prev: SelectedSubcategory[]) => {
-        const filtered = prev.filter((item) => item._id !== subcategory._id);
-        updatedSelections = filtered;
-        return filtered;
-      });
+      updatedSelections = selectedServices.filter(
+        (item) => item._id !== subcategory._id
+      );
     } else {
-      setSelectedServices((prev: SelectedSubcategory[]) => {
-        const updated = [
-          ...prev,
-          {
-            ...subcategory,
-            _id: subcategory._id, // ensure _id is present
-            categoryName,
-            categoryId,
-          },
-        ];
-        updatedSelections = updated;
-        return updated;
-      });
+      updatedSelections = [
+        ...selectedServices,
+        { _id: subcategory._id, categoryId },
+      ];
     }
     setSelectedServices(updatedSelections);
-    // Update user profile immediately
     updateProfile({
       activeRoleId: { ...user.activeRoleId, subcategories: updatedSelections },
     });
