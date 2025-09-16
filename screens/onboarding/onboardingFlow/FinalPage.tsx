@@ -11,13 +11,19 @@ import { Image } from "react-native";
 import { useRouter } from "expo-router";
 
 const FinalPage = () => {
-  const { updateUserProfile, completeOnboarding, isLoading, setCurrentStep } =
-    useGlobalStore();
+  const {
+    updateUserProfile,
+    completeOnboarding,
+    isLoading,
+    setCurrentStep,
+    setSwitchRole,
+    switchRole,
+  } = useGlobalStore();
   const router = useRouter();
   // Call updateUserProfile when this component mounts
   useEffect(() => {
     const finalizeProfile = async () => {
-      await updateUserProfile();
+      await updateUserProfile(switchRole);
       completeOnboarding();
       setTimeout(() => {
         router.replace("/providers");

@@ -1,4 +1,4 @@
-import { Subcategory, ServiceCategory } from "./services";
+import { Subcategory, ServiceCategory } from "./service";
 
 export interface OnboardingData {
   activeRole: string;

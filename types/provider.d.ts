@@ -1,10 +1,10 @@
 import { SubcategoryData } from "./subcategory";
-
+import { FileType } from "./media";
 export interface ProviderData {
   _id: string;
   // id: string;
   providerName: string;
-  providerLogo?: string;
+  providerLogo?: string | FileType;
   providerTagline?: string;
   providerDescription: string;
   providerEmail: string;
@@ -20,7 +20,7 @@ export interface ProviderData {
   };
   reviewCount: number;
   averageRating: number;
-  providerImages: string[];
+  providerImages: string[] | FileType[];
   services: any[];
   clients: any[];
   latitude: number;

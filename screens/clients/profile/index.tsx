@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
@@ -39,7 +39,6 @@ const Profile = () => {
     setSwitchRole,
     setCurrentStep,
     resetOnboarding,
-    setParamsFrom,
   } = useGlobalStore();
 
   const profileSections = [
@@ -109,29 +108,40 @@ const Profile = () => {
       ],
     },
   ];
+  // const [toggle, setToggle] = useState(false);
 
   const handleCompanyOnboarding = () => {
+    // setSwitchRole("Client");
+    //  resetOnboarding();
+    //  setCurrentStep(7);
+    //  setSwitchRole("Provider");
+    //  router.push({
+    //    pathname: "/onboarding",
+    //    params: { from: "/providers" },
+    //  });
+    //  return;
     if (user?.activeRoleId?.owner && switchRole === "Client") {
       setSwitchRole("Provider");
       router.push("/clients");
-      return;
+      return true;
     } else if (user?.activeRoleId?.owner && switchRole === "Provider") {
       setSwitchRole("Client");
       router.push("/providers");
-      return;
+      return true;
     } else if (!user?.activeRoleId?.owner && switchRole === "Client") {
       resetOnboarding();
       setCurrentStep(7);
+      setSwitchRole("Provider");
       router.push({
         pathname: "/onboarding",
         params: { from: "/providers" },
       });
-      return;
+      return true;
     }
-    return;
+    return false;
   };
 
-  console.log(switchRole);
+  console.log(switchRole, user?.activeRoleId?.owner);
 
   return (
     <VStack className="flex-1 bg-white">

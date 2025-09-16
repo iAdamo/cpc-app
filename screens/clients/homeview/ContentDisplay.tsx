@@ -23,17 +23,14 @@ const ContentDisplay = () => {
   } = useGlobalStore();
   useEffect(() => {
     const handleProvidersSearch = async () => {
-      if (
-        !(await executeSearch({
-          page: 1,
-          limit: 30,
-          engine: false,
-          sortBy: sortBy,
-          lat: currentLocation?.coords.latitude,
-          long: currentLocation?.coords.longitude,
-        }))
-      )
-        return;
+      await executeSearch({
+        page: 1,
+        limit: 30,
+        engine: false,
+        sortBy: sortBy,
+        lat: currentLocation?.coords.latitude,
+        long: currentLocation?.coords.longitude,
+      });
     };
 
     handleProvidersSearch();

@@ -55,7 +55,7 @@ const MediaPicker: React.FC<MediaPickerProps> = ({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        className="bg-red-600"
+        className=""
         contentContainerStyle={{
           alignItems: "center",
           gap: 16,
@@ -82,19 +82,19 @@ const MediaPicker: React.FC<MediaPickerProps> = ({
             />
             <Button
               size="md"
-              className="absolute -top-8 right-0 w-10 h-10 rounded-full shadow-md bg-red-800/20"
+              className="absolute top-0 right-0 w-10 h-10 rounded-full shadow-md bg-red-800/20"
               onPress={() => removeFile(file.uri)}
             >
               <ButtonIcon
                 as={TrashIcon}
-                className="fill-red-100/60 text-red-800"
+                className="fill-red-500/60 text-red-800"
               />
             </Button>
           </Box>
         ))}
       </ScrollView>
       {remainingSlots > 0 && (
-        <Text className="text-red-500 text-sm mt-1">
+        <Text size="sm" className="bg-green-200 border border-green-300 text-center p-2 text-green-900 font-semibold rounded mt-2">
           You can add {remainingSlots} more file
           {remainingSlots > 1 ? "s" : ""}.
         </Text>

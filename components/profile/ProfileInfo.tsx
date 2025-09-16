@@ -55,7 +55,7 @@ const ProfileInfo = () => {
         type: "image/jpeg",
       } as any);
     }
-    await updateUserProfile(formData);
+    await updateUserProfile("Client", formData);
     router.back();
   };
 

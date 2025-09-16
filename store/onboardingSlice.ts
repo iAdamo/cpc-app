@@ -9,7 +9,7 @@ export const onboardingSlice: StateCreator<
   OnboardingState
 > = (set, get) => ({
   currentStep: 1,
-  totalSteps: 10,
+  totalSteps: 9,
   isOnboardingComplete: false,
 
   setCurrentStep: (step: number) => {

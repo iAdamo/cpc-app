@@ -6,7 +6,7 @@ export interface UserData {
   accessToken: string;
   firstName?: string;
   lastName?: string;
-  activeRole: "Client" | "Provider" | "Admin";
+  activeRole: "Client" | "Provider";
   email: string;
   homeAddress: string;
   language: string;

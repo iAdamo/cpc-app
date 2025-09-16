@@ -12,6 +12,15 @@ export const updateUserProfile = async (data: FormData): Promise<UserData> => {
   return response.data;
 };
 
+export const updateProviderProfile = async (data: FormData): Promise<UserData> => {
+  const response = await axiosInstance.patch("provider/profile", data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
+
 export const setUserFavourites = async (
   providerId: string
 ): Promise<ProviderData> => {

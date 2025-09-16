@@ -1,5 +1,5 @@
 import { ApiClientSingleton } from "./conf";
-import { ServiceData, ServiceCategory } from "@/types";
+import { ServiceData, Category } from "@/types";
 
 const { axiosInstance } = ApiClientSingleton.getInstance();
 
@@ -32,7 +32,7 @@ export const deleteService = async (id: string): Promise<ServiceData[]> => {
 };
 
 export const getAllCategoriesWithSubcategories = async (): Promise<
-  ServiceCategory[]
+  Category[]
 > => {
   const response = await axiosInstance.get("services/categories");
   return response.data;

@@ -65,7 +65,11 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
           <VStack className="flex-1">
             <Box className="relative w-full h-1/2 mb-2">
               <Image
-                source={{ uri: provider.providerImages[0] }}
+                source={
+                  typeof provider.providerImages[0] === "string"
+                    ? { uri: provider.providerImages[0] }
+                    : undefined
+                }
                 alt={provider.providerName}
                 className="w-full h-full rounded-xl bg-gray-200"
               />
@@ -82,7 +86,7 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
                       className={`w-6 h-6 text-black/40 ${
                         isSaved
                           ? "fill-red-600 text-red-400"
-                          : "fill-white text-white"
+                          : "fill-white text-black/50"
                       }`}
                     />
                   </Button>
@@ -101,7 +105,7 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
                 </HStack>
               </HStack>
             </Box>
-            <VStack className="flex-1 justify-between">
+            <VStack className="flex-1 pr-2">
               <Pressable
                 onPress={() =>
                   router.push({
@@ -109,14 +113,20 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
                     params: { id: provider._id },
                   })
                 }
-                className="flex-1 gap-1"
+                className="flex-1 gap-1 justify-between flex-col pr-2"
               >
                 <HStack space="sm" className="items-center">
                   <Avatar size="sm">
                     <AvatarFallbackText>
                       {provider.providerName}
                     </AvatarFallbackText>
-                    <AvatarImage source={{ uri: user?.profilePicture }} />
+                    <AvatarImage
+                      source={
+                        typeof provider?.providerLogo === "string"
+                          ? { uri: provider.providerLogo }
+                          : undefined
+                      }
+                    />
                   </Avatar>
                   <Heading size="md" className="break-words text-brand-primary">
                     {provider.providerName}
@@ -130,7 +140,7 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
                 </Text>
                 <HStack space="xs" className="items-center">
                   <Icon as={MapPinIcon} size="sm" className="text-red-500" />
-                  <Text className=" text-gray-500 line-clamp-1">
+                  <Text className=" text-gray-500 line-clamp-1 flex-1">
                     {provider?.location?.primary?.address?.address}
                   </Text>
                 </HStack>
@@ -153,7 +163,11 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
           <HStack className="h-full">
             <Box className="relative w-1/2 h-full mr-4">
               <Image
-                source={{ uri: provider.providerImages[0] }}
+                source={
+                  typeof provider.providerImages[0] === "string"
+                    ? { uri: provider.providerImages[0] }
+                    : undefined
+                }
                 alt={provider.providerName}
                 className="w-full h-full rounded-xl bg-gray-200"
               />
@@ -170,7 +184,7 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
                       className={`w-6 h-6 text-black/40 ${
                         isSaved
                           ? "fill-red-600 text-red-400"
-                          : "fill-white text-white"
+                          : "fill-white text-black/50"
                       }`}
                     />
                   </Button>
@@ -198,22 +212,33 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
               }
               className="flex-1"
             >
-              <VStack className="flex-1 gap-1">
-                <HStack space="sm" className="items-center">
-                  <Avatar size="sm">
-                    <AvatarFallbackText>
+              <VStack className="flex-1 justify-between pb-2">
+                <VStack space="xs">
+                  <HStack space="sm" className="items-center">
+                    <Avatar size="sm">
+                      <AvatarFallbackText>
+                        {provider.providerName}
+                      </AvatarFallbackText>
+                      <AvatarImage
+                        source={
+                          typeof provider?.providerLogo === "string"
+                            ? { uri: provider.providerLogo }
+                            : undefined
+                        }
+                      />
+                    </Avatar>
+                    <Heading
+                      size="md"
+                      className="break-words text-brand-primary"
+                    >
                       {provider.providerName}
-                    </AvatarFallbackText>
-                    <AvatarImage source={{ uri: user?.profilePicture }} />
-                  </Avatar>
-                  <Heading size="md" className="break-words text-brand-primary">
-                    {provider.providerName}
-                  </Heading>
-                </HStack>
+                    </Heading>
+                  </HStack>
 
-                <Text className="font-medium">
-                  {provider.subcategories[0].name}
-                </Text>
+                  <Text className="font-medium">
+                    {provider.subcategories[0].name}
+                  </Text>
+                </VStack>
                 <Text className="text-gray-600 break-words line-clamp-2">
                   {provider.providerDescription}
                 </Text>
@@ -229,7 +254,7 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
               </Pressable> */}
                 <HStack space="xs" className="items-center">
                   <Icon as={MapPinIcon} size="sm" className="text-red-500" />
-                  <Text className=" text-gray-500 line-clamp-1">
+                  <Text className=" text-gray-500 line-clamp-1 flex-1">
                     {provider?.location?.primary?.address?.address}
                   </Text>
                 </HStack>

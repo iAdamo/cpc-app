@@ -1,5 +1,9 @@
-import { UserData } from "./../types/user";
-import { updateUserProfile, setUserFavourites } from "./../axios/user";
+import { UserData, ActiveRole } from "@/types";
+import {
+  updateUserProfile,
+  setUserFavourites,
+  updateProviderProfile,
+} from "@/axios/user";
 import { StateCreator } from "zustand";
 import {
   GlobalStore,
@@ -22,28 +26,39 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
   },
 
   // Action to update user profile via API
-  updateUserProfile: async (data?: FormData) => {
+  updateUserProfile: async (role: ActiveRole, data?: FormData) => {
     set({ isLoading: true, error: null });
     try {
+      let response;
+
       if (data) {
-        const response = await updateUserProfile(data);
-        if (response) {
-          set({ user: { ...response }, isLoading: false });
+        if (role === "Client") {
+          response = await updateUserProfile(data);
+        } else {
+          response = await updateProviderProfile(data);
+        }
+      } else {
+        const { user } = get();
+        const formData = new FormData();
+        if (user) {
+          if (role === "Client") {
+            appendFormData(formData, user);
+            response = await updateUserProfile(formData);
+          } else {
+            appendFormData(formData, user.activeRoleId);
+            // for deugging only
+            // console.log("Submitting formData:", Array.from(formData.entries()));
+            response = await updateProviderProfile(formData);
+          }
         }
       }
-      const { user } = get();
-      const formData = new FormData();
-      if (user)   appendFormData(formData, user.activeRoleId);
-
-      // print the formData contents for debugging
-      for (const pair of formData.entries()) {
-        console.log(`${pair[0]}: ${pair[1]}`);
+      if (response) {
+        set({
+          user: { ...response },
+          switchRole: response.activeRole,
+          isLoading: false,
+        });
       }
-
-      //const response = await updateUserProfile(formData);
-      // if (response) {
-      //   set({ user: response, isLoading: false });
-      // }
     } catch (error: any) {
       set({
         error: error?.response?.data?.message || "Profile update failed",

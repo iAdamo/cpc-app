@@ -69,23 +69,33 @@ const CompanyBasicInfo = () => {
       providerPhoneNumber: user.activeRoleId?.providerPhoneNumber || "",
       providerLogo: user.activeRoleId?.providerLogo
         ? {
-            uri: user.activeRoleId?.providerLogo,
+            uri:
+              typeof user.activeRoleId?.providerLogo === "string"
+                ? user.activeRoleId?.providerLogo
+                : "",
             name: "companylogo.jpg",
             type: "image/jpeg",
           }
         : undefined,
-      providerImages: user.activeRoleId?.providerImages
-        ? user.activeRoleId?.providerImages.map((uri, index) => ({
-            uri,
-            name: `${index}companyimage.jpg`,
-            type: "image/jpeg",
-          }))
+      providerImages: Array.isArray(user.activeRoleId?.providerImages)
+        ? user.activeRoleId.providerImages.map(
+            (img, index) =>
+              typeof img === "string"
+                ? {
+                    uri: img,
+                    name: `${index}companyimage.jpg`,
+                    type: "image/jpeg",
+                  }
+                : img // already a FileType object
+          )
         : [],
+
       providerLocation: user.activeRoleId?.location?.primary,
     },
   });
+  // console.log("isValid", user);
 
-  console.log("form errors", errors);
+  // console.log("form errors", errors);
   // console.log("form values", getValues());
 
   const handleFilesChange = (files: FileType[]) => {
@@ -94,7 +104,6 @@ const CompanyBasicInfo = () => {
       name: file.name ?? "", // Ensure name is always a string
     }));
     setValue("providerImages", mappedFiles);
-    console.log("Selected files:", mappedFiles);
     if (files.length > 0) {
       clearErrors("providerImages");
     }
@@ -176,15 +185,15 @@ const CompanyBasicInfo = () => {
           providerDescription: data.providerDescription,
           providerEmail: data.providerEmail,
           providerPhoneNumber: data.providerPhoneNumber,
-          providerLogo: data?.providerLogo?.uri,
-          providerImages: data.providerImages.map((file: any) => file.uri),
+          providerLogo: data?.providerLogo,
+          providerImages: data.providerImages,
           location: {
             primary: data.providerLocation,
           },
         },
       });
       setCurrentStep(0);
-      // console.log("Company Basic Info step completed. Data:", user);
+      console.log("Company Basic Info step completed. Data:", user);
     } catch (error) {
       console.error("Failed to update profile:", error);
       setGError("Failed to update profile. Please try again.");
@@ -219,12 +228,16 @@ const CompanyBasicInfo = () => {
                         isEditable={true}
                         showChangeButton={false}
                         imageUri={
-                          user?.activeRoleId?.providerLogo || value?.uri
+                          typeof user?.activeRoleId?.providerImages?.[0] ===
+                          "string"
+                            ? user?.activeRoleId?.providerImages[0]
+                            : undefined
                         }
                         onImageSelected={(uri) => handleLogoChange(uri)}
                       />
                     )}
                   />
+
                   {errors.providerLogo && (
                     <FormControlError>
                       <FormControlErrorText className="text-sm">
@@ -396,7 +409,7 @@ const CompanyBasicInfo = () => {
                           <InputSlot>
                             <InputIcon
                               as={MapPinIcon}
-                              className="fill-red-500 bg-red-500 text-red-400 ml-4"
+                              className="text-red-500 ml-4"
                             />
                           </InputSlot>
                           <InputField

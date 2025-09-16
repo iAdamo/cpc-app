@@ -5,35 +5,49 @@ export default function appendFormData(
 ) {
   if (data === null || data === undefined) return;
 
+  // RN file object
+  if (typeof data === "object" && data.uri && (data.type || data.name)) {
+    formData.append(parentKey, {
+      uri: data.uri,
+      name: data.name || "file",
+      type: data.type || "application/octet-stream",
+    } as any);
+    return;
+  }
+
+  // Subcategories special case
+  if (parentKey === "subcategories" && Array.isArray(data)) {
+    data.forEach((item: { categoryId: string; _id: string }) => {
+      formData.append("subcategories[]", item._id);
+      formData.append("categories[]", item.categoryId);
+    });
+    return;
+  }
+
+  // Arrays — append with same key, not [idx]
+  if (Array.isArray(data)) {
+    data.forEach((value) => {
+      appendFormData(formData, value, parentKey);
+    });
+    return;
+  }
+
+  // Plain objects
   if (
     typeof data === "object" &&
     !(data instanceof File) &&
     !(data instanceof Blob)
   ) {
-    // Special handling for subcategories
-    if (parentKey === "subcategories" && Array.isArray(data)) {
-      data.forEach((item: { categoryId: string; _id: string }) => {
-        formData.append("subcategories[]", item._id);
-        formData.append("categories[]", item.categoryId);
-      });
-      return;
-    }
-    // Arrays
-    if (Array.isArray(data)) {
-      data.forEach((value, idx) => {
-        appendFormData(formData, value, `${parentKey}[${idx}]`);
-      });
-    } else {
-      // Objects
-      Object.entries(data).forEach(([key, value]) => {
-        const formKey = parentKey ? `${parentKey}[${key}]` : key;
-        appendFormData(formData, value, formKey);
-      });
-    }
-  } else {
-    // Primitives, File, Blob
-    let valueToAppend = data;
-    if (typeof data === "boolean") valueToAppend = String(data);
-    if (data !== "") formData.append(parentKey, valueToAppend);
+    Object.entries(data).forEach(([key, value]) => {
+      const formKey = parentKey ? `${parentKey}[${key}]` : key;
+      appendFormData(formData, value, formKey);
+    });
+    return;
   }
+
+  // Primitives
+  let valueToAppend = data;
+  if (typeof data === "boolean") valueToAppend = String(data);
+  if (parentKey && valueToAppend !== "")
+    formData.append(parentKey, valueToAppend);
 }

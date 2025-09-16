@@ -1,3 +1,4 @@
+import { updateProviderProfile } from "./../axios/user";
 import { SignUpData, LoginData } from "./auth";
 import { UserData } from "./user";
 import { OnboardingData } from "./onboarding";
@@ -56,7 +57,7 @@ export interface AuthState {
 export interface UserState {
   // Actions
   updateProfile: (updates: Partial<UserData>) => void;
-  updateUserProfile: (data?: FormData) => Promise<void>;
+  updateUserProfile: (role: ActiveRole, data?: FormData) => Promise<void>;
 }
 
 export interface OnboardingState {
