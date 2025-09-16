@@ -1,3 +1,3 @@
-import ReviewAndRating from "@/screens/clients/profile/sections/ReviewSection";
+import ReviewAndRating from "@/screens/profile/sections/ReviewSection";
 
 export default ReviewAndRating;

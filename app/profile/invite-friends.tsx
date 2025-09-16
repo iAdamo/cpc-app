@@ -1,3 +1,3 @@
-import InviteFriends from "@/screens/clients/profile/sections/InviteFriends";
+import InviteFriends from "@/screens/profile/sections/InviteFriends";
 
 export default InviteFriends;

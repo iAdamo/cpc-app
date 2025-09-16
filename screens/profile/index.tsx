@@ -31,7 +31,7 @@ import {
 } from "lucide-react-native";
 import { router } from "expo-router";
 
-const Profile = () => {
+const ProfileView = () => {
   const {
     user,
     currentLocation,
@@ -203,4 +203,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default ProfileView;

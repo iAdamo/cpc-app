@@ -8,7 +8,7 @@ import { useLocalSearchParams } from "expo-router";
 import EmptyState from "@/components/EmptyState";
 import { ScrollView } from "@/components/ui/scroll-view";
 
-const ProviderInfo = () => {
+const UserProfile = () => {
   const { searchResults } = useGlobalStore();
   // console.log("Search Results in Profile Screen:", searchResults);
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -35,4 +35,4 @@ const ProviderInfo = () => {
   );
 };
 
-export default ProviderInfo;
+export default UserProfile;

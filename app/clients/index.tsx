@@ -1,3 +1,3 @@
-import ClientsScreen from "@/screens/clients";
+import Screen from "@/screens";
 
-export default ClientsScreen;
+export default Screen;

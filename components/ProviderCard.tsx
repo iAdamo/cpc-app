@@ -109,7 +109,7 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
               <Pressable
                 onPress={() =>
                   router.push({
-                    pathname: "/providers/[id]",
+                    pathname: "/profile/[id]",
                     params: { id: provider._id },
                   })
                 }
@@ -206,7 +206,7 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
             <Pressable
               onPress={() =>
                 router.push({
-                  pathname: "/providers/[id]",
+                  pathname: "/profile/[id]",
                   params: { id: provider._id },
                 })
               }

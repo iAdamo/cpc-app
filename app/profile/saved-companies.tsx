@@ -1,3 +1,3 @@
-import SavedCompanies from "@/screens/clients/profile/sections/SavedCompanies";
+import SavedCompanies from "@/screens/profile/sections/SavedCompanies";
 
 export default SavedCompanies;

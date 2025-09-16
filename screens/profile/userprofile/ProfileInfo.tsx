@@ -30,7 +30,7 @@ const ProfileInfo = ({ provider }: { provider: ProviderData }) => {
             <HStack space="xs" className="items-center ">
               <Icon as={MapPinIcon} size="md" className="text-red-600" />
               <Text className="break-words">
-                {provider.location.primary.address.address ||
+                {provider.location.primary?.address?.address ||
                   "Florida, United States"}
               </Text>
             </HStack>

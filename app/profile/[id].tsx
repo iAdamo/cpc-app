@@ -1,5 +1,3 @@
-import { VStack } from "@/components/ui/vstack";
+import UserProfile from "@/screens/profile/userprofile";
 
-export default function AppLayout() {
-  return <VStack className="flex-1 bg-background">{/* Your app content */}</VStack>;
-}
+export default UserProfile;

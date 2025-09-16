@@ -6,6 +6,7 @@ import { Linking } from "react-native";
 import { ShareService } from "@/services/ShareService";
 import { useEffect } from "react";
 import { router } from "expo-router";
+import { BottomNavbar, TopNavbar } from "@/components/layout/Navbar";
 
 export default function AppLayout() {
   useEffect(() => {
@@ -32,7 +33,7 @@ export default function AppLayout() {
   const handleDeepLink = (linkData: any) => {
     // Navigate to appropriate screen
     if (linkData.screen === "providers" && linkData.id) {
-      router.push({ pathname: "/providers/[id]", params: linkData.id });
+      router.push({ pathname: "/profile/[id]", params: linkData.id });
     } else if (linkData.screen === "ServiceDetails" && linkData.id) {
       router.push({ pathname: "/services/[id]", params: linkData.id });
     } else if (linkData.screen === "Profile" && linkData.id) {
@@ -48,6 +49,7 @@ export default function AppLayout() {
         backgroundColor={"transparent"}
       />
       <Stack screenOptions={{ headerShown: false }} />
+      <BottomNavbar />
     </LocationPermission>
   );
 }

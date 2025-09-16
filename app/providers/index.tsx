@@ -1,3 +1,3 @@
-import ProvidersScreen from "@/screens/clients";
+import Screen from "@/screens";
 
-export default ProvidersScreen;
+export default Screen;
