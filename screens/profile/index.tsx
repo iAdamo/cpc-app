@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-import { ScrollView } from "react-native";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import {
@@ -16,19 +14,6 @@ import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import useGlobalStore from "@/store/globalStore";
 import ProfileSection from "./ProfileSection";
-import { useNavigation } from "expo-router";
-import {
-  UserRoundIcon,
-  BookmarkCheckIcon,
-  StarIcon,
-  NavigationIcon,
-  SettingsIcon,
-  BellDotIcon,
-  SirenIcon,
-  HandshakeIcon,
-  MessageCircleQuestionMarkIcon,
-  UserStarIcon,
-} from "lucide-react-native";
 import { router } from "expo-router";
 
 const ProfileView = () => {
@@ -41,94 +26,20 @@ const ProfileView = () => {
     resetOnboarding,
   } = useGlobalStore();
 
-  const profileSections = [
-    {
-      title: "Companies Center",
-      items: [
-        {
-          text: "Personal Information",
-          icon: UserRoundIcon,
-          action: () => router.push("/profile/personal-info"),
-        },
-        {
-          text: "Saved Companies",
-          icon: BookmarkCheckIcon,
-          action: () => router.push("/profile/saved-companies"),
-        },
-        {
-          text: "Reviews & Ratings",
-          icon: StarIcon,
-          action: () => router.push("/profile/reviews-ratings"),
-        },
-        {
-          text: "Invite Friends",
-          icon: NavigationIcon,
-          action: () => router.push("/profile/invite-friends"),
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      items: [
-        {
-          text: "Account",
-          icon: SettingsIcon,
-          action: () => router.push("/profile/settings"),
-        },
-        {
-          text: "Notifications",
-          icon: BellDotIcon,
-          action: () => router.push("/profile/notifications"),
-        },
-      ],
-    },
-    {
-      title: "Resources",
-      items: [
-        {
-          text: "Customer Support",
-          icon: MessageCircleQuestionMarkIcon,
-          action: () => router.push("/profile/privacy-policy"),
-        },
-        {
-          text: "Rate Us",
-          icon: UserStarIcon,
-          action: () => router.push("/profile/privacy-policy"),
-        },
-        {
-          text: "Privacy Policy",
-          icon: SirenIcon,
-          action: () => router.push("/profile/privacy-policy"),
-        },
-        {
-          text: "Terms & Conditions",
-          icon: HandshakeIcon,
-          action: () => router.push("/profile/terms"),
-        },
-      ],
-    },
-  ];
   // const [toggle, setToggle] = useState(false);
 
   const handleCompanyOnboarding = () => {
-    // setSwitchRole("Client");
-    //  resetOnboarding();
-    //  setCurrentStep(7);
-    //  setSwitchRole("Provider");
-    //  router.push({
-    //    pathname: "/onboarding",
-    //    params: { from: "/providers" },
-    //  });
-    //  return;
-    if (user?.activeRoleId?.owner && switchRole === "Client") {
+    if (!user) return false;
+
+    if (user.activeRoleId?.owner && switchRole === "Client") {
       setSwitchRole("Provider");
       router.push("/clients");
       return true;
-    } else if (user?.activeRoleId?.owner && switchRole === "Provider") {
+    } else if (user.activeRoleId?.owner && switchRole === "Provider") {
       setSwitchRole("Client");
       router.push("/providers");
       return true;
-    } else if (!user?.activeRoleId?.owner && switchRole === "Client") {
+    } else if (!user.activeRoleId?.owner && switchRole === "Client") {
       resetOnboarding();
       setCurrentStep(7);
       setSwitchRole("Provider");
@@ -147,21 +58,70 @@ const ProfileView = () => {
     <VStack className="flex-1 bg-white">
       {/* Header */}
       <VStack className="relative">
-        <VStack className="bg-brand-secondary/70 h-48 pt-20">
+        <VStack
+          className={`h-48 pt-20 ${
+            switchRole === "Client"
+              ? "bg-brand-secondary/70"
+              : "bg-brand-primary/40"
+          }`}
+        >
           <HStack className="w-full px-4 justify-between items-center">
             <HStack space="md" className="items-center">
               <Avatar size="lg">
                 <AvatarFallbackText>
                   {`${user?.firstName} ${user?.lastName}`}
                 </AvatarFallbackText>
-                <AvatarImage source={{ uri: user?.profilePicture }} />
+                <AvatarImage
+                  source={
+                    typeof (switchRole === "Client"
+                      ? user?.profilePicture
+                      : user?.activeRoleId?.providerLogo) === "string"
+                      ? {
+                          uri:
+                            switchRole === "Client"
+                              ? (user?.profilePicture as string | undefined)
+                              : (user?.activeRoleId?.providerLogo as
+                                  | string
+                                  | undefined),
+                        }
+                      : undefined
+                  }
+                />
               </Avatar>
               <VStack>
-                <Heading className="text-yellow-900">{`${user?.firstName} ${user?.lastName}`}</Heading>
+                <Heading
+                  className={`${
+                    switchRole === "Client"
+                      ? "text-yellow-900"
+                      : "text-brand-primary"
+                  }`}
+                >{`${
+                  switchRole === "Client"
+                    ? `${user?.firstName} ${user?.lastName}`
+                    : `${user?.activeRoleId?.providerName}`
+                }`}</Heading>
                 <HStack space="xs" className="items-center">
-                  <Icon size="sm" as={MapPinIcon} className="text-yellow-900" />
-                  <Text className="text-yellow-900">
-                    {`${currentLocation?.region} ${currentLocation?.country}`}
+                  <Icon
+                    size="sm"
+                    as={MapPinIcon}
+                    className={`${
+                      switchRole === "Client"
+                        ? "text-yellow-900"
+                        : "text-brand-primary"
+                    }`}
+                  />
+                  <Text
+                    className={`${
+                      switchRole === "Client"
+                        ? "text-yellow-900"
+                        : "text-brand-primary"
+                    }`}
+                  >
+                    {`${
+                      switchRole === "Client"
+                        ? `${currentLocation?.region} ${currentLocation?.country}`
+                        : `${user?.activeRoleId?.location?.primary?.address?.city}, ${user?.activeRoleId?.location?.primary?.address?.state}`
+                    }`}
                   </Text>
                 </HStack>
               </VStack>
@@ -172,7 +132,11 @@ const ProfileView = () => {
             >
               <ButtonIcon
                 as={ThreeDotsIcon}
-                className="rotate-90 w-6 h-6 text-yellow-900"
+                className={`rotate-90 w-6 h-6 ${
+                  switchRole === "Client"
+                    ? "text-yellow-900"
+                    : "text-brand-primary"
+                }`}
               />
             </Button>
           </HStack>
@@ -190,15 +154,7 @@ const ProfileView = () => {
       </VStack>
 
       {/* Sections */}
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {profileSections.map((section, idx) => (
-          <ProfileSection
-            key={idx}
-            title={section.title}
-            items={section.items}
-          />
-        ))}
-      </ScrollView>
+      <ProfileSection />
     </VStack>
   );
 };

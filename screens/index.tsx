@@ -7,15 +7,30 @@ import HomeView from "./providers/home";
 import ProfileView from "./profile";
 
 const Screen = () => {
-  const { currentView, setCurrentView } = useGlobalStore();
+  const { currentView, setCurrentView, switchRole } = useGlobalStore();
 
   return (
     <VStack className="flex-1 bg-white">
       {currentView === "Home" && <TopNavbar />}
       <VStack className="flex-1">
-        {currentView === "Home" && <HomeView />}
-        {currentView === "Updates" && <Text>Updates View</Text>}
-        {currentView === "Chat" && <Text>Chat View</Text>}
+        {currentView === "Home" &&
+          (switchRole === "Client" ? (
+            <HomeView />
+          ) : (
+            <Text>Provider Home View</Text>
+          ))}
+        {currentView === "Updates" &&
+          (switchRole === "Client" ? (
+            <Text>Client Updates View</Text>
+          ) : (
+            <Text>Provider Updates View</Text>
+          ))}
+        {currentView === "Chat" &&
+          (switchRole === "Client" ? (
+            <Text>Client Messages View</Text>
+          ) : (
+            <Text>Provider Messages View</Text>
+          ))}
         {currentView === "Profile" && <ProfileView />}
       </VStack>
     </VStack>

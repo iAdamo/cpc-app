@@ -48,23 +48,6 @@ const AccountSettings = () => {
 
   return (
     <VStack className="flex-1 bg-white">
-      <VStack className="mt-14">
-        <Button
-          size="xl"
-          variant="link"
-          onPress={router.back}
-          className="w-40 ml-4"
-        >
-          <ButtonIcon
-            as={ChevronLeftIcon}
-            className="w-7 h-7 text-typography-700"
-          />
-          <ButtonText className="text-typography-700 data-[active=true]:no-underline">
-            Account Settings
-          </ButtonText>
-        </Button>
-      </VStack>
-
       {/* Sections */}
       <ScrollView showsVerticalScrollIndicator={false}>
         {settings.map((setting, idx) => (

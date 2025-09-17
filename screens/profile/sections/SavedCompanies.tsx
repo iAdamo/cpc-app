@@ -13,23 +13,7 @@ const SavedCompanies = () => {
 
   return (
     <VStack className="flex-1 bg-white">
-      <VStack className="mt-14">
-        <Button
-          size="xl"
-          variant="link"
-          onPress={router.back}
-          className="w-40 ml-4"
-        >
-          <ButtonIcon
-            as={ChevronLeftIcon}
-            className="w-7 h-7 text-typography-700"
-          />
-          <ButtonText className="text-typography-700 data-[active=true]:no-underline">
-            Saved Companies
-          </ButtonText>
-        </Button>
-        <SearchBar providers={savedProviders} />
-      </VStack>
+      <SearchBar providers={savedProviders} />
       {savedProviders && savedProviders.length > 0 ? (
         <ScrollView
           showsVerticalScrollIndicator={false}

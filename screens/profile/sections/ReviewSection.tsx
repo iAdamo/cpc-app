@@ -42,22 +42,6 @@ const ReviewAndRating = () => {
 
   return (
     <VStack className="flex-1 bg-white">
-      <VStack className="mt-14 mb-2">
-        <Button
-          size="xl"
-          variant="link"
-          onPress={router.back}
-          className="w-40 ml-4"
-        >
-          <ButtonIcon
-            as={ChevronLeftIcon}
-            className="w-7 h-7 text-typography-700"
-          />
-          <ButtonText className="text-typography-700 data-[active=true]:no-underline">
-            Reviews & Ratings
-          </ButtonText>
-        </Button>
-      </VStack>
       <VStack className="">
         {!id && (
           <Card className="mx-4 border p-2 border-brand-secondary flex-row gap-4 items-center bg-brand-secondary/40">

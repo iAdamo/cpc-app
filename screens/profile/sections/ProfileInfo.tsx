@@ -24,6 +24,7 @@ const ProfileInfo = () => {
   const [profilePicUri, setProfilePicUri] = useState<string>("");
 
   const {
+    switchRole,
     updateProfile,
     user,
     setError,
@@ -41,7 +42,9 @@ const ProfileInfo = () => {
   const homeAddress = user?.homeAddress || "";
 
   // If editing from /profile-info, all fields are optional and onboarding is skipped
-  const isProfileEdit = pathname === "/profile/personal-info";
+  const isProfileEdit = pathname === "/profile";
+
+  console.log({ isProfileEdit, pathname });
 
   const handleSave = async () => {
     const formData = new FormData();
@@ -90,16 +93,6 @@ const ProfileInfo = () => {
 
   return (
     <VStack className="px-6 mt-4 gap-10">
-      {isProfileEdit && (
-        <HStack className="mt-12 w-full justify-start">
-          <Button variant="link" onPress={() => router.back()}>
-            <ButtonIcon
-              as={ChevronLeftIcon}
-              className="text-brand-secondary w-7 h-7"
-            />
-          </Button>
-        </HStack>
-      )}
       <VStack space="md">
         <Heading size="3xl" className="text-brand-primary">
           {isProfileEdit

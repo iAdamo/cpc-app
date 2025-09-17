@@ -2,7 +2,7 @@ import EmailVerificationPage from "./EmailVerify";
 import FirstOnboardingPage from "./00FirstPage";
 import PhoneVerificationPage from "./PhoneVerify";
 import SelectRole from "./SelectRole";
-import ProfileInfo from "@/components/profile/ProfileInfo";
+import ProfileInfo from "@/screens/profile/sections/ProfileInfo";
 import ChooseService from "./ChooseService";
 import FinalPage from "./FinalPage";
 import SignUpScreen from "@/screens/auth/signup";
