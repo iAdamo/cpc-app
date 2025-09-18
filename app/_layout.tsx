@@ -73,7 +73,7 @@ function RootLayoutNav() {
       Toast.show({
         type: "error",
         text1: error,
-        visibilityTime: 5000,
+        visibilityTime: 3000,
         onHide: clearError, // Clear error after toast hides
       });
     }
@@ -84,7 +84,7 @@ function RootLayoutNav() {
       Toast.show({
         type: "success",
         text1: success,
-        visibilityTime: 5000,
+        visibilityTime: 3000,
         onHide: clearSuccess, // Clear success after toast hides
       });
     }

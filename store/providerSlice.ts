@@ -39,7 +39,10 @@ export const providerViewSlice: StateCreator<
       const data = await setUserFavourites(providerId);
       if (data) {
         if (data.favoritedBy.includes(get().user?._id || "")) {
-          set({ savedProviders: [data], success: "Added to Saved Companies" });
+          set({
+            savedProviders: [...get().savedProviders, data],
+            success: "Added to Saved Companies",
+          });
         } else {
           set({
             savedProviders: get().savedProviders.filter(

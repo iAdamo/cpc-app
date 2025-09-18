@@ -16,7 +16,7 @@ const SortBar = () => {
   const { displayStyle, setDisplayStyle, sortBy, setSortBy } = useGlobalStore();
   const sorts: SortBy[] = ["Relevance", "Newest", "Oldest"];
   return (
-    <VStack className="space-y-4 py-4 bg-white">
+    <VStack className="p-4 bg-white">
       <HStack className="justify-between items-center mt-2">
         <HStack space="xs" className="items-center">
           <Text size="lg">Sort by:</Text>

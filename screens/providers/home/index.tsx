@@ -1,23 +1,22 @@
 import Categories from "./Categories";
 import { ScrollView } from "react-native";
 import { VStack } from "@/components/ui/vstack";
-import { Text } from "@/components/ui/text";
 import ContentDisplay from "./ContentDisplay";
 import SortBar from "./SortBar";
-//import { SearchBar } from "@/components/providers/SearchBar";
 import useGlobalStore from "@/store/globalStore";
+import { TopNavbar } from "@/components/layout/Navbar";
+import SearchBar from "@/components/SearchEngine";
 
 const HomeView = () => {
   return (
-    <VStack className="px-4">
-      {/* <SearchBar /> */}
+    <VStack className="flex-1">
       <ScrollView
         showsVerticalScrollIndicator={false}
-        stickyHeaderIndices={[1]}
       >
+        <SearchBar />
         <Categories />
         <SortBar />
-        <ContentDisplay/>
+        <ContentDisplay />
       </ScrollView>
     </VStack>
   );

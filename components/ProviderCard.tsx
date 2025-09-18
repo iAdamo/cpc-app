@@ -18,7 +18,7 @@ import {
 import { MapPinIcon } from "lucide-react-native";
 import { router } from "expo-router";
 import { HeartIcon, StarIcon } from "lucide-react-native";
-import { usePathname } from "expo-router";
+import { usePathname, useLocalSearchParams } from "expo-router";
 import RatingSection from "./RatingFunction";
 import { ShareService } from "@/services/ShareService";
 import { ProviderData } from "@/types";
@@ -32,8 +32,9 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
     savedProviders,
   } = useGlobalStore();
   const pathname = usePathname();
+  const { section } = useLocalSearchParams<{ section: string }>();
 
-  const isSavedPro = pathname === "/profile/saved-companies";
+  const isSavedPro = section === "saved-companies";
   isSavedPro && displayStyle === "Grid" && setDisplayStyle("List");
   const isGrid = displayStyle === "Grid";
 
@@ -91,17 +92,6 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
                     />
                   </Button>
                   {/* Star icon and rating at top-right */}
-                  <Pressable
-                    onPress={() =>
-                      router.push({
-                        pathname: "/profile/reviews-ratings/[id]",
-                        params: { id: provider._id },
-                      })
-                    }
-                    className="flex flex-row items-center"
-                  >
-                    <RatingSection rating={provider.averageRating} />
-                  </Pressable>
                 </HStack>
               </HStack>
             </Box>
@@ -139,7 +129,7 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
                   {provider.providerDescription}
                 </Text>
                 <HStack space="xs" className="items-center">
-                  <Icon as={MapPinIcon} size="sm" className="text-red-500" />
+                  <Icon as={MapPinIcon} size="sm" className="text-red-400" />
                   <Text className=" text-gray-500 line-clamp-1 flex-1">
                     {provider?.location?.primary?.address?.address}
                   </Text>
@@ -189,17 +179,6 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
                     />
                   </Button>
                   {/* Star icon and rating at top-right */}
-                  <Pressable
-                    onPress={() =>
-                      router.push({
-                        pathname: "/profile/reviews-ratings/[id]",
-                        params: { id: provider._id },
-                      })
-                    }
-                    className="flex flex-row items-center"
-                  >
-                    <RatingSection rating={provider.ratings} />
-                  </Pressable>
                 </HStack>
               </HStack>
             </Box>
@@ -242,18 +221,8 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
                 <Text className="text-gray-600 break-words line-clamp-2">
                   {provider.providerDescription}
                 </Text>
-                {/* <Pressable onPress={() => console.log("An Apple")} className="z-50">
-                <HStack className="items-center">
-                  <RatingSection reviewCount={provider.reviews} />
-                  <Icon
-                    size="sm"
-                    as={ChevronRightIcon}
-                    className="text-yellow-500"
-                  />
-                </HStack>
-              </Pressable> */}
                 <HStack space="xs" className="items-center">
-                  <Icon as={MapPinIcon} size="sm" className="text-red-500" />
+                  <Icon as={MapPinIcon} size="sm" className="text-red-400" />
                   <Text className=" text-gray-500 line-clamp-1 flex-1">
                     {provider?.location?.primary?.address?.address}
                   </Text>

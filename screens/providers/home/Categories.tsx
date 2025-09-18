@@ -40,7 +40,7 @@ const Categories = () => {
   const { width } = Dimensions.get("window");
 
   return (
-    <VStack>
+    <VStack className="mx-4">
       {/* Progress Indicator */}
       <HStack className="justify-center mb-2">
         {Array.from({ length: totalPages }).map((_, i) => (

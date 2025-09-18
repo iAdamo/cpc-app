@@ -13,10 +13,25 @@ import {
   PhoneIcon,
 } from "lucide-react-native";
 import { ProviderData } from "@/types";
+import useGlobalStore from "@/store/globalStore";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const ProfileInfo = ({ provider }: { provider: ProviderData }) => {
+const ProfileInfo = ({
+  provider,
+  isSticky,
+  onLayout,
+}: {
+  provider: ProviderData;
+  isSticky: boolean;
+  onLayout: any;
+}) => {
+  const { switchRole } = useGlobalStore();
+
   return (
-    <VStack className="bg-white">
+    <VStack
+      onLayout={onLayout}
+      className={`bg-white ${isSticky ? "pt-8" : ""}`}
+    >
       {/* Profile Info Section */}
       <VStack className="">
         <HStack className="justify-between">
@@ -40,29 +55,35 @@ const ProfileInfo = ({ provider }: { provider: ProviderData }) => {
               <Icon as={DotIcon} className="text-green-500 " />
               <Text className="text-green-500">Unavailable</Text>
             </HStack>
-            <Text>Last active 2 hours ago</Text>
-            <HStack className="gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onPress={() => {}}
-                className="border-0 bg-gray-200/50 px-2"
-              >
-                <ButtonIcon as={PhoneIcon} className="text-brand-primary" />
-                <ButtonText className="text-brand-primary">Call</ButtonText>
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="border-0 bg-gray-200/50 px-2"
-              >
-                <ButtonIcon
-                  as={MessageSquareTextIcon}
-                  className="text-brand-primary"
-                />
-                <ButtonText className="text-brand-primary">Message</ButtonText>
-              </Button>
-            </HStack>
+            {switchRole === "Client" && (
+              <VStack>
+                <Text>Last active 2 hours ago</Text>
+                <HStack className="gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onPress={() => {}}
+                    className="border-0 bg-gray-200/50 px-2"
+                  >
+                    <ButtonIcon as={PhoneIcon} className="text-brand-primary" />
+                    <ButtonText className="text-brand-primary">Call</ButtonText>
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-0 bg-gray-200/50 px-2"
+                  >
+                    <ButtonIcon
+                      as={MessageSquareTextIcon}
+                      className="text-brand-primary"
+                    />
+                    <ButtonText className="text-brand-primary">
+                      Message
+                    </ButtonText>
+                  </Button>
+                </HStack>
+              </VStack>
+            )}
           </Card>
         </HStack>
       </VStack>

@@ -52,7 +52,7 @@ const ProfileView = () => {
     return false;
   };
 
-  console.log(switchRole, user?.activeRoleId?.owner);
+  // console.log(switchRole, user?.activeRoleId?.owner);
 
   return (
     <VStack className="flex-1 bg-white">

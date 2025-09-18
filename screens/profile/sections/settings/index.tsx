@@ -85,7 +85,7 @@ const AccountSettings = () => {
         <Pressable
           onPress={() => {
             logout();
-            router.replace("/auth/signin");
+            router.replace("/");
           }}
           className="flex flex-row items-center gap-4 mt-16 p-4 border-y border-gray-200 bg-gray-100 data-[active=true]:bg-transparent"
         >

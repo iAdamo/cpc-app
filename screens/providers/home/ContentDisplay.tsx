@@ -1,13 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { VStack } from "@/components/ui/vstack";
-import { HStack } from "@/components/ui/hstack";
-import { Text } from "@/components/ui/text";
-import { ScrollView, View, Dimensions, Pressable } from "react-native";
-import { Card } from "@/components/ui/card";
-import { Icon } from "@/components/ui/icon";
-import { ChevronRightIcon } from "@/components/ui/icon";
-import { ChevronDownIcon, ListIcon, Grid2X2Icon } from "lucide-react-native";
-import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
+import { Dimensions } from "react-native";
 import useGlobalStore from "@/store/globalStore";
 import ProviderCard from "@/components/ProviderCard";
 import { ProviderData } from "@/types";
@@ -36,21 +29,12 @@ const ContentDisplay = () => {
     handleProvidersSearch();
   }, [sortBy, currentLocation]);
 
-  // console.log("Search Results in Home View:", searchResults.providers);
-  // // show subcategories
-  // console.log(
-  //   "First Provider's Subcategories:",
-  //   searchResults.providers && searchResults.providers.length > 0
-  //     ? searchResults.providers[0].subcategories
-  //     : "No providers available"
-  // );
-
   const view =
     displayStyle === "Grid"
       ? "flex-row flex-wrap justify-between"
       : "flex flex-col";
   return (
-    <VStack className={`${view}`}>
+    <VStack className={`${view} px-2`}>
       {(searchResults.providers && searchResults.providers.length > 0
         ? searchResults.providers
         : []

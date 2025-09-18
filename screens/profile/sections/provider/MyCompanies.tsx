@@ -7,6 +7,7 @@ import { Text } from "@/components/ui/text";
 import { Button, ButtonText } from "@/components/ui/button";
 import useGlobalStore from "@/store/globalStore";
 import EmptyState from "@/components/EmptyState";
+import { router } from "expo-router";
 
 const MyCompanies = () => {
   const { user } = useGlobalStore();
@@ -30,7 +31,15 @@ const MyCompanies = () => {
                     {provider?.location?.primary?.address?.address}
                   </Text>
                 </VStack>
-                <Button className="bg-brand-primary shadow-xl">
+                <Button
+                  onPress={() =>
+                    router.push({
+                      pathname: "/profile/[id]",
+                      params: { id: provider?._id ?? "" },
+                    })
+                  }
+                  className="bg-brand-primary shadow-xl"
+                >
                   <ButtonText className="text-white">View</ButtonText>
                 </Button>
               </HStack>
