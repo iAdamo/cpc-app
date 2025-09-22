@@ -4,6 +4,7 @@ import { Dimensions } from "react-native";
 import useGlobalStore from "@/store/globalStore";
 import ProviderCard from "@/components/ProviderCard";
 import { ProviderData } from "@/types";
+import EmptyState from "@/components/EmptyState";
 
 const ContentDisplay = () => {
   const { width } = Dimensions.get("window");
@@ -28,6 +29,8 @@ const ContentDisplay = () => {
 
     handleProvidersSearch();
   }, [sortBy, currentLocation]);
+
+  if (!searchResults) return <EmptyState header="" text="" />;
 
   const view =
     displayStyle === "Grid"

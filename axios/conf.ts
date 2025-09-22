@@ -1,5 +1,6 @@
 import axios, { InternalAxiosRequestConfig } from "axios";
 import * as SecureStore from "expo-secure-store";
+import useGlobalStore from "@/store/globalStore";
 
 const createClient = () => {
   const apiClient = axios.create({
@@ -33,10 +34,11 @@ const createClient = () => {
     (response) => response,
     async (error) => {
       console.warn(error);
-      if (error.response?.status === 403) {
+      if (error.response?.status === 403 || error.response?.status === 401) {
         // token expired or forbidden
         console.warn("Forbidden - maybe token expired, redirect to login");
-        // handle logout / redirect here for mobile
+        const { logout } = useGlobalStore.getState();
+        await logout();
       } else if (error.message === "Network Error") {
         throw "Please check your internet connection.";
       } else if (!error.response) {

@@ -1,52 +1,35 @@
 import { useState, useEffect } from "react";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
-import { Button, ButtonText } from "@/components/ui/button";
+import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
+import { EditIcon } from "@/components/ui/icon";
+import { PencilLineIcon } from "lucide-react-native";
 import { Card } from "@/components/ui/card";
 import { Text } from "@/components/ui/text";
+import { Heading } from "@/components/ui/heading";
 import { Image } from "@/components/ui/image";
 import { ScrollView } from "react-native";
-import { ProviderData, ReviewData } from "@/types";
-import { getReviews } from "@/axios/reviews";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionContentText,
-  AccordionHeader,
-  AccordionIcon,
-  AccordionItem,
-  AccordionTitleText,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import RatingSection from "@/components/RatingFunction";
-import EmptyState from "@/components/EmptyState";
-import { useLocalSearchParams } from "expo-router";
-import useGlobalStore from "@/store/globalStore";
-import DateFormatter from "@/utils/DateFormat";
-import { Spinner } from "@/components/ui/spinner";
+import { ProviderData, EditableFields } from "@/types";
+import ReviewAndRating from "../sections/ReviewSection";
 
 const TABS = [{ label: "About" }, { label: "Portfolio" }, { label: "Reviews" }];
 
-const MoreInfo = ({ provider }: { provider: ProviderData }) => {
+const MoreInfo = ({
+  provider,
+  isEditable,
+  editingFields,
+  handleSave,
+  handleEditStart,
+  handleCancelEdit,
+}: {
+  provider: ProviderData;
+  isEditable: boolean;
+  editingFields: Partial<Record<EditableFields, string>>;
+  handleSave: () => void;
+  handleEditStart: (fields: Partial<Record<EditableFields, string>>) => void;
+  handleCancelEdit: () => void;
+}) => {
   const [selectedTab, setSelectedTab] = useState<string>("About");
-  const [reviews, setReviews] = useState<ReviewData[]>();
-  const [isLoading, setIsLoading] = useState(false);
-  useEffect(() => {
-    const fetchReviews = async () => {
-      setIsLoading(true);
-      try {
-        const response = await getReviews(provider._id);
-        if (response) {
-          setReviews(response);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchReviews();
-  }, []);
 
   return (
     <Card className="bg-white mt-2 h-auto p-4">
@@ -55,7 +38,6 @@ const MoreInfo = ({ provider }: { provider: ProviderData }) => {
           <Button
             key={tab.label}
             variant="outline"
-            size="sm"
             onPress={() => setSelectedTab(tab.label)}
             className={`${
               selectedTab === tab.label ? "bg-brand-primary" : ""
@@ -72,12 +54,36 @@ const MoreInfo = ({ provider }: { provider: ProviderData }) => {
         ))}
       </HStack>
       {selectedTab === "About" && (
-        <VStack className="mt-4">
-          <Card variant="filled">
+        <VStack className="mt-4 gap-4">
+          <VStack space="xs">
+            <HStack className="items-center">
+              <Heading size="md" className="text-typography-700">
+                Description
+              </Heading>
+              {isEditable && (
+                <Button
+                  variant="link"
+                  onPress={() =>
+                    handleEditStart({
+                      providerDescription: provider.providerDescription || "",
+                    })
+                  }
+                  className="ml-auto"
+                >
+                  <ButtonIcon
+                  size="sm"
+                    className="text-brand-primary"
+                    as={PencilLineIcon}
+                  />
+                  <ButtonText className="text-brand-primary">Edit</ButtonText>
+                </Button>
+              )}
+            </HStack>
+
             <Text className="text-justify break-words line-clamp-[9]">
               {provider.providerDescription ||
                 `
-              Hi, I&apos;m Akpan Blessing, a professional painter with over 10
+              Hi, I&apos;m Sodiq Sanusi, a professional painter with over 10
               years of experience transforming homes and offices across Lagos. I
               specialize in creating beautiful, vibrant, and lasting finishes
               that bring your spaces to life. Whether it&apos;s a modern look,
@@ -89,7 +95,23 @@ const MoreInfo = ({ provider }: { provider: ProviderData }) => {
               life. Whether it&apos;s a modern look, classic design, or artistic
               touch, I ensure every project is tailored to your style and needs.`}
             </Text>
-          </Card>
+          </VStack>
+          <VStack space="xs">
+            <Heading size="md" className="text-typography-700">
+              Photos
+            </Heading>
+            {provider.providerImages.map((item, idx) => (
+              <Image
+                key={idx}
+                source={
+                  (typeof item === "string" && item) ||
+                  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80"
+                }
+                alt={`Portfolio ${item}`}
+                className="w-full h-60 rounded-md bg-gray-200 mb-4"
+              />
+            ))}
+          </VStack>
         </VStack>
       )}
       {selectedTab === "Portfolio" && (
@@ -115,51 +137,7 @@ const MoreInfo = ({ provider }: { provider: ProviderData }) => {
           </VStack>
         </Card>
       )}
-      {selectedTab === "Reviews" && !isLoading ? (
-        <Accordion variant="filled" className="shadow-none gap-2 mt-4">
-          {reviews && reviews.length > 0 ? (
-            reviews.map((review, index) => (
-              <AccordionItem
-                value={index.toString()}
-                key={index}
-                className="mb-4 bg-gray-50 border border-gray-200"
-              >
-                <AccordionHeader>
-                  <AccordionTrigger>
-                    <HStack className="justify-between items-center">
-                      <AccordionTitleText className="text-justify font-medium text-typography-600">
-                        {DateFormatter.toShortDate(review.createdAt)}
-                        {"  "}
-                        {`${review.user?.firstName} ${review.user?.lastName}`}
-                      </AccordionTitleText>
-                      <RatingSection rating={review.rating} />
-                    </HStack>
-                  </AccordionTrigger>
-                </AccordionHeader>
-                <AccordionContent>
-                  <AccordionContentText>
-                    {review.description}
-                  </AccordionContentText>
-                </AccordionContent>
-              </AccordionItem>
-            ))
-          ) : (
-            <EmptyState
-              header="No reviews available."
-              text={`${
-                !provider._id
-                  ? "You haven't given any companies reviews yet."
-                  : "No reviews available for this company yet. You can be the first to make a review by giving the company a try and give them your review"
-              }`}
-            />
-          )}
-        </Accordion>
-      ) : (
-        selectedTab === "Reviews" &&
-        isLoading && (
-          <Spinner className="my-4" />
-        )
-      )}
+      {selectedTab === "Reviews" && <ReviewAndRating />}
     </Card>
   );
 };

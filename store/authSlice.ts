@@ -11,6 +11,8 @@ import {
   sendCode,
   changePassword,
 } from "@/axios/auth";
+import { th } from "zod/v4/locales";
+import { router } from "expo-router";
 
 export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
   set,
@@ -38,6 +40,7 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
         error: error?.response?.data?.message || "Signup failed",
         isLoading: false,
       });
+      throw error;
     }
   },
 
@@ -56,12 +59,12 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
         });
       }
     } catch (error: any) {
-      console.log(error);
       set({
         error:
           error?.response?.data?.message || error?.message || "Login failed",
         isLoading: false,
       });
+      throw error;
     }
   },
 
@@ -102,6 +105,7 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
         isLoading: false,
         error: error?.response?.data?.message || "Email verification failed",
       });
+      throw error;
     }
   },
 
@@ -159,9 +163,16 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       user: null,
       isAuthenticated: false,
       error: null,
-      success: "Logged out successfully",
+      currentStep: 1,
+      currentView: "Home",
+      displayStyle: "Grid",
+      currentLocation: null,
+      switchRole: "Client",
+      savedProviders: [],
+      paramsFrom: null,
     });
     await SecureStore.deleteItemAsync("accessToken");
+    router.replace("/");
   },
 
   clearError: () => set({ error: null }),

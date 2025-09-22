@@ -1,3 +1,4 @@
+import { getUserServices } from "./service";
 import { ApiClientSingleton } from "./conf";
 import { UserData, ProviderData } from "@/types";
 
@@ -12,12 +13,30 @@ export const updateUserProfile = async (data: FormData): Promise<UserData> => {
   return response.data;
 };
 
-export const updateProviderProfile = async (data: FormData): Promise<UserData> => {
-  const response = await axiosInstance.patch("provider/profile", data, {
+export const createProviderProfile = async (
+  data: FormData
+): Promise<UserData> => {
+  const response = await axiosInstance.post("/provider", data, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
   });
+  return response.data;
+};
+
+export const updateProviderProfile = async (
+  data: FormData
+): Promise<UserData> => {
+  const response = await axiosInstance.patch("/provider", data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
+
+export const getUserProfile = async (userId?: string): Promise<UserData> => {
+  const response = await axiosInstance.get(`users/${userId}`);
   return response.data;
 };
 

@@ -31,3 +31,5 @@ export interface UserData {
   hiredCompanies: ProviderData[];
   owner: string;
 }
+
+export type EditableFields = keyof UserData | keyof ProviderData;

@@ -27,6 +27,7 @@ const ProfileView = () => {
   } = useGlobalStore();
 
   // const [toggle, setToggle] = useState(false);
+console.log("user", user);
 
   const handleCompanyOnboarding = () => {
     if (!user) return false;
@@ -42,7 +43,6 @@ const ProfileView = () => {
     } else if (!user.activeRoleId?.owner && switchRole === "Client") {
       resetOnboarding();
       setCurrentStep(7);
-      setSwitchRole("Provider");
       router.push({
         pathname: "/onboarding",
         params: { from: "/providers" },

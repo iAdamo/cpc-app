@@ -25,8 +25,8 @@ const SelectRole = () => {
     return;
   };
   return (
-    <VStack className="p-4 h-full justify-between mt-16">
-      <Box className="gap-20">
+    <VStack className="flex-1 p-4">
+      <Box className="gap-20 flex-1 mt-16">
         <VStack className="gap-4 ">
           <Heading size="2xl" className="text-brand-primary">
             Tell Us How You'll Use Companies Center
@@ -96,7 +96,7 @@ const SelectRole = () => {
       </Box>
       <Button
         size="xl"
-        className="bg-brand-primary data-[active=true]:bg-brand-primary/70 mb-20"
+        className="bg-brand-primary data-[active=true]:bg-brand-primary/70"
         onPress={handleSubmit}
         isDisabled={!activeRole}
       >

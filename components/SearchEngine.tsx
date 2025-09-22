@@ -24,7 +24,7 @@ const SearchBar = ({ providers }: { providers?: ProviderData[] }) => {
   const [filterQuery, setFilterQuery] = useState<string>("");
 
   const pathname = usePathname();
-  const isHomeView = pathname === "/providers";
+  const isHomeView = pathname === "/clients" || pathname === "/providers";
 
   const {
     setFilteredProviders,

@@ -9,8 +9,8 @@ export default function appendFormData(
   if (typeof data === "object" && data.uri && (data.type || data.name)) {
     formData.append(parentKey, {
       uri: data.uri,
-      name: data.name || "file",
-      type: data.type || "application/octet-stream",
+      name: data.name,
+      type: data.type,
     } as any);
     return;
   }

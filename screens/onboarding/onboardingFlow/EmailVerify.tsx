@@ -150,14 +150,16 @@ const EmailVerificationPage = () => {
   };
 
   const handleVerifyEmail = async () => {
-    Keyboard.dismiss();
-    //console.log("Verifying email with code:", code);
-    await verifyEmail(getValues("code"));
+    try {
+      Keyboard.dismiss();
+      //console.log("Verifying email with code:", code);
+      await verifyEmail(getValues("code"));
 
-    // Update verification status in storage
-    updateProfile({ isEmailVerified: true });
+      // Update verification status in storage
+      updateProfile({ isEmailVerified: true });
 
-    isAuthenticated && setCurrentStep(currentStep + 1);
+      isAuthenticated && setCurrentStep(currentStep + 1);
+    } catch (error) {}
   };
 
   const handleSendCode = async () => {

@@ -47,7 +47,7 @@ const SignInScreen = () => {
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
 
   const router = useRouter();
-  const { login, isLoading, isAuthenticated, setParamsFrom } = useGlobalStore();
+  const { login, isLoading, isAuthenticated } = useGlobalStore();
 
   const switchToSignUp = () => {
     useGlobalStore.setState({
@@ -81,14 +81,16 @@ const SignInScreen = () => {
 
   // handle form submission
   const onSubmit = async (data: SignInSchemaType) => {
-    Keyboard.dismiss();
-    await login(data);
-    if (!isAuthenticated) {
-      setValidated({ emailValid: false, passwordValid: false });
-      return;
-    }
-    reset();
-    router.replace("/providers");
+    try {
+      Keyboard.dismiss();
+      await login(data);
+      if (!isAuthenticated) {
+        setValidated({ emailValid: false, passwordValid: false });
+        return;
+      }
+      reset();
+      router.replace("/providers");
+    } catch (err) {}
   };
 
   // handle password visibility
@@ -103,7 +105,7 @@ const SignInScreen = () => {
     handleSubmit(onSubmit)();
   };
   return (
-    <VStack className="bg-white w-full p-4">
+    <VStack className="bg-white w-full p-4 ">
       <VStack className="h-3/5 justify-end">
         <Card className="shadow-xl gap-8">
           <Heading size="xl" className="text-brand-primary">

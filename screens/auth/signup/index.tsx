@@ -80,19 +80,23 @@ const SignUpScreen = () => {
 
   // handle form submission
   const onSubmit = async (data: SignUpFormType) => {
-    Keyboard.dismiss();
-    if (data.password !== data.confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-    const referrerId = await AsyncStorage.getItem("referrerId");
-    if (referrerId) {
-      data = { ...data, referrerId };
-    }
+    try {
+      Keyboard.dismiss();
+      if (data.password !== data.confirmPassword) {
+        setError("Passwords do not match");
+        return;
+      }
+      const referrerId = await AsyncStorage.getItem("referrerId");
+      if (referrerId) {
+        data = { ...data, referrerId };
+      }
 
-    await signUp(data);
-    reset();
-    setCurrentStep(currentStep + 1);
+      await signUp(data);
+      reset();
+      setCurrentStep(currentStep + 1);
+    } catch (e) {
+      // error is already set in store, do nothing or show a message
+    }
   };
 
   // handle password visibility

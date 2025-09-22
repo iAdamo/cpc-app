@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
@@ -12,20 +13,33 @@ import {
   MessageSquareTextIcon,
   PhoneIcon,
 } from "lucide-react-native";
-import { ProviderData } from "@/types";
+import { ProviderData, EditableFields } from "@/types";
 import useGlobalStore from "@/store/globalStore";
-import { SafeAreaView } from "react-native-safe-area-context";
+import appendFormData from "@/utils/AppendFormData";
+import SocialMediaDetails from "./SocialLinks";
 
 const ProfileInfo = ({
   provider,
   isSticky,
+  isEditable,
+  editingFields,
+  handleSave,
+  handleEditStart,
+  handleCancelEdit,
   onLayout,
 }: {
   provider: ProviderData;
   isSticky: boolean;
+  isEditable: boolean;
+  editingFields: Partial<Record<EditableFields, string>>;
+  handleSave: () => void;
+  handleEditStart: (fields: Partial<Record<EditableFields, string>>) => void;
+  handleCancelEdit: () => void;
   onLayout: any;
 }) => {
-  const { switchRole } = useGlobalStore();
+
+  const { switchRole, updateUserProfile } = useGlobalStore();
+  // console.log({ provider });
 
   return (
     <VStack
@@ -50,7 +64,7 @@ const ProfileInfo = ({
               </Text>
             </HStack>
           </Card>
-          <Card className="gap-2 items-end">
+          <Card className="gap-2 items-end flex-1">
             <HStack space="xs" className="items-center">
               <Icon as={DotIcon} className="text-green-500 " />
               <Text className="text-green-500">Unavailable</Text>
@@ -84,8 +98,24 @@ const ProfileInfo = ({
                 </HStack>
               </VStack>
             )}
+            {/* <SocialMediaDetails
+              provider={provider}
+              isEditable={isEditable}
+              editingFields={editingFields}
+              handleSave={handleSave}
+              handleEditStart={handleEditStart}
+              handleCancelEdit={handleCancelEdit}
+            /> */}
           </Card>
         </HStack>
+        <SocialMediaDetails
+          provider={provider}
+          isEditable={isEditable}
+          editingFields={editingFields}
+          handleSave={handleSave}
+          handleEditStart={handleEditStart}
+          handleCancelEdit={handleCancelEdit}
+        />
       </VStack>
     </VStack>
   );

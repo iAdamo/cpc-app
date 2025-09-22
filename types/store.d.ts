@@ -55,9 +55,11 @@ export interface AuthState {
 }
 
 export interface UserState {
-  // Actions
+  otherUser: UserData | null;
+  setOtherUser: (user: UserData | null) => void;
   updateProfile: (updates: Partial<UserData>) => void;
   updateUserProfile: (role: ActiveRole, data?: FormData) => Promise<void>;
+  fetchUserProfile: (userId?: string) => Promise<void>;
 }
 
 export interface OnboardingState {

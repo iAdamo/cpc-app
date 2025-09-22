@@ -44,49 +44,41 @@ const ProfileInfo = () => {
   // If editing from /profile-info, all fields are optional and onboarding is skipped
   const isProfileEdit = pathname === "/profile";
 
-  console.log({ isProfileEdit, pathname });
-
   const handleSave = async () => {
-    const formData = new FormData();
-    newFirstName && formData.append("firstName", newFirstName);
-    newLastName && formData.append("lastName", newLastName);
-    newHomeAddress && formData.append("homeAdress", newHomeAddress);
-    if (profilePicUri) {
-      formData.append("profilePicture", {
-        uri: profilePicUri,
-        name: "profile.jpg",
-        type: "image/jpeg",
-      } as any);
+    try {
+      const formData = new FormData();
+      newFirstName && formData.append("firstName", newFirstName);
+      newLastName && formData.append("lastName", newLastName);
+      newHomeAddress && formData.append("homeAdress", newHomeAddress);
+      if (profilePicUri) {
+        formData.append("profilePicture", {
+          uri: profilePicUri,
+          name: "profile.jpg",
+          type: "image/jpeg",
+        } as any);
+      }
+      await updateUserProfile("Client", formData);
+    } catch (error) {
+      console.error("Error updating profile:", error);
     }
-    await updateUserProfile("Client", formData);
-    router.back();
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     // Onboarding logic (unchanged)
+    if (firstName.length < 2 || lastName.length < 2) {
+      setError("First and Last names must be at least 2 characters long.");
+      return;
+    }
+    if (homeAddress && homeAddress.length < 5) {
+      setError("Please provide a valid address.");
+      return;
+    }
+    await handleSave();
     if (user?.activeRole === "Client") {
-      if (firstName.length < 2 || lastName.length < 2) {
-        setError("First and Last names must be at least 2 characters long.");
-        return;
-      }
-      if (homeAddress && homeAddress.length < 5) {
-        setError("Please provide a valid address.");
-        return;
-      }
       setCurrentStep(0);
       return;
     } else if (user?.activeRole === "Provider") {
-      if (firstName.length < 2 || lastName.length < 2) {
-        setError("First and Last names must be at least 2 characters long.");
-        return;
-      } else if (!homeAddress || homeAddress.length < 5) {
-        setError("Please provide a valid residential address.");
-        return;
-      }
       setCurrentStep(currentStep + 1);
-      // useGlobalStore.setState((state) => ({
-      //   currentStep: state.currentStep + 1,
-      // }));
       return;
     }
   };
@@ -169,7 +161,14 @@ const ProfileInfo = () => {
         size="xl"
         className="bg-brand-primary mt-20 w-full"
         isDisabled={isLoading}
-        onPress={isProfileEdit ? handleSave : handleContinue}
+        onPress={
+          isProfileEdit
+            ? async () => {
+                await handleSave();
+                router.back();
+              }
+            : handleContinue
+        }
       >
         <ButtonText>{isProfileEdit ? "Save" : "Continue"}</ButtonText>
       </Button>

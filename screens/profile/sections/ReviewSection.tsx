@@ -131,7 +131,10 @@ const ReviewAndRating = () => {
                 </VStack>
               </HStack>
             </Card>
-            <Accordion variant="filled" className="shadow-none gap-2">
+            <Accordion
+              variant="filled"
+              className="shadow-none gap-2 rounded-xl"
+            >
               {reviews && reviews.length > 0 ? (
                 reviews.map((review, index) => (
                   <AccordionItem

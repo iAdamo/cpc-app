@@ -48,7 +48,10 @@ const CompanyBasicInfo = () => {
     setCurrentStep,
     selectedPlace,
     setSelectedPlace,
+    isLoading,
     setError: setGError,
+    updateUserProfile,
+    completeOnboarding,
   } = useGlobalStore();
   if (!user) return;
 
@@ -102,6 +105,7 @@ const CompanyBasicInfo = () => {
     const mappedFiles = files.map((file, index) => ({
       ...file,
       name: file.name ?? "", // Ensure name is always a string
+      type: "image/jpeg", // Default to image/jpeg if type is missing
     }));
     setValue("providerImages", mappedFiles);
     if (files.length > 0) {
@@ -185,18 +189,19 @@ const CompanyBasicInfo = () => {
           providerDescription: data.providerDescription,
           providerEmail: data.providerEmail,
           providerPhoneNumber: data.providerPhoneNumber,
-          providerLogo: data?.providerLogo,
+          providerLogo: data.providerLogo,
           providerImages: data.providerImages,
           location: {
             primary: data.providerLocation,
           },
         },
       });
+      await updateUserProfile("Provider");
+      completeOnboarding();
       setCurrentStep(0);
-      console.log("Company Basic Info step completed. Data:", user);
     } catch (error) {
-      console.error("Failed to update profile:", error);
-      setGError("Failed to update profile. Please try again.");
+      // console.error("Failed to update profile:", error);
+      setGError(error as any);
     }
   });
 
@@ -478,8 +483,8 @@ const CompanyBasicInfo = () => {
       </ScrollView>
       <Button
         size="xl"
-        variant="outline"
         className="mb-4 mt-2 bg-brand-secondary border-0 mx-2"
+        isDisabled={!isValid || isLoading}
         onPress={() => handleNext()}
       >
         <ButtonText className="text-white">Continue</ButtonText>
@@ -489,4 +494,3 @@ const CompanyBasicInfo = () => {
 };
 
 export default CompanyBasicInfo;
-// setSelectedImages((prev) => [...prev, ...uris]);

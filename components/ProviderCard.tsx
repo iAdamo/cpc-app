@@ -100,7 +100,7 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
                 onPress={() =>
                   router.push({
                     pathname: "/profile/[id]",
-                    params: { id: provider._id },
+                    params: { id: provider.owner },
                   })
                 }
                 className="flex-1 gap-1 justify-between flex-col pr-2"
@@ -186,7 +186,7 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
               onPress={() =>
                 router.push({
                   pathname: "/profile/[id]",
-                  params: { id: provider._id },
+                  params: { id: provider.owner },
                 })
               }
               className="flex-1"
@@ -213,9 +213,8 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
                       {provider.providerName}
                     </Heading>
                   </HStack>
-
                   <Text className="font-medium">
-                    {provider.subcategories[0].name}
+                    {provider?.subcategories[0].name}
                   </Text>
                 </VStack>
                 <Text className="text-gray-600 break-words line-clamp-2">

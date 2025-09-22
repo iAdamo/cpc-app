@@ -10,8 +10,8 @@ export interface ProviderData {
   providerEmail: string;
   providerPhoneNumber: string;
   subcategories: SubcategoryData[];
-  website: string;
   providerSocialMedia: {
+    website?: string;
     facebook?: string;
     twitter?: string;
     instagram?: string;
@@ -25,7 +25,7 @@ export interface ProviderData {
   clients: any[];
   latitude: number;
   longitude: number;
-  owner?: string;
+  owner: string;
   favoritedBy: string[];
   favoriteCount: number;
   ratings: number;
