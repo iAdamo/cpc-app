@@ -3,7 +3,7 @@ import { Keyboard } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FormSchema, FormSchemaType } from "@/screens/auth/AuthFormSchema";
+import { FormSchema, FormSchemaType } from "@/components/schema/AuthFormSchema";
 import { Toast, useToast, ToastTitle } from "@/components/ui/toast";
 import { Input, InputField, InputSlot, InputIcon } from "@/components/ui/input";
 import {

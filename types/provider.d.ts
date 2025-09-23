@@ -16,7 +16,7 @@ export interface ProviderData {
     twitter?: string;
     instagram?: string;
     linkedin?: string;
-    other?: string;
+    tiktok?: string;
   };
   reviewCount: number;
   averageRating: number;

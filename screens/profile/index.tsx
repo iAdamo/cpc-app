@@ -27,7 +27,7 @@ const ProfileView = () => {
   } = useGlobalStore();
 
   // const [toggle, setToggle] = useState(false);
-console.log("user", user);
+// console.log("user", user);
 
   const handleCompanyOnboarding = () => {
     if (!user) return false;

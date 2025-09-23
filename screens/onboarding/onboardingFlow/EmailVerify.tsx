@@ -20,7 +20,7 @@ import { z } from "zod";
 import { Keyboard, TouchableOpacity, View } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FormSchema } from "@/screens/auth/AuthFormSchema";
+import { FormSchema } from "@/components/schema/AuthFormSchema";
 import { Icon, EditIcon, CheckIcon, CloseIcon } from "@/components/ui/icon";
 
 const EmailVerificationPage = () => {

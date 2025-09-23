@@ -40,6 +40,7 @@ const UserProfile = () => {
     try {
       const formData = new FormData();
       appendFormData(formData, editingFields);
+      console.log(Array.from(formData.entries()));
       await updateUserProfile("Provider", formData);
     } catch (error) {
       console.error("Error saving profile changes:", error);

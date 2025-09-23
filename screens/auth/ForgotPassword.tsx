@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FormSchema, FormSchemaType } from "@/screens/auth/AuthFormSchema";
+import { FormSchema, FormSchemaType } from "@/components/schema/AuthFormSchema";
 import FormModal from "./AuthFormModal";
 import useGlobalStore from "@/store/globalStore";
 import { Toast, ToastTitle, useToast } from "@/components/ui/toast";

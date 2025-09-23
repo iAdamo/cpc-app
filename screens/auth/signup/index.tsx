@@ -2,7 +2,7 @@ import React, { useState, useCallback } from "react";
 import { Keyboard } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FormSchema, FormSchemaType } from "@/screens/auth/AuthFormSchema";
+import { FormSchema, FormSchemaType } from "@/components/schema/AuthFormSchema";
 import { z } from "zod";
 import { Input, InputField, InputSlot, InputIcon } from "@/components/ui/input";
 import {

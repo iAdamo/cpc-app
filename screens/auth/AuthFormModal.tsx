@@ -22,7 +22,7 @@ import { Text } from "@/components/ui/text";
 import { Heading } from "@/components/ui/heading";
 import { ArrowLeftIcon } from "@/components/ui/icon";
 import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
-import { FormSchemaType } from "@/screens/auth/AuthFormSchema";
+import { FormSchemaType } from "@/components/schema/AuthFormSchema";
 
 interface FormModalProps {
   isOpen: boolean;
@@ -133,7 +133,7 @@ const FormModal: React.FC<FormModalProps> = ({
                   {extraText}
                 </Text>
                 <Button
-                size="sm"
+                  size="sm"
                   onPress={onSubmit_2}
                   className="bg-green-200 ml-auto data-[hover=true]:bg-green-300"
                   isDisabled={onSubmit_2 === undefined}

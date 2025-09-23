@@ -1,4 +1,3 @@
-import { current } from "immer";
 import { ApiClientSingleton } from "./conf";
 import { UserData, SignUpData } from "@/types";
 
@@ -21,10 +20,6 @@ export const loginUser = async (credentials: {
     credentials
   );
   return response.data;
-};
-
-export const logout = async () => {
-  await axiosInstance.post("/auth/logout", {}, { withCredentials: true });
 };
 
 export const sendCode = async (data: { email: string }) => {
