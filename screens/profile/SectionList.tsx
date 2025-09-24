@@ -10,6 +10,7 @@ import {
   MessageCircleQuestionMarkIcon,
   UserStarIcon,
   Building2Icon,
+  BriefcaseBusinessIcon
 } from "lucide-react-native";
 import { router } from "expo-router";
 
@@ -36,6 +37,16 @@ export const ProfileSections = [
             params: { section: "personal-info" },
           }),
         showFor: "Both",
+      },
+      {
+        text: "My Services",
+        icon: BriefcaseBusinessIcon,
+        action: () =>
+          router.push({
+            pathname: "/profile",
+            params: { section: "my-services" },
+          }),
+        showFor: "Provider",
       },
       {
         text: "Saved Companies",

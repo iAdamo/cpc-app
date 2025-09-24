@@ -5,6 +5,11 @@ export interface ProviderData {
   // id: string;
   providerName: string;
   providerLogo?: string | FileType;
+  isVerified?: boolean;
+  isFeatured?: boolean;
+  isPremium?: boolean;
+  isOnline?: boolean;
+  isAvailable?: boolean;
   providerTagline?: string;
   providerDescription: string;
   providerEmail: string;

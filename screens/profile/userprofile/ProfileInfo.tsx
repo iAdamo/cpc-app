@@ -16,7 +16,7 @@ import {
 import { ProviderData, EditableFields } from "@/types";
 import useGlobalStore from "@/store/globalStore";
 import appendFormData from "@/utils/AppendFormData";
-import SocialMediaDetails from "./SocialLinks";
+import { Badge, BadgeText, BadgeIcon } from "@/components/ui/badge";
 
 const ProfileInfo = ({
   provider,
@@ -37,7 +37,6 @@ const ProfileInfo = ({
   handleCancelEdit: () => void;
   onLayout: any;
 }) => {
-
   const { switchRole, updateUserProfile } = useGlobalStore();
   // console.log({ provider });
 
@@ -50,9 +49,15 @@ const ProfileInfo = ({
       <VStack className="">
         <HStack className="justify-between">
           <Card className="w-1/2 gap-2 items-start">
-            <Heading size="xl" className="">
-              {provider?.providerName || "Alejandro De'Armas"}
-            </Heading>
+            <HStack space="xs" className="">
+              <Heading size="xl" className="">
+                {provider?.providerName || "Alejandro De'Armas"}
+              </Heading>
+              <Badge action={provider?.isVerified ? "success" : "muted"} className="ml-2">
+                <BadgeText>{provider?.isVerified ? "Verified" : "Unverified" }</BadgeText>
+              </Badge>
+            </HStack>
+
             <Text size="lg" className="font-bold">
               {provider.subcategories[0].name || "Tree Felling"}
             </Text>
@@ -98,24 +103,12 @@ const ProfileInfo = ({
                 </HStack>
               </VStack>
             )}
-            {/* <SocialMediaDetails
-              provider={provider}
-              isEditable={isEditable}
-              editingFields={editingFields}
-              handleSave={handleSave}
-              handleEditStart={handleEditStart}
-              handleCancelEdit={handleCancelEdit}
-            /> */}
           </Card>
         </HStack>
-        <SocialMediaDetails
+        {/* <SocialMediaDetails
           provider={provider}
           isEditable={isEditable}
-          editingFields={editingFields}
-          handleSave={handleSave}
-          handleEditStart={handleEditStart}
-          handleCancelEdit={handleCancelEdit}
-        />
+        /> */}
       </VStack>
     </VStack>
   );

@@ -44,21 +44,11 @@ export const getServiceById = async (id: string): Promise<ServiceData> => {
   return response.data;
 };
 
-export const getServicesByCompany = async (
+export const getServicesByProvider = async (
   id: string
 ): Promise<ServiceData[]> => {
   const response = await axiosInstance.get(`services/provider/${id}`);
 
-  return response.data;
-};
-
-export const getRandomServices = async (
-  page: number,
-  limit: number
-): Promise<{ services: ServiceData[]; totalPages: number }> => {
-  const response = await axiosInstance.get(
-    `services/random?page=${page}&limit=${limit}`
-  );
   return response.data;
 };
 
@@ -72,8 +62,3 @@ export const getServices = async (
   return response.data;
 };
 
-export const getUserServices = async (id: string): Promise<ServiceData[]> => {
-  const response = await axiosInstance.get(`services/user/${id}`);
-
-  return response.data;
-};

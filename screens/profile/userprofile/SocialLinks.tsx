@@ -2,6 +2,7 @@ import { useState } from "react";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Card } from "@/components/ui/card";
+import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { Link, LinkText } from "@/components/ui/link";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
@@ -191,10 +192,20 @@ const SocialMediaDetails = ({
     return originalValue !== currentValue;
   };
 
+  const fieldsToDisplay = isEditable
+    ? fields
+    : fields.filter((field) => {
+        const value = form.watch(field.platform);
+        return value && value.trim() !== "";
+      });
+
   return (
-    <Card>
+    <Card className="gap-2">
+      <Heading size="md" className="text-typography-700">
+        Social links
+      </Heading>
       <HStack className="flex-1 flex-wrap justify-between">
-        {fields.map((field) => {
+        {fieldsToDisplay.map((field) => {
           const isEditing = editingState.platform === field.platform;
           const currentValue = form.watch(field.platform);
           const hasError = !!getFieldError(field.platform);

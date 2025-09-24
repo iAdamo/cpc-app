@@ -120,10 +120,6 @@ const UserProfile = () => {
             <MoreInfo
               provider={provider}
               isEditable={isEditable}
-              editingFields={editingFields}
-              handleSave={handleSave}
-              handleEditStart={handleEditStart}
-              handleCancelEdit={handleCancelEdit}
             />
           </ScrollView>
         </>
