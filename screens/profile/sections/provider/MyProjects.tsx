@@ -17,6 +17,10 @@ import {
 } from "@/components/ui/form-control";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Icon, ChevronLeftIcon } from "@/components/ui/icon";
+import {
+  ProjectFormSchema,
+  ProjectFormSchemaType,
+} from "@/components/schema/ProjectSchema";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -67,18 +71,18 @@ const MyServices = ({ providerId }: { providerId?: string }) => {
 
   return (
     <VStack className="flex-1 bg-white">
+      <EmptyState header="" text="" />
       {isEditable && (
         <VStack className="flex-1 bg-white">
-          <Button variant="outline" onPress={() => setIsModalOpen(true)}>
+          {/* <Button variant="outline" onPress={() => setIsModalOpen(true)}>
             <ButtonText>Add a Project</ButtonText>
-          </Button>
+          </Button> */}
           <CreateServiceModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
           />
         </VStack>
       )}
-      <EmptyState header="" text="" />
     </VStack>
   );
 };
@@ -105,8 +109,8 @@ const CreateServiceModal = ({
         <ModalHeader className="items-center justify-start gap-2">
           <ModalCloseButton className="flex flex-row items-center gap-2">
             <Icon size="xl" as={ChevronLeftIcon} />
+            <Heading>New Service Project</Heading>
           </ModalCloseButton>
-          <Heading>New Service Project</Heading>
         </ModalHeader>
         <ModalBody className="gap-20 flex flex-col">
           <VStack className="mt-4 gap-4 items-center justify-center"></VStack>

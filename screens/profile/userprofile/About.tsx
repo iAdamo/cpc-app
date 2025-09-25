@@ -28,7 +28,7 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
     Array.isArray(provider.providerImages)
       ? provider.providerImages.map((img, idx) =>
           typeof img === "string"
-            ? { uri: img, name: `${idx}companyimage.jpg`, type: "image/jpeg" }
+            ? { uri: img, type: "image/jpeg" as FileType["type"] }
             : img
         )
       : []
@@ -152,6 +152,7 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
             maxSize={10}
             initialFiles={photos}
             onFilesChange={setPhotos}
+            allowedTypes={["image", "video"]}
           />
         ) : photos.length > 0 ? (
           photos.map((item, idx) => (
@@ -188,7 +189,7 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
                           ? {
                               uri: img,
                               name: `photo${idx}.jpg`,
-                              type: "image/jpeg",
+                              type: "image/jpeg" as FileType["type"],
                             }
                           : img
                       )

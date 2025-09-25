@@ -1,6 +1,11 @@
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
-import { FileType, MediaServiceInterface, MediaSource } from "@/types";
+import {
+  FileType,
+  MediaServiceInterface,
+  MediaSource,
+  ValidationConstraints,
+  ValidationResult,
+} from "@/types";
 
 class MediaService implements MediaServiceInterface {
   private static instance: MediaService;
@@ -29,19 +34,18 @@ class MediaService implements MediaServiceInterface {
 
       let result: ImagePicker.ImagePickerResult;
 
+      const mediaTypes = options.mediaTypes || "images";
+      const pickerOptions: ImagePicker.ImagePickerOptions = {
+        mediaTypes: options.mediaTypes,
+        allowsMultipleSelection: options.allowsMultipleSelection ?? true,
+        quality: options.quality ?? (mediaTypes === "videos" ? undefined : 1),
+        ...options,
+      };
+
       if (source === "gallery") {
-        result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ["images"],
-          allowsMultipleSelection: true,
-          quality: 1,
-          ...options,
-        });
+        result = await ImagePicker.launchImageLibraryAsync(pickerOptions);
       } else {
-        result = await ImagePicker.launchCameraAsync({
-          mediaTypes: ["images"],
-          quality: 0.8,
-          ...options,
-        });
+        result = await ImagePicker.launchCameraAsync(pickerOptions);
       }
 
       if (result.canceled) {
@@ -50,12 +54,14 @@ class MediaService implements MediaServiceInterface {
 
       const files: FileType[] = await Promise.all(
         result.assets.map(async (asset) => {
-          const info = await FileSystem.getInfoAsync(asset.uri);
           return {
             uri: asset.uri,
             name: asset.fileName ?? asset.uri.split("/").pop() ?? undefined,
-            type: asset.type ?? "image",
-            size: info.exists && "size" in info ? info.size : undefined,
+            type: asset.type as "image" | "video",
+            size: asset.fileSize,
+            width: asset.width,
+            height: asset.height,
+            duration: asset.duration ? Math.round(asset.duration) : undefined,
           };
         })
       );
@@ -88,20 +94,71 @@ class MediaService implements MediaServiceInterface {
 
   validateFiles(
     files: FileType[],
-    maxCount: number = 5,
-    maxSize: number = 10 * 1024 * 1024
-  ): { valid: boolean; error?: string } {
+    constraints: ValidationConstraints = {}
+  ): ValidationResult {
+    const {
+      maxCount = 5,
+      maxSize = 10 * 1024 * 1024,
+      maxDuration,
+      allowedTypes = ["image", "video"],
+    } = constraints;
+
     if (files.length > maxCount) {
-      return { valid: false, error: `Maximum ${maxCount} files allowed` };
+      return {
+        valid: false,
+        error: `Too many files selected. Maximum allowed: ${maxCount}`,
+      };
     }
 
+    const invalidTypeFiles = files.filter(
+      (file) => !file.type || !allowedTypes.includes(file.type)
+    );
+
+    if (invalidTypeFiles.length > 0) {
+      const invalidTypes = [...new Set(invalidTypeFiles.map((f) => f.type))];
+      return {
+        valid: false,
+        error: `Invalid file type${
+          invalidTypes.length > 1 ? "s" : ""
+        }: ${invalidTypes.join(", ")}. Please select ${allowedTypes.join(
+          " or "
+        )} files only.`,
+      };
+    }
+
+    // Size validation with better formatting
     for (const file of files) {
       if (file.size && file.size > maxSize) {
+        const fileSizeMB = (file.size / 1024 / 1024).toFixed(1);
+        const maxSizeMB = (maxSize / 1024 / 1024).toFixed(1);
         return {
           valid: false,
-          error: `File ${file.name || "unknown"} exceeds maximum size of ${
-            maxSize / 1024 / 1024
-          }MB`,
+          error: `"${
+            file.name || "File"
+          }" is too large (${fileSizeMB}MB). Maximum size: ${maxSizeMB}MB`,
+        };
+      }
+    }
+
+    // Duration validation
+    if (maxDuration !== undefined) {
+      const longVideos = files.filter(
+        (file) =>
+          file.type === "video" && file.duration && file.duration > maxDuration
+      );
+
+      if (longVideos.length > 0) {
+        const formatDuration = (seconds: number) => {
+          const mins = Math.floor(seconds / 60);
+          const secs = seconds % 60;
+          return `${mins}:${secs.toString().padStart(2, "0")}`;
+        };
+
+        return {
+          valid: false,
+          error: `Video${longVideos.length > 1 ? "s" : ""} exceed${
+            longVideos.length > 1 ? "" : "s"
+          } the maximum duration of ${formatDuration(maxDuration)}`,
         };
       }
     }

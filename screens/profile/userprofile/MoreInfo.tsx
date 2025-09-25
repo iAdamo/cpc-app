@@ -13,7 +13,7 @@ import { ProviderData, EditableFields } from "@/types";
 import ReviewAndRating from "../sections/ReviewSection";
 import SocialMediaDetails from "./SocialLinks";
 import About from "./About";
-import MyServices from "../sections/provider/MyServices";
+import MyServices from "../sections/provider/MyProjects";
 
 const TABS = [{ label: "About" }, { label: "Portfolio" }, { label: "Reviews" }];
 
@@ -50,10 +50,7 @@ const MoreInfo = ({
       </HStack>
       {selectedTab === "About" && (
         <VStack className="mt-4 gap-4">
-          <About
-            provider={provider}
-            isEditable={isEditable}
-          />
+          <About provider={provider} isEditable={isEditable} />
         </VStack>
       )}
       {selectedTab === "Portfolio" && (

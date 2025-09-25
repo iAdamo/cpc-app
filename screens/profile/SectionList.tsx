@@ -39,12 +39,12 @@ export const ProfileSections = [
         showFor: "Both",
       },
       {
-        text: "My Services",
+        text: "My Projects",
         icon: BriefcaseBusinessIcon,
         action: () =>
           router.push({
             pathname: "/profile",
-            params: { section: "my-services" },
+            params: { section: "my-projects" },
           }),
         showFor: "Provider",
       },

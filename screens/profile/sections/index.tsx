@@ -8,7 +8,7 @@ import ReviewAndRating from "@/screens/profile/sections/ReviewSection";
 import SavedCompanies from "@/screens/profile/sections/SavedCompanies";
 import AccountSettings from "@/screens/profile/sections/settings";
 import MyCompanies from "@/screens/profile/sections/provider/MyCompanies";
-import MyServices from "@/screens/profile/sections/provider/MyServices";
+import MyProjects from "@/screens/profile/sections/provider/MyProjects";
 
 const SectionPage = () => {
   const { section } = useLocalSearchParams();
@@ -22,7 +22,7 @@ const SectionPage = () => {
     "saved-companies": SavedCompanies,
     settings: AccountSettings,
     "my-companies": MyCompanies,
-    "my-services": MyServices,
+    "my-projects": MyProjects,
   };
   const SectionComponent: React.ComponentType =
     renderSection[section as string];
@@ -34,7 +34,7 @@ const SectionPage = () => {
     "saved-companies": "Saved Companies",
     settings: "Account Settings",
     "my-companies": "My Companies",
-    "my-services": "My Services",
+    "my-projects": "My Projects",
   };
   const buttonText = ButtonTextMap[section as string] || "Back";
 
