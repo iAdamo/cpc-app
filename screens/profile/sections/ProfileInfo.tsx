@@ -16,12 +16,13 @@ import {
 import { Input, InputField } from "@/components/ui/input";
 import useGlobalStore from "@/store/globalStore";
 import { ChevronLeftIcon } from "@/components/ui/icon";
+import { FileType } from "@/types";
 
 const ProfileInfo = () => {
   const [newFirstName, setNewFirstName] = useState<string>("");
   const [newLastName, setNewLastName] = useState<string>("");
   const [newHomeAddress, setNewHomeAddress] = useState<string>("");
-  const [profilePicUri, setProfilePicUri] = useState<string>("");
+  const [profilePic, setProfilePic] = useState<FileType>();
 
   const {
     switchRole,
@@ -50,10 +51,10 @@ const ProfileInfo = () => {
       newFirstName && formData.append("firstName", newFirstName);
       newLastName && formData.append("lastName", newLastName);
       newHomeAddress && formData.append("homeAdress", newHomeAddress);
-      if (profilePicUri) {
+      if (profilePic) {
         formData.append("profilePicture", {
-          uri: profilePicUri,
-          name: "profile.jpg",
+          uri: profilePic.uri,
+          name: profilePic.name || "profile.jpg",
           type: "image/jpeg",
         } as any);
       }
@@ -103,7 +104,7 @@ const ProfileInfo = () => {
           isEditable={true}
           showChangeButton={false}
           imageUri={user?.profilePicture}
-          onImageSelected={(uri) => setProfilePicUri(uri)}
+          onImageSelected={(file) => setProfilePic(file)}
         />
       </VStack>
       <VStack className="mt-6 h-64 justify-between">

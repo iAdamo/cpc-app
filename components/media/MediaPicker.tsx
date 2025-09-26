@@ -12,19 +12,18 @@ import { Icon, CloseIcon, TrashIcon } from "@/components/ui/icon";
 import { Pressable } from "@/components/ui/pressable";
 import useGlobalStore from "@/store/globalStore";
 import { MediaPickerProps } from "@/types";
-import { max } from "lodash";
-import { A } from "@expo/html-elements";
 
 const MediaPicker = ({
   maxFiles = 5,
-  maxSize = 5,
+  maxSize = 50,
   onFilesChange,
   initialFiles = [],
   label = "",
   classname = "",
   allowedTypes = ["image", "video"], // New prop to specify allowed types
 }: MediaPickerProps) => {
-  const { selectedFiles, isLoading, pickMedia, removeFile } = useGlobalStore();
+  const { selectedFiles, isLoading, pickMedia, removeFile, error } =
+    useGlobalStore();
 
   useEffect(() => {
     if (initialFiles.length > 0 && selectedFiles.length === 0) {
@@ -37,11 +36,13 @@ const MediaPicker = ({
     onFilesChange && onFilesChange?.(selectedFiles);
   }, [selectedFiles]);
 
+  // console.log("Selected files:", selectedFiles);
+
   const handlePickMedia = async (
     source: "gallery" | "camera",
     mediaType: ("images" | "videos")[]
   ) => {
-    console.log("Picking media of type:", mediaType, "from", source);
+    // console.log("Picking media of type:", mediaType, "from", source);
     await pickMedia(
       source,
       {
@@ -121,48 +122,37 @@ const MediaPicker = ({
             {getMediaTypeLabel()}
           </Text>
 
-          <HStack className="justify-center space-x-4">
+          <HStack className="justify-center gap-4">
             {/* Gallery Options */}
-            {showImageOption && (
-              <Pressable
-                className="flex-1 h-32 rounded-lg border-2 border-dashed border-brand-primary/50 items-center justify-center"
-                onPress={() =>
-                  handlePickMedia(
-                    "gallery",
-                    showBothOptions ? ["images", "videos"] : ["images"]
-                  )
-                }
-                disabled={isLoading}
-              >
-                {showBothOptions ? (
-                  <HStack space="xs" className="items-center justify-center">
-                    <VStack className="items-center">
-                      <Box className="p-2 bg-brand-primary/20 rounded-full">
-                        <Icon
-                          as={Gallery}
-                          size="xl"
-                          className="rounded-full text-brand-primary"
-                        />
-                      </Box>
-                      <Text className="text-brand-primary bg-brand-primary/20 px-4 py-1 rounded-full mt-1 text-sm font-medium">
-                        {`Pictures up to ${maxSize}mb`}
-                      </Text>
-                    </VStack>
-                    <VStack className="items-center">
-                      <Box className="p-2 bg-brand-primary/20 rounded-full">
-                        <Icon
-                          as={Video}
-                          size="xl"
-                          className="rounded-full text-brand-primary"
-                        />
-                      </Box>
-                      <Text className="text-brand-primary bg-brand-primary/20 px-4 py-1 rounded-full mt-1 text-sm font-medium">
-                        {`Videos up to ${maxSize}mb`}
-                      </Text>
-                    </VStack>
-                  </HStack>
-                ) : (
-                  <VStack className="items-center justify-center">
+            <Pressable
+              className="flex-1 h-52 rounded-lg border-2 border-dashed border-brand-primary/50 items-center justify-center"
+              onPress={() =>
+                handlePickMedia(
+                  "gallery",
+                  showBothOptions
+                    ? ["images", "videos"]
+                    : showImageOption
+                    ? ["images"]
+                    : ["videos"]
+                )
+              }
+              disabled={isLoading}
+            >
+              {showBothOptions ? (
+                <HStack space="xl" className="items-center justify-center">
+                  <VStack className="items-center">
+                    <Box className="p-2 bg-brand-primary/20 rounded-full">
+                      <Icon
+                        as={Gallery}
+                        size="xl"
+                        className="rounded-full text-brand-primary"
+                      />
+                    </Box>
+                    <Text className="text-brand-primary bg-brand-primary/20 px-4 py-1 rounded-full mt-1 text-sm font-medium">
+                      {`Pictures up to ${maxSize}mb`}
+                    </Text>
+                  </VStack>
+                  <VStack className="items-center">
                     <Box className="p-2 bg-brand-primary/20 rounded-full">
                       <Icon
                         as={Video}
@@ -171,12 +161,38 @@ const MediaPicker = ({
                       />
                     </Box>
                     <Text className="text-brand-primary bg-brand-primary/20 px-4 py-1 rounded-full mt-1 text-sm font-medium">
-                      {`Images up to ${maxSize}mb`}
+                      {`Videos up to ${maxSize}mb`}
                     </Text>
                   </VStack>
-                )}
-              </Pressable>
-            )}
+                </HStack>
+              ) : showImageOption ? (
+                <VStack className="items-center">
+                  <Box className="p-2 bg-brand-primary/20 rounded-full">
+                    <Icon
+                      as={Gallery}
+                      size="xl"
+                      className="rounded-full text-brand-primary"
+                    />
+                  </Box>
+                  <Text className="text-brand-primary bg-brand-primary/20 px-4 py-1 rounded-full mt-1 text-sm font-medium">
+                    {`Pictures up to ${maxSize}mb`}
+                  </Text>
+                </VStack>
+              ) : (
+                <VStack className="items-center">
+                  <Box className="p-2 bg-brand-primary/20 rounded-full">
+                    <Icon
+                      as={Video}
+                      size="xl"
+                      className="rounded-full text-brand-primary"
+                    />
+                  </Box>
+                  <Text className="text-brand-primary bg-brand-primary/20 px-4 py-1 rounded-full mt-1 text-sm font-medium">
+                    {`Videos up to ${maxSize}mb`}
+                  </Text>
+                </VStack>
+              )}
+            </Pressable>
           </HStack>
 
           {/* Camera Option - Only for images */}
@@ -196,14 +212,23 @@ const MediaPicker = ({
       )}
 
       {/* Remaining Slots Info */}
-      {remainingSlots > 0 && (
-        <Text
-          size="sm"
-          className="bg-green-100 border border-green-300 text-center p-3 text-green-900 font-medium rounded-lg"
-        >
-          You can add {remainingSlots} more file{remainingSlots > 1 ? "s" : ""}.
-        </Text>
-      )}
+      {remainingSlots > 0 &&
+        (error ? (
+          <Text
+            size="sm"
+            className="bg-red-100 border border-red-300 text-center p-4 text-red-900 font-medium rounded-lg"
+          >
+            {error}
+          </Text>
+        ) : (
+          <Text
+            size="sm"
+            className="bg-green-100 border border-green-300 text-center p-3 text-green-900 font-medium rounded-lg"
+          >
+            You can add {remainingSlots} more file
+            {remainingSlots > 1 ? "s" : ""}.
+          </Text>
+        ))}
 
       {/* Max Files Reached Message */}
       {remainingSlots === 0 && selectedFiles.length > 0 && (

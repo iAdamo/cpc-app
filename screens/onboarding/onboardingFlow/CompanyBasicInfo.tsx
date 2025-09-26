@@ -113,10 +113,10 @@ const CompanyBasicInfo = () => {
     }
   };
 
-  const handleLogoChange = (uri: string) => {
+  const handleLogoChange = (file: FileType) => {
     setValue("providerLogo", {
-      uri,
-      name: "logo.jpg",
+      uri: file.uri,
+      name: file.name ?? "companylogo.jpg",
       type: "image/jpeg",
     } as any);
     clearErrors("providerLogo");
@@ -189,8 +189,8 @@ const CompanyBasicInfo = () => {
           providerDescription: data.providerDescription,
           providerEmail: data.providerEmail,
           providerPhoneNumber: data.providerPhoneNumber,
-          providerLogo: data.providerLogo,
-          providerImages: data.providerImages,
+          providerLogo: data.providerLogo as any,
+          providerImages: data.providerImages as any,
           location: {
             primary: data.providerLocation,
           },
@@ -238,7 +238,7 @@ const CompanyBasicInfo = () => {
                             ? user?.activeRoleId?.providerImages[0]
                             : undefined
                         }
-                        onImageSelected={(uri) => handleLogoChange(uri)}
+                        onImageSelected={(file) => handleLogoChange(file)}
                       />
                     )}
                   />
@@ -465,7 +465,7 @@ const CompanyBasicInfo = () => {
                   <MediaPicker
                     maxFiles={4}
                     maxSize={10}
-                    initialFiles={value}
+                    initialFiles={value as any}
                     onFilesChange={handleFilesChange}
                   />
                 )}

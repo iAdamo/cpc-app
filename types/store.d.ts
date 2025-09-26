@@ -10,7 +10,7 @@ import {
   LocationGeocodedAddress,
 } from "expo-location";
 import { ProviderData } from "./provider";
-import { ServiceCategory, Subcategory } from "./service";
+import { ServiceCategory, Subcategory, ServiceData } from "./service";
 import { FileType, MediaSource, MediaPickerOptions } from "./media";
 
 export type PersistedAppState = {
@@ -125,6 +125,7 @@ export interface ServiceState {
   setAvailableCategories: (categories: ServiceCategory[]) => void;
   selectedServices: Subcategory[];
   setSelectedServices: (services: Subcategory[]) => void;
+  fetchServiceById: (serviceId: string) => Promise<ServiceData | void>;
 }
 //  selectedFiles,
 //     isLoading,

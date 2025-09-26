@@ -44,6 +44,7 @@ class MediaService implements MediaServiceInterface {
 
       if (source === "gallery") {
         result = await ImagePicker.launchImageLibraryAsync(pickerOptions);
+        // console.log("Picked from gallery:", result);
       } else {
         result = await ImagePicker.launchCameraAsync(pickerOptions);
       }
@@ -65,6 +66,7 @@ class MediaService implements MediaServiceInterface {
           };
         })
       );
+      // console.log("Processed files:", files);
       return files;
     } catch (error) {
       console.error("Error picking media:", error);

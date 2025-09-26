@@ -15,7 +15,7 @@ export default function App() {
   return (
     <VStack className="flex-1 bg-brand-primary">
       <VStack className="items-center mt-80 flex-1 gap-2">
-        <Text className="text-white text-center" size="6xl">
+        <Text className="text-white text-center" size="5xl">
           Companies Center
         </Text>
         <Text className="text-white" size="xl">
@@ -27,7 +27,7 @@ export default function App() {
           Powered By
         </Text>
         <Text size="2xs" className="text-white">
-          Sanux Technologies
+          Sanuxtech
         </Text>
       </Center>
     </VStack>

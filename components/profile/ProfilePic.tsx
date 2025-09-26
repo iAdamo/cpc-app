@@ -1,7 +1,6 @@
 import { Card } from "../ui/card";
 import { Image } from "../ui/image";
 import { Button, ButtonText, ButtonIcon } from "../ui/button";
-import * as ImagePicker from "expo-image-picker";
 // import * as Camera from "expo-camera";
 import { Box } from "../ui/box";
 import { VStack } from "../ui/vstack";
@@ -24,12 +23,14 @@ import { Pressable } from "../ui/pressable";
 import { Camera, Image as Gallery } from "lucide-react-native";
 import { Spinner } from "../ui/spinner";
 import MediaService from "@/services/MediaService";
+import useGlobalStore from "@/store/globalStore";
+import { FileType } from "@/types";
 
 interface ProfilePicProps {
-  imageUri?: string | null;
+  imageUri?: string | FileType | null;
   isEditable?: boolean;
   isLoading?: boolean;
-  onImageSelected: (uri: string) => void;
+  onImageSelected: (file: FileType) => void;
   size?: "sm" | "md" | "lg" | "xl";
   showChangeButton?: boolean;
   setError?: (error: string | null) => void;
@@ -44,9 +45,13 @@ const ProfilePic = ({
   showChangeButton = true,
   setError = () => null,
 }: ProfilePicProps) => {
-  const [selectedImage, setSelectedImage] = useState<string | null>(imageUri);
+  const [selectedImage, setSelectedImage] = useState<FileType | string | null>(
+    imageUri as string
+  );
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+
+  const { pickMedia } = useGlobalStore();
 
   // Size mappings
   const sizeMap = {
@@ -59,7 +64,7 @@ const ProfilePic = ({
   const currentSize = sizeMap[size];
 
   useEffect(() => {
-    setSelectedImage(imageUri);
+    setSelectedImage(imageUri as string);
   }, [imageUri]);
 
   const pickImage = async (source: "gallery" | "camera") => {
@@ -67,17 +72,17 @@ const ProfilePic = ({
     setIsUploading(true);
 
     try {
-      const files = await MediaService.pickMedia(source, {
+      const file = await MediaService.pickMedia(source, {
         allowsMultipleSelection: false,
         allowsEditing: true,
         aspect: [1, 1],
         quality: source === "camera" ? 0.8 : 1,
       });
 
-      if (files.length > 0) {
-        const uri = files[0].uri;
+      if (file.length > 0) {
+        const uri = file[0].uri;
         setSelectedImage(uri);
-        onImageSelected(uri);
+        onImageSelected(file[0]);
       }
     } catch (error) {
       console.error("Error picking image:", error);
@@ -100,7 +105,7 @@ const ProfilePic = ({
           style: "destructive",
           onPress: () => {
             setSelectedImage(null);
-            onImageSelected("");
+            onImageSelected({ uri: "", name: "", type: "image" } as FileType);
           },
         },
       ]
@@ -128,7 +133,7 @@ const ProfilePic = ({
         >
           {selectedImage ? (
             <Image
-              source={{ uri: selectedImage }}
+              source={{ uri: selectedImage as string }}
               alt="Profile Picture"
               className="w-full h-full"
               style={{

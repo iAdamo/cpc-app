@@ -18,10 +18,12 @@ export const mediaSlice: StateCreator<GlobalStore, [], [], MediaState> = (
       const files = await MediaService.pickMedia(source, pickerOptions);
       const validation = MediaService.validateFiles(
         files,
-        maxFiles,
-        maxSize * 1024 * 1024
+        { maxCount: maxFiles - get().selectedFiles.length,
+          maxSize: maxSize * 1024 * 1024, // Convert MB to bytes
+        }
       );
       if (!validation.valid) {
+        console.log("Validation error:", validation.error);
         set({
           error: validation.error || "Invalid files selected",
           isLoading: false,
