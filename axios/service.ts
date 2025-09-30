@@ -61,4 +61,3 @@ export const getServices = async (
   );
   return response.data;
 };
-

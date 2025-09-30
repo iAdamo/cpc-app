@@ -10,7 +10,7 @@ export default function appendFormData(
     formData.append(parentKey, {
       uri: data.uri,
       name: data.name,
-      type: data.type,
+      type: data.type === "image" ? "image/jpeg" : "video/mp4",
     } as any);
     return;
   }

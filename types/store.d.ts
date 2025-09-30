@@ -126,6 +126,15 @@ export interface ServiceState {
   selectedServices: Subcategory[];
   setSelectedServices: (services: Subcategory[]) => void;
   fetchServiceById: (serviceId: string) => Promise<ServiceData | void>;
+  fetchServicesByProvider: (
+    providerId: string
+  ) => Promise<ServiceData[] | void>;
+  MyProjects: ServiceData[];
+  setMyProjects: (projects: ServiceData[]) => void;
+  createService: (data: FormData) => Promise<ServiceData | void>;
+  updateService: (id: string, data: FormData) => Promise<ServiceData | void>;
+  handleToggleActive: (service: ServiceData) => Promise<void>;
+  // deleteService: (id: string) => Promise<void>;
 }
 //  selectedFiles,
 //     isLoading,

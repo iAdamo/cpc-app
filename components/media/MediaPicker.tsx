@@ -96,7 +96,7 @@ const MediaPicker = ({
                 <Image
                   source={{ uri: file.uri }}
                   alt={file.name || `Selected media ${index + 1}`}
-                  className={`w-full h-52 rounded-md ${classname}`}
+                  className={`w-full h-80 object-cover rounded-md ${classname}`}
                   resizeMode="cover"
                 />
                 <Button
@@ -212,33 +212,25 @@ const MediaPicker = ({
       )}
 
       {/* Remaining Slots Info */}
-      {remainingSlots > 0 &&
-        (error ? (
-          <Text
-            size="sm"
-            className="bg-red-100 border border-red-300 text-center p-4 text-red-900 font-medium rounded-lg"
-          >
-            {error}
-          </Text>
-        ) : (
-          <Text
-            size="sm"
-            className="bg-green-100 border border-green-300 text-center p-3 text-green-900 font-medium rounded-lg"
-          >
-            You can add {remainingSlots} more file
-            {remainingSlots > 1 ? "s" : ""}.
-          </Text>
-        ))}
+      {/* {remainingSlots > 0 && (
+        <Text
+          size="sm"
+          className="bg-green-100 border border-green-300 text-center p-3 text-green-900 font-medium rounded-lg"
+        >
+          You can add {remainingSlots} more file
+          {remainingSlots > 1 ? "s" : ""}.
+        </Text>
+      )} */}
 
       {/* Max Files Reached Message */}
-      {remainingSlots === 0 && selectedFiles.length > 0 && (
+      {/* {remainingSlots === 0 && selectedFiles.length > 0  && (
         <Text
           size="sm"
           className="bg-blue-100 border border-blue-300 text-center p-3 text-blue-900 font-medium rounded-lg"
         >
           Maximum of {maxFiles} files selected.
         </Text>
-      )}
+      )} */}
     </VStack>
   );
 };

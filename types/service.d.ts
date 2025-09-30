@@ -16,7 +16,11 @@ export interface SubcategoryData {
   _id: string;
   name: string;
   description?: string;
-  categoryId: string;
+  categoryId: {
+    _id: string;
+    name: string;
+    description?: string;
+  };
 }
 
 export interface Subcategory {
@@ -37,17 +41,20 @@ export interface ServiceData {
   id: string;
   title: string;
   description: string;
-  price: number;
+  minPrice: number;
+  maxPrice: number;
   duration: number;
-  category: string;
+  subcategoryId: SubcategoryData;
   ratings: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
   location: string;
-  provider: ProviderData;
   favoritedBy: string[];
   favoriteCount: number;
-  images: string[];
-  videos: string[];
+  media: string[];
   tags: string[];
   link: string;
   clients: [];
+  providerId: ProviderData;
 }

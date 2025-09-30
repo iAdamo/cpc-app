@@ -37,7 +37,7 @@ export const updateProviderProfile = async (
 };
 
 export const getUserProfile = async (userId?: string): Promise<UserData> => {
-  const response = await axiosInstance.get(`users/${userId}`);
+  const response = await axiosInstance.get(`users/profile/${userId}`);
   return response.data;
 };
 
