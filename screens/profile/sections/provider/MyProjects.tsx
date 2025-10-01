@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
@@ -63,6 +63,7 @@ import {
   getServiceById,
   createService,
   deleteService,
+  updateService,
 } from "@/axios/service";
 import EmptyState from "@/components/EmptyState";
 import { ServiceData, FileType } from "@/types";
@@ -84,17 +85,15 @@ export const MyServices = ({ providerId }: { providerId?: string }) => {
   const [activeTab, setActiveTab] = useState<"published" | "drafts">(
     "published"
   );
-  const { user, updateService, draftProjects, setDraftProjects } =
-    useGlobalStore();
+  const { user, draftProjects, setDraftProjects } = useGlobalStore();
 
   const [services, setServices] = useState<ServiceData[]>([]);
-  const [draftServices, setDraftServices] = useState<ServiceData[]>([]);
 
   // Filter services based on active tab
   const filteredServices =
     activeTab === "published"
       ? services.filter((service) => service.isActive)
-      : draftServices.filter((service) => !service.isActive);
+      : draftProjects.filter((project) => !project.isActive);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -115,7 +114,10 @@ export const MyServices = ({ providerId }: { providerId?: string }) => {
           const drafts = response.filter((service) => !service.isActive);
 
           setServices(published);
-          setDraftServices([...(drafts || []), ...draftProjects]); // Include draftProjects from store
+          // append to draft
+          useGlobalStore.setState((state) => ({
+            draftProjects: [...state.draftProjects, ...drafts],
+          }));
           setLoading(false);
         } catch (error) {
           console.error("Error fetching services:", error);
@@ -126,7 +128,7 @@ export const MyServices = ({ providerId }: { providerId?: string }) => {
       }
     };
     fetchServices();
-  }, [providerId, user?.activeRoleId?._id, draftProjects]);
+  }, [providerId, user?.activeRoleId?._id]);
 
   const isEditable = !providerId;
 
@@ -134,17 +136,29 @@ export const MyServices = ({ providerId }: { providerId?: string }) => {
     const formData = new FormData();
     formData.append("isActive", (!service.isActive).toString());
     try {
-      await updateService(service._id, formData);
+      const response = await updateService(service._id, formData);
 
       // Update both services and draftServices arrays
       if (service.isActive) {
         // Moving from published to drafts
         setServices((prev) => prev.filter((s) => s._id !== service._id));
-        setDraftServices((prev) => [...prev, { ...service, isActive: false }]);
+        useGlobalStore.setState((state) => ({
+          draftProjects: [
+            ...state.draftProjects,
+            { ...service, isActive: false },
+          ],
+        }));
       } else {
         // Moving from drafts to published
-        setDraftServices((prev) => prev.filter((s) => s._id !== service._id));
-        setServices((prev) => [...prev, { ...service, isActive: true }]);
+        useGlobalStore.setState((state) => ({
+          draftProjects: state.draftProjects.filter(
+            (s) => s._id !== service._id
+          ),
+        }));
+        setServices((prev) => [
+          ...prev,
+          { ...service, isActive: true, media: response.media },
+        ]);
       }
     } catch (error) {
       console.error("Failed to toggle service active status:", error);
@@ -301,7 +315,7 @@ export const MyServices = ({ providerId }: { providerId?: string }) => {
       {isEditable && (
         <HStack className="items-center justify-between px-4 pt-4">
           {renderTabButton("published", services.length)}
-          {renderTabButton("drafts", draftServices.length)}
+          {renderTabButton("drafts", draftProjects.length)}
           <Button
             size="sm"
             variant="outline"
@@ -346,10 +360,7 @@ export const MyServices = ({ providerId }: { providerId?: string }) => {
           <CreateServiceModal
             isOpen={isModalOpen || !!showPreview}
             onClose={handleModalClose}
-            isEditable={
-              isEditable &&
-              (showPreview?._id.startsWith("draft-") || !showPreview)
-            }
+            isEditable={isEditable && (!showPreview?.isActive || !showPreview)}
             project={showPreview}
           />
         )}
@@ -376,7 +387,7 @@ export const CreateServiceModal = ({
   const { isLoading, user, setSuccess, setDraftProjects, selectedFiles } =
     useGlobalStore();
 
-    console.log("project", project);
+  // console.log("project", project);
 
   const {
     control,
@@ -396,6 +407,7 @@ export const CreateServiceModal = ({
       maxPrice: project?.maxPrice || 0,
       minPrice: project?.minPrice || 0,
       duration: project?.duration || 0,
+      // media: [],
       media: Array.isArray(project?.media)
         ? project?.media.map(
             (img, index) =>
@@ -405,14 +417,47 @@ export const CreateServiceModal = ({
                     name: img.split("/").pop() || `image-${index}.jpg`,
                     type:
                       img.endsWith(".mp4") || img.endsWith(".mov")
-                        ? "video/mp4"
-                        : "image/jpeg",
+                        ? "video"
+                        : "image",
                   }
                 : img // already a FileType object
           )
         : [],
     },
   });
+
+  console.log("project", project);
+
+  // useEffect(() => {
+  //   if (project && Array.isArray(project.media)) {
+  //     const projectMediaFiles: FileType[] = project.media.map(
+  //       (mediaItem, index) => {
+  //         if (typeof mediaItem === "string") {
+  //           return {
+  //             uri: mediaItem,
+  //             name: mediaItem.split("/").pop() || `media-${index}`,
+  //             type:
+  //               mediaItem.endsWith(".mp4") || mediaItem.endsWith(".mov")
+  //                 ? "video"
+  //                 : "image",
+  //           };
+  //         }
+  //         // Already a FileType object
+  //         return mediaItem;
+  //       }
+  //     );
+  //     const combinedMedia = [
+  //       ...projectMediaFiles,
+  //       ...selectedFiles.filter(
+  //         (sf) => !projectMediaFiles.some((pm) => pm.uri === sf.uri)
+  //       ),
+  //     ];
+  //     // setValue("media", combinedMedia);
+  //     useGlobalStore.setState({ selectedFiles: combinedMedia });
+  //   } else {
+  //     setValue("media", selectedFiles);
+  //   }
+  // }, [project, selectedFiles]);
 
   const handleSaveDraft = async () => {
     if (!isDirty) return; // No changes to save
@@ -494,8 +539,10 @@ export const CreateServiceModal = ({
             )}
           />
         </Input>
-        <FormControlError className="bg-red-500/20 px-4 py-2 rounded-lg">
-          <FormControlErrorText>{errors.title?.message}</FormControlErrorText>
+        <FormControlError className="">
+          <FormControlErrorText className="text-sm">
+            {errors.title?.message}
+          </FormControlErrorText>
         </FormControlError>
       </FormControl>
 
@@ -525,8 +572,8 @@ export const CreateServiceModal = ({
             )}
           />
         </Textarea>
-        <FormControlError className="bg-red-500/20 px-4 py-2 rounded-lg">
-          <FormControlErrorText>
+        <FormControlError className="">
+          <FormControlErrorText className="text-sm">
             {errors.description?.message}
           </FormControlErrorText>
         </FormControlError>
@@ -541,7 +588,7 @@ export const CreateServiceModal = ({
         </FormControlLabel>
         <Select
           onValueChange={(value) => {
-            setValue("subcategoryId", value);
+            setValue("subcategoryId", value, { shouldDirty: true });
             setCategoryName(value);
           }}
           className="flex-1 border-2 rounded border-brand-primary/30 focus:border-brand-primary focus:bg-blue-50"
@@ -552,7 +599,11 @@ export const CreateServiceModal = ({
           >
             <SelectInput
               className="font-semibold text-typography-500"
-              placeholder="Project Category"
+              placeholder={`${
+                project?.subcategoryId?.name
+                  ? `${project.subcategoryId.name}`
+                  : "Select a category"
+              }`}
             />
             <SelectIcon className="mr-3" as={ChevronDownIcon} />
           </SelectTrigger>
@@ -562,20 +613,20 @@ export const CreateServiceModal = ({
               <SelectDragIndicatorWrapper>
                 <SelectDragIndicator />
               </SelectDragIndicatorWrapper>
-              {/* {user?.activeRoleId?.subcategories?.map((subcategoryId, idx) => (
+              {user?.activeRoleId?.subcategories?.map((subcategoryId, idx) => (
                 <SelectItem
                   key={idx}
                   label={subcategoryId.name}
                   value={subcategoryId._id}
                   className="font-semibold text-typography-500 h-28"
                 />
-              ))} */}
+              ))}
             </SelectContent>
           </SelectPortal>
         </Select>
         {errors.subcategoryId && (
-          <FormControlError className="bg-red-500/20 px-4 py-2 rounded-lg">
-            <FormControlErrorText>
+          <FormControlError className="">
+            <FormControlErrorText className="text-sm">
               {errors.subcategoryId.message}
             </FormControlErrorText>
           </FormControlError>
@@ -590,7 +641,9 @@ export const CreateServiceModal = ({
           </FormControlLabelText>
         </FormControlLabel>
         <Select
-          onValueChange={(value) => setValue("location", value)}
+          onValueChange={(value) =>
+            setValue("location", value, { shouldDirty: true })
+          }
           className="flex-1 border-2 rounded border-brand-primary/30 focus:border-brand-primary focus:bg-blue-50"
         >
           <SelectTrigger
@@ -599,7 +652,9 @@ export const CreateServiceModal = ({
           >
             <SelectInput
               className="font-semibold text-typography-500"
-              placeholder="Project Location"
+              placeholder={`${
+                project?.location ? `${project.location}` : "Project Location"
+              }`}
             />
             <SelectIcon className="mr-3" as={ChevronDownIcon} />
           </SelectTrigger>
@@ -631,8 +686,8 @@ export const CreateServiceModal = ({
           </SelectPortal>
         </Select>
         {errors.location && (
-          <FormControlError className="bg-red-500/20 px-4 py-2 rounded-lg">
-            <FormControlErrorText>
+          <FormControlError className="">
+            <FormControlErrorText className="text-sm">
               {errors.location.message}
             </FormControlErrorText>
           </FormControlError>
@@ -667,8 +722,8 @@ export const CreateServiceModal = ({
               )}
             />
           </Input>
-          <FormControlError className="bg-red-500/20 px-4 py-2 rounded-lg">
-            <FormControlErrorText>
+          <FormControlError className="">
+            <FormControlErrorText className="text-sm">
               {errors.minPrice?.message}
             </FormControlErrorText>
           </FormControlError>
@@ -699,8 +754,8 @@ export const CreateServiceModal = ({
               )}
             />
           </Input>
-          <FormControlError className="bg-red-500/20 px-4 py-2 rounded-lg">
-            <FormControlErrorText>
+          <FormControlError className="">
+            <FormControlErrorText className="text-sm">
               {errors.maxPrice?.message}
             </FormControlErrorText>
           </FormControlError>
@@ -734,8 +789,8 @@ export const CreateServiceModal = ({
             )}
           />
         </Input>
-        <FormControlError className="bg-red-500/20 px-4 py-2 rounded-lg">
-          <FormControlErrorText>
+        <FormControlError className="">
+          <FormControlErrorText className="text-sm">
             {errors.duration?.message}
           </FormControlErrorText>
         </FormControlError>
@@ -747,26 +802,31 @@ export const CreateServiceModal = ({
           maxFiles={6}
           maxSize={100}
           allowedTypes={["image", "video"]}
-          initialFiles={
-            (watch("media") || []).map((file) => ({
-              ...file,
-              type:
-                file.type === "image" || file.type === "video"
-                  ? file.type
-                  : file.type?.includes("video")
-                  ? "video"
-                  : file.type?.includes("image")
-                  ? "image"
-                  : undefined,
-            }))
-          }
-          onFilesChange={(files: FileType[]) => {
-            setValue("media", files);
+          initialFiles={(watch("media") || []).map((file) => ({
+            ...file,
+            type:
+              file.type === "image" || file.type === "video"
+                ? file.type
+                : file.type?.includes("video")
+                ? "video"
+                : file.type?.includes("image")
+                ? "image"
+                : undefined,
+          }))}
+          onFilesChange={(files) => {
+            console.log("files", files);
+            if (files.length === 0) {
+              setValue("media", [], { shouldDirty: true });
+              return;
+            }
+            setValue("media", files, { shouldDirty: true });
           }}
-          classname="h-52"
+          classname="h-80"
         />
-        <FormControlError className="bg-red-500/20 px-4 py-2 rounded-lg">
-          <FormControlErrorText>{errors.media?.message}</FormControlErrorText>
+        <FormControlError className="">
+          <FormControlErrorText className="text-sm">
+            {errors.media?.message}
+          </FormControlErrorText>
         </FormControlError>
       </FormControl>
     </VStack>
@@ -843,14 +903,6 @@ export const CreateServiceModal = ({
       return (
         <ModalFooter className="mt-0 flex-col">
           <HStack className="w-full gap-3">
-            {/* <Button
-              size="xl"
-              variant="outline"
-              className="flex-1"
-              onPress={handleSaveDraft}
-            >
-              <ButtonText className="text-gray-500">Save as Draft</ButtonText>
-            </Button> */}
             {isValid && (
               <Button
                 size="xl"
@@ -869,8 +921,8 @@ export const CreateServiceModal = ({
             className="w-full bg-brand-primary"
             onPress={handleSubmit(onSubmit)}
           >
-            <ButtonText>
-              {isLoading || loading ? <Spinner /> : "Save & Publish Project"}
+            <ButtonText className="text-brand-secondary">
+              {isLoading || loading ? <Spinner /> : "Publish"}
             </ButtonText>
           </Button>
         </ModalFooter>
@@ -878,7 +930,7 @@ export const CreateServiceModal = ({
     }
 
     return (
-      <ModalFooter className="mt-0 flex-col">
+      <ModalFooter className="mt-0 flex-col px-4">
         <Button
           size="xl"
           variant="outline"
@@ -887,16 +939,18 @@ export const CreateServiceModal = ({
         >
           <ButtonText className="text-gray-500">Back to Edit</ButtonText>
         </Button>
-        <Button
-          size="xl"
-          isDisabled={!isValid || isLoading || loading}
-          className="w-full bg-brand-primary"
-          onPress={handleSubmit(onSubmit)}
-        >
-          <ButtonText>
-            {isLoading || loading ? <Spinner /> : "Save & Publish Project"}
-          </ButtonText>
-        </Button>
+        {isDirty && (
+          <Button
+            size="xl"
+            isDisabled={!isValid || isLoading || loading}
+            className="w-full bg-brand-primary"
+            onPress={handleSubmit(onSubmit)}
+          >
+            <ButtonText>
+              {isLoading || loading ? <Spinner /> : "Save & Publish Project"}
+            </ButtonText>
+          </Button>
+        )}
       </ModalFooter>
     );
   };
