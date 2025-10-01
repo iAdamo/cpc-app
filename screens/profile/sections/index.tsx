@@ -3,7 +3,7 @@ import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { ChevronLeftIcon } from "@/components/ui/icon";
 import { useLocalSearchParams, router, usePathname } from "expo-router";
 import InviteFriends from "@/screens/profile/sections/InviteFriends";
-import ProfileInfo from "@/screens/profile/sections/ProfileInfo";
+import ProfileInfo from "@/screens/profile/sections/BasicInfo";
 import ReviewAndRating from "@/screens/profile/sections/ReviewSection";
 import SavedCompanies from "@/screens/profile/sections/SavedCompanies";
 import AccountSettings from "@/screens/profile/sections/settings";

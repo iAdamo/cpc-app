@@ -170,7 +170,6 @@ export default function VideoPlayer({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 12,
     overflow: "hidden",
     backgroundColor: "#000",
   },

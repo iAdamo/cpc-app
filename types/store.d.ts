@@ -134,13 +134,12 @@ export interface ServiceState {
   createService: (data: FormData) => Promise<ServiceData | void>;
   updateService: (id: string, data: FormData) => Promise<ServiceData | void>;
   handleToggleActive: (service: ServiceData) => Promise<void>;
+  OtherProjects: ServiceData[];
+  setOtherProjects: (projects: ServiceData[]) => void;
+  draftProjects: ServiceData[];
+  setDraftProjects: (projects: ServiceData[]) => void;
   // deleteService: (id: string) => Promise<void>;
 }
-//  selectedFiles,
-//     isLoading,
-//     pickMedia,
-//     removeFile,
-//     clearFiles,
 export interface MediaState {
   selectedFiles: FileType[];
   pickMedia: (

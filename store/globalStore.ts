@@ -53,6 +53,7 @@ const useGlobalStore = create<GlobalStore>()(
             switchRole: state.switchRole,
             savedProviders: state.savedProviders,
             paramsFrom: state.paramsFrom,
+            draftProjects: state.draftProjects,
           }),
         }
       )

@@ -45,16 +45,13 @@ export interface ServiceData {
   maxPrice: number;
   duration: number;
   subcategoryId: SubcategoryData;
-  ratings: number;
+  // ratings: number;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
   location: string;
-  favoritedBy: string[];
-  favoriteCount: number;
   media: string[];
-  tags: string[];
-  link: string;
-  clients: [];
+  // tags: string[];
+  // clients: [];
   providerId: ProviderData;
 }

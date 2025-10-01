@@ -18,13 +18,31 @@ export const serviceSlice: StateCreator<GlobalStore, [], [], ServiceState> = (
   selectedServices: [],
   MyProjects: [],
   OtherProjects: [],
+  draftProjects: [],
 
   setAvailableCategories: (categories: Category[]) =>
     set({ availableCategories: categories }),
   setSelectedServices: (services: Subcategory[]) =>
     set({ selectedServices: services }),
   setMyProjects: (projects: ServiceData[]) => set({ MyProjects: projects }),
-
+  setOtherProjects: (projects: ServiceData[]) =>
+    set({ OtherProjects: projects }),
+  setDraftProjects: (projects: ServiceData[]) =>
+    set((state) => {
+      // Create a map of the new projects for quick lookup
+      const newProjectsMap = new Map(projects.map((p) => [p._id, p]));
+      // Replace or keep old projects
+      const updatedDrafts = state.draftProjects.map((proj) =>
+        newProjectsMap.has(proj._id) ? newProjectsMap.get(proj._id)! : proj
+      );
+      // Add any truly new projects
+      projects.forEach((proj) => {
+        if (!state.draftProjects.some((p) => p._id === proj._id)) {
+          updatedDrafts.push(proj);
+        }
+      });
+      return { draftProjects: updatedDrafts };
+    }),
   createService: async (data: FormData) => {
     set({ isLoading: true });
     try {
