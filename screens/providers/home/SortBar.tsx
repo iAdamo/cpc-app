@@ -1,57 +1,99 @@
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
+import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { ScrollView, View, Dimensions, Pressable } from "react-native";
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Icon } from "@/components/ui/icon";
+import { Icon, InfoIcon } from "@/components/ui/icon";
 import { ChevronRightIcon } from "@/components/ui/icon";
 import { ChevronDownIcon, ListIcon, Grid2X2Icon } from "lucide-react-native";
 import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
 import useGlobalStore from "@/store/globalStore";
 import { Menu, MenuItem, MenuItemLabel } from "@/components/ui/menu";
 import { SortBy } from "@/types";
+import {
+  Actionsheet,
+  ActionsheetContent,
+  ActionsheetItem,
+  ActionsheetItemText,
+  ActionsheetDragIndicator,
+  ActionsheetDragIndicatorWrapper,
+  ActionsheetBackdrop,
+} from "@/components/ui/actionsheet";
 
 const SortBar = () => {
+  const [openSheet, setOpenSheet] = useState(false);
   const { displayStyle, setDisplayStyle, sortBy, setSortBy } = useGlobalStore();
-  const sorts: SortBy[] = ["Relevance", "Newest", "Oldest"];
+  const sorts: SortBy[] = [
+    "Relevance",
+    "Top Rated",
+    "Most Reviewed",
+    "Location",
+    "Newest",
+    "Oldest",
+  ];
   return (
     <VStack className="p-4 bg-white">
       <HStack className="justify-between items-center mt-2">
         <HStack space="xs" className="items-center">
           <Text size="lg">Sort by:</Text>
-          <Menu
-            placement="bottom"
-            className="w-36"
-            crossOffset={15}
-            trigger={({ ...triggerProps }) => {
-              return (
-                <Button
-                  {...triggerProps}
-                  size="lg"
-                  variant="link"
-                  className="gap-0.5"
-                >
-                  <ButtonText className="text-brand-primary data-[active=true]:no-underline">
-                    {sortBy}
-                  </ButtonText>
-                  <ButtonIcon as={ChevronDownIcon} />
-                </Button>
-              );
-            }}
+          <Button
+            size="lg"
+            variant="link"
+            onPress={() => setOpenSheet((prev) => !prev)}
+            className="gap-0.5"
           >
+            <ButtonText className="text-brand-primary data-[active=true]:no-underline">
+              {sortBy}
+            </ButtonText>
+            <ButtonIcon as={ChevronDownIcon} />
+          </Button>
+        </HStack>
+        <Actionsheet
+          isOpen={openSheet}
+          onClose={() => {
+            setOpenSheet(false);
+          }}
+        >
+          <ActionsheetBackdrop />
+          <ActionsheetContent>
+            <ActionsheetDragIndicatorWrapper>
+              <ActionsheetDragIndicator />
+            </ActionsheetDragIndicatorWrapper>
+            <Heading
+              size="xl"
+              className="self-start text-brand-primary my-6 pl-4"
+            >
+              Sort by
+            </Heading>
+
             {sorts.map((sort, index) => (
-              <MenuItem
+              <ActionsheetItem
                 key={index}
-                onPress={() => setSortBy(sort)}
-                textValue={sort}
+                onPress={() => {
+                  setSortBy(sort), setOpenSheet(false);
+                }}
                 className=""
               >
-                <MenuItemLabel>{sort}</MenuItemLabel>
-              </MenuItem>
+                <ActionsheetItemText
+                  size="xl"
+                  className={`${
+                    sortBy === sort ? "text-brand-secondary font-medium" : ""
+                  }`}
+                >
+                  {sort}
+                </ActionsheetItemText>
+              </ActionsheetItem>
             ))}
-          </Menu>
-        </HStack>
+            <HStack className="gap-1 m-4 ">
+              <Icon as={InfoIcon} size="sm" />
+              <Text size="sm" className="flex-1 text-gray-600">
+                The results are by default sorted by your current location
+              </Text>
+            </HStack>
+          </ActionsheetContent>
+        </Actionsheet>
         <HStack space="lg" className="items-center">
           <Pressable
             onPress={() => setDisplayStyle("Grid")}

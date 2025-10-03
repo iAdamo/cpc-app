@@ -37,7 +37,7 @@ const ProfileInfo = ({
   handleCancelEdit: () => void;
   onLayout: any;
 }) => {
-  const { switchRole, updateUserProfile } = useGlobalStore();
+  const { switchRole, updateUserProfile, isAvailable } = useGlobalStore();
   // console.log({ provider });
 
   return (
@@ -53,8 +53,13 @@ const ProfileInfo = ({
               <Heading size="xl" className="">
                 {provider?.providerName || "Alejandro De'Armas"}
               </Heading>
-              <Badge action={provider?.isVerified ? "success" : "muted"} className="ml-2">
-                <BadgeText>{provider?.isVerified ? "Verified" : "Unverified" }</BadgeText>
+              <Badge
+                action={provider?.isVerified ? "success" : "muted"}
+                className="ml-2"
+              >
+                <BadgeText>
+                  {provider?.isVerified ? "Verified" : "Unverified"}
+                </BadgeText>
               </Badge>
             </HStack>
 
@@ -71,8 +76,21 @@ const ProfileInfo = ({
           </Card>
           <Card className="gap-2 items-end flex-1">
             <HStack space="xs" className="items-center">
-              <Icon as={DotIcon} className="text-green-500 " />
-              <Text className="text-green-500">Unavailable</Text>
+              {/* availability indicator */}
+              <Badge
+                action={isAvailable ? "success" : "muted"}
+                className="px-2 py-1"
+              >
+                <BadgeIcon
+                  as={DotIcon}
+                  className={`w-3 h-3 ${
+                    isAvailable ? "text-green-600" : "text-gray-500"
+                  }`}
+                />
+                <BadgeText className="text-sm">
+                  {isAvailable ? "Available" : "Unavailable"}
+                </BadgeText>
+              </Badge>
             </HStack>
             {switchRole === "Client" && (
               <VStack>

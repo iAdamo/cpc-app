@@ -350,7 +350,7 @@ export const MyServices = ({ providerId }: { providerId?: string }) => {
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={{ paddingBottom: 20 }}
           >
-            <VStack className="gap-4">
+            <VStack className="">
               {filteredServices.map(renderServiceCard)}
             </VStack>
           </ScrollView>
@@ -426,7 +426,7 @@ export const CreateServiceModal = ({
     },
   });
 
-  console.log("project", project);
+  // console.log("project", project);
 
   // useEffect(() => {
   //   if (project && Array.isArray(project.media)) {
@@ -888,7 +888,7 @@ export const CreateServiceModal = ({
             <Image
               key={index}
               source={{ uri: mediaUrl }}
-              className="w-full h-80 object-cover -px-4"
+              className="w-full h-80 object-cover"
               alt={`Project media ${index + 1}`}
             />
           )

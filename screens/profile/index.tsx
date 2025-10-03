@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import {
@@ -5,6 +6,7 @@ import {
   AvatarFallbackText,
   AvatarImage,
 } from "@/components/ui/avatar";
+import { Pressable } from "@/components/ui/pressable";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { Button, ButtonIcon } from "@/components/ui/button";
@@ -15,8 +17,12 @@ import { Card } from "@/components/ui/card";
 import useGlobalStore from "@/store/globalStore";
 import ProfileSection from "./ProfileSection";
 import { router } from "expo-router";
+import ProfilePic from "@/components/profile/ProfilePic";
+import { FileType } from "@/types";
 
 const ProfileView = () => {
+  const [profilePic, setProfilePic] = useState<FileType | null>(null);
+
   const {
     user,
     currentLocation,
@@ -24,10 +30,31 @@ const ProfileView = () => {
     setSwitchRole,
     setCurrentStep,
     resetOnboarding,
+    updateUserProfile,
+  
   } = useGlobalStore();
 
-  // const [toggle, setToggle] = useState(false);
-// console.log("user", user);
+  useEffect(() => {
+    console.log("I ran");
+    if (profilePic) {
+      const updateProfilePicture = async () => {
+        if (!user) return;
+        const formData = new FormData();
+        formData.append(
+          switchRole === "Client" ? "profilePicture" : "providerLogo",
+          {
+            uri: profilePic.uri,
+            name: profilePic.name || "logo.jpg",
+            type: "image/jpeg",
+          } as any
+        );
+
+        await updateUserProfile(switchRole, formData);
+        setProfilePic(null);
+      };
+      updateProfilePicture();
+    }
+  }, [setProfilePic, profilePic]);
 
   const handleCompanyOnboarding = () => {
     if (!user) return false;
@@ -67,27 +94,23 @@ const ProfileView = () => {
         >
           <HStack className="w-full px-4 justify-between items-center">
             <HStack space="md" className="items-center">
-              <Avatar size="lg">
-                <AvatarFallbackText>
-                  {`${user?.firstName} ${user?.lastName}`}
-                </AvatarFallbackText>
-                <AvatarImage
-                  source={
-                    typeof (switchRole === "Client"
-                      ? user?.profilePicture
-                      : user?.activeRoleId?.providerLogo) === "string"
-                      ? {
-                          uri:
-                            switchRole === "Client"
-                              ? (user?.profilePicture as string | undefined)
-                              : (user?.activeRoleId?.providerLogo as
-                                  | string
-                                  | undefined),
-                        }
-                      : undefined
-                  }
-                />
-              </Avatar>
+              <ProfilePic
+                size="xs"
+                isEditable={true}
+                showChangeButton={false}
+                isLogo={true}
+                imageUri={
+                  typeof (switchRole === "Client"
+                    ? user?.profilePicture
+                    : user?.activeRoleId?.providerLogo) === "string"
+                    ? switchRole === "Client"
+                      ? (user?.profilePicture as string | undefined)
+                      : (user?.activeRoleId?.providerLogo as string | undefined)
+                    : undefined
+                }
+                onImageSelected={(file) => setProfilePic(file)}
+              />
+
               <VStack>
                 <Heading
                   className={`${

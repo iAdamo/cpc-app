@@ -47,3 +47,10 @@ export const setUserFavourites = async (
   const response = await axiosInstance.patch(`provider/${providerId}/favorite`);
   return response.data;
 };
+
+export const toggleFollowProvider = async (
+  providerId: string
+): Promise<UserData> => {
+  const response = await axiosInstance.patch(`users/user/follow/${providerId}`);
+  return response.data;
+};

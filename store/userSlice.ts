@@ -5,6 +5,7 @@ import {
   updateProviderProfile,
   createProviderProfile,
   getUserProfile,
+  toggleFollowProvider,
 } from "@/axios/user";
 import { StateCreator } from "zustand";
 import {
@@ -20,7 +21,10 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
   set,
   get
 ) => ({
+  isAvailable: true,
+  isFollowing: false,
   otherUser: null,
+  setAvailability: (available: boolean) => set({ isAvailable: available }),
   setOtherUser: (user: UserData | null) => set({ otherUser: user }),
   // Action to directly update user state
   updateProfile: (updates: Partial<UserData>) => {
@@ -99,6 +103,38 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
         error: error?.response?.data?.message || "Failed to fetch user profile",
         isLoading: false,
       });
+    }
+  },
+  toggleFollow: async (providerId: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await toggleFollowProvider(providerId);
+      // check if providerId is in user's following list
+      if (response) {
+        console.log("Follow toggle response:", response);
+        if (response.followedProviders.some((p) => p._id === providerId)) {
+          set({
+            user: { ...response },
+            isFollowing: true,
+            info: "Started following provider",
+            isLoading: false,
+          });
+        } else {
+          set({
+            user: { ...response },
+            isFollowing: false,
+            info: "Unfollowed provider",
+            isLoading: false,
+          });
+        }
+      }
+    } catch (error: any) {
+      set({
+        error:
+          error?.response?.data?.message || "Failed to update follow status",
+        isLoading: false,
+      });
+      throw error;
     }
   },
 });

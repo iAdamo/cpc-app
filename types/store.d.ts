@@ -26,6 +26,8 @@ export interface GlobalState {
   isLoading: boolean;
   error: string | null;
   success: string | null;
+  info: string | null;
+  setInfo: (info: string | null) => void;
   setSuccess: (success: string | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -33,6 +35,9 @@ export interface GlobalState {
   setSwitchRole: (role: ActiveRole) => void;
   paramsFrom: string | null;
   setParamsFrom: (params: string | null) => void;
+  clearInfo: () => void;
+  clearSuccess: () => void;
+  clearError: () => void;
 }
 
 export interface AuthState {
@@ -50,16 +55,18 @@ export interface AuthState {
   resetPassword: (password: string, email?: string) => Promise<void>;
   changePassword: (currentPassword: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  clearError: () => void;
-  clearSuccess: () => void;
 }
 
 export interface UserState {
+  isAvailable: boolean;
+  isFollowing: boolean;
   otherUser: UserData | null;
   setOtherUser: (user: UserData | null) => void;
+  setAvailability: (available: boolean) => void;
   updateProfile: (updates: Partial<UserData>) => void;
   updateUserProfile: (role: ActiveRole, data?: FormData) => Promise<void>;
   fetchUserProfile: (userId?: string) => Promise<void>;
+  toggleFollow: (providerId: string) => Promise<void>;
 }
 
 export interface OnboardingState {
@@ -73,7 +80,13 @@ export interface OnboardingState {
 
 export type ProviderView = "Home" | "Updates" | "Chat" | "Profile";
 export type DisplayStyle = "Grid" | "List";
-export type SortBy = "Relevance" | "Newest" | "Oldest";
+export type SortBy =
+  | "Relevance"
+  | "Newest"
+  | "Oldest"
+  | "Location"
+  | "Top Rated"
+  | "Most Reviewed";
 
 export interface ProviderState {
   currentView: ProviderView;

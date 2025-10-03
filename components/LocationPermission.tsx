@@ -19,6 +19,7 @@ import { Button, ButtonText } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { Heading } from "@/components/ui/heading";
 import { Alert, Platform, BackHandler, Linking } from "react-native";
+import { Image } from "./ui/image";
 
 interface LocationPermissionProps {
   children: React.ReactNode;
@@ -81,33 +82,42 @@ export const LocationPermission: React.FC<LocationPermissionProps> = ({
       >
         <AlertDialogBackdrop />
         <AlertDialogContent className="w-[90%] gap-4 items-center">
-          <Box className="rounded-full h-12 w-12 bg-background-success items-center justify-center">
+          {/* <Box className="rounded-full h-12 w-12 bg-background-success items-center justify-center">
             <Icon as={MapPinIcon} className="stroke-success-500 w-8 h-8" />
-          </Box>
+          </Box> */}
+          <Image
+            source={require("../assets/images/locationperm.png")}
+            className="w-36 h-36"
+            alt="Location Permission"
+          />
           <AlertDialogHeader>
-            <Heading size="lg">Location Permission Required</Heading>
+            <Heading className="text-center">
+              Allow Companies Center to use your current location.
+            </Heading>
           </AlertDialogHeader>
           <AlertDialogBody>
-            <Text>
+            <Text className="text-center">
               This app requires location access to function properly. Please
               enable location services in your device settings.
             </Text>
           </AlertDialogBody>
           <AlertDialogFooter>
             <Button
+              size="xl"
               variant="outline"
               action="secondary"
               onPress={handleClose}
               className=""
             >
-              <ButtonText>Close</ButtonText>
+              <ButtonText>No, Thanks!</ButtonText>
             </Button>
             <Button
+              size="xl"
               action="positive"
               onPress={() => Linking.openSettings()}
               className=""
             >
-              <ButtonText>Grant Permission</ButtonText>
+              <ButtonText>Yes, Please!</ButtonText>
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

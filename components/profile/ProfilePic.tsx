@@ -1,15 +1,15 @@
 import { Card } from "../ui/card";
 import { Image } from "../ui/image";
 import { Button, ButtonText, ButtonIcon } from "../ui/button";
-// import * as Camera from "expo-camera";
 import { Box } from "../ui/box";
 import { VStack } from "../ui/vstack";
+import { HStack } from "../ui/hstack";
 import { Text } from "../ui/text";
 import { Heading } from "../ui/heading";
 import { useState, useEffect, useRef } from "react";
 import { Icon, CloseIcon } from "../ui/icon";
-import { ActivityIndicator, Alert } from "react-native";
-import { CameraIcon, SmileIcon } from "lucide-react-native";
+import { Alert } from "react-native";
+import { CameraIcon } from "lucide-react-native";
 import {
   Actionsheet,
   ActionsheetContent,
@@ -22,6 +22,7 @@ import {
 import { Pressable } from "../ui/pressable";
 import { Camera, Image as Gallery } from "lucide-react-native";
 import { Spinner } from "../ui/spinner";
+import { Switch } from "../ui/switch";
 import MediaService from "@/services/MediaService";
 import useGlobalStore from "@/store/globalStore";
 import { FileType } from "@/types";
@@ -30,8 +31,9 @@ interface ProfilePicProps {
   imageUri?: string | FileType | null;
   isEditable?: boolean;
   isLoading?: boolean;
+  isLogo?: boolean;
   onImageSelected: (file: FileType) => void;
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
   showChangeButton?: boolean;
   setError?: (error: string | null) => void;
 }
@@ -40,6 +42,7 @@ const ProfilePic = ({
   imageUri = null,
   isEditable = true,
   isLoading = false,
+  isLogo = false,
   onImageSelected,
   size = "lg",
   showChangeButton = true,
@@ -50,11 +53,11 @@ const ProfilePic = ({
   );
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-
-  const { pickMedia } = useGlobalStore();
+  const { isAvailable, setAvailability } = useGlobalStore();
 
   // Size mappings
   const sizeMap = {
+    xs: { container: 56, image: 50, icon: 12, button: 8 },
     sm: { container: 80, image: 70, icon: 20, button: 16 },
     md: { container: 110, image: 100, icon: 24, button: 18 },
     lg: { container: 120, image: 130, icon: 24, button: 14 },
@@ -132,23 +135,28 @@ const ProfilePic = ({
           }}
         >
           {selectedImage ? (
-            <Image
-              source={{ uri: selectedImage as string }}
-              alt="Profile Picture"
+            <Pressable
               className="w-full h-full"
-              style={{
-                width: currentSize.image,
-                height: currentSize.image,
-                borderRadius: currentSize.container / 2,
-              }}
-            />
+              onPress={isEditable && isLogo ? openOptionsModal : undefined}
+            >
+              <Image
+                source={{ uri: selectedImage as string }}
+                alt="Profile Picture"
+                className="w-full h-full"
+                style={{
+                  width: currentSize.image,
+                  height: currentSize.image,
+                  borderRadius: currentSize.container / 2,
+                }}
+              />
+            </Pressable>
           ) : (
             <Heading className="text-typography-400">LOGO</Heading>
           )}
         </Card>
 
         {/* Camera/Edit Button */}
-        {isEditable && (
+        {isEditable && !isLogo && (
           <Button
             variant="solid"
             size="xs"
@@ -186,53 +194,89 @@ const ProfilePic = ({
 
       <Actionsheet isOpen={showOptionsModal} onClose={handleClose}>
         <ActionsheetBackdrop />
-        <ActionsheetContent className="gap-6">
+        <ActionsheetContent className="gap-2 px-0">
           <ActionsheetDragIndicatorWrapper>
             <ActionsheetDragIndicator />
           </ActionsheetDragIndicatorWrapper>
-          <ActionsheetItem onPress={handleClose} className="mt-4">
-            <Pressable
-              disabled={isUploading}
-              onPress={() => pickImage("camera")}
-              className="w-full flex flex-row gap-4 items-center"
-            >
-              <Box className="bg-brand-primary/60 rounded-full p-3">
-                <Icon as={Camera} className="text-brand-primary w-6 h-6" />
-              </Box>
-              <Text size="xl" className="font-medium">
-                Camera
-              </Text>
-            </Pressable>
+          <Heading className="text-brand-primary font-medium self-start py-4 pl-6 border-b border-gray-200 w-full">
+            Profile Image
+          </Heading>
+          <ActionsheetItem
+            onPress={() => {
+              handleClose(), pickImage("camera");
+            }}
+            isDisabled={isUploading}
+            className="pl-6"
+          >
+            <Box className="bg-brand-primary/40 rounded-full p-4">
+              <Icon as={Camera} className="text-brand-primary w-6 h-6" />
+            </Box>
+            <ActionsheetItemText size="xl" className="">
+              Camera
+            </ActionsheetItemText>
           </ActionsheetItem>
-          <ActionsheetItem onPress={handleClose} className="">
-            <Pressable
-              disabled={isUploading}
-              onPress={() => pickImage("gallery")}
-              className="w-full flex flex-row gap-4 items-center"
-            >
-              <Box className="bg-brand-primary/60 rounded-full p-3">
-                <Icon as={Gallery} className="text-brand-primary w-6 h-6" />
-              </Box>
-              <Text size="xl" className="font-medium">
-                Choose from Photos
-              </Text>
-            </Pressable>
+          <ActionsheetItem
+            onPress={() => {
+              handleClose(), pickImage("gallery");
+            }}
+            isDisabled={isUploading}
+            className="pl-6"
+          >
+            <Box className="bg-brand-primary/40 rounded-full p-4">
+              <Icon as={Gallery} className="text-brand-primary w-6 h-6" />
+            </Box>
+            <ActionsheetItemText size="xl" className="">
+              Choose from Photos
+            </ActionsheetItemText>
           </ActionsheetItem>
-          {selectedImage && (
-            <ActionsheetItem>
-              <Pressable
-                disabled={isUploading}
-                onPress={removeImage}
-                className="w-full flex flex-row gap-4 items-center"
+          {selectedImage && !isLogo && (
+            <ActionsheetItem
+              onPress={() => {
+                removeImage();
+              }}
+              isDisabled={isUploading}
+              className="pl-6"
+            >
+              <Box className="bg-red-800/30 rounded-full p-4">
+                <Icon as={CloseIcon} className="text-red-800 w-6 h-6" />
+              </Box>
+              <ActionsheetItemText
+                size="xl"
+                className="font-medium text-red-500"
               >
-                <Box className="bg-red-800/30 rounded-full p-3">
-                  <Icon as={CloseIcon} className="text-red-950 w-6 h-6" />
-                </Box>
-                <Text size="xl" className="font-medium text-red-400">
-                  Remove Current Photo
-                </Text>
-              </Pressable>
+                Remove Current Photo
+              </ActionsheetItemText>
             </ActionsheetItem>
+          )}
+          {isLogo && (
+            <VStack className="w-full">
+              <Heading className="text-brand-primary font-medium self-start py-4 pl-6 border-b border-gray-200 w-full">
+                Set Status
+              </Heading>
+              <ActionsheetItem className="justify-between items-center w-full pl-6">
+                <Text size="lg" className="">
+                  Status
+                </Text>
+                <HStack space="sm" className="items-center">
+                  <Text
+                    size="lg"
+                    className={`${
+                      isAvailable ? "text-green-600" : "text-gray-500"
+                    }`}
+                  >
+                    Available
+                  </Text>
+                  <Switch
+                    value={isAvailable}
+                    onValueChange={setAvailability}
+                    trackColor={{ false: "#d4d4d4", true: "#16a34a" }}
+                    thumbColor="#fafafa"
+                    ios_backgroundColor="#d4d4d4"
+                  />
+                </HStack>
+              </ActionsheetItem>
+              <Text className="pl-6 mb-6">Clients will be able to see you are availble</Text>
+            </VStack>
           )}
         </ActionsheetContent>
       </Actionsheet>

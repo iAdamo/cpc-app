@@ -21,6 +21,7 @@ import {
 import useGlobalStore from "@/store/globalStore";
 import { LinearGradient } from "expo-linear-gradient";
 import SearchBar from "../SearchEngine";
+import ProfilePic from "../profile/ProfilePic";
 
 export const BottomNavbar = () => {
   const { currentView, setCurrentView, switchRole } = useGlobalStore();
@@ -96,7 +97,14 @@ export const TopNavbar = () => {
         <HStack className="w-full p-4 items-center">
           <Avatar size="md">
             <AvatarFallbackText>{`${user?.firstName} ${user?.lastName}`}</AvatarFallbackText>
-            <AvatarImage source={{ uri: user?.profilePicture }} />
+            <AvatarImage
+              source={{
+                uri:
+                  typeof user?.activeRoleId?.providerLogo === "string"
+                    ? user.activeRoleId.providerLogo
+                    : undefined,
+              }}
+            />
           </Avatar>
           {isProvider && (
             <Heading className="ml-4 text-typography-700">Tasks</Heading>

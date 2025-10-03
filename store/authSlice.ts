@@ -168,14 +168,9 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       displayStyle: "Grid",
       currentLocation: null,
       switchRole: "Client",
-      savedProviders: [],
       paramsFrom: null,
-      draftProjects: [],
     });
     await SecureStore.deleteItemAsync("accessToken");
     router.replace("/");
   },
-
-  clearError: () => set({ error: null }),
-  clearSuccess: () => set({ success: null }),
 });

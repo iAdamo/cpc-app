@@ -12,6 +12,8 @@ export interface UserData {
   language: string;
   emailEditCount: number;
   phoneNumber: string;
+  followingCount: number;
+  followedProviders: ProviderData[];
   phoneEditCount: number;
   profilePicture?: string;
   purchasedServices: any[];

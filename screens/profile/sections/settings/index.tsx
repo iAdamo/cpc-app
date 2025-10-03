@@ -4,22 +4,17 @@ import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
-import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Pressable } from "@/components/ui/pressable";
-import { Icon, ChevronLeftIcon, ChevronRightIcon } from "@/components/ui/icon";
-import { MapPinIcon } from "lucide-react-native";
-import { Switch } from "@/components/ui/switch";
-import { Card } from "@/components/ui/card";
-import useGlobalStore from "@/store/globalStore";
+import { Icon, ChevronRightIcon } from "@/components/ui/icon";
 import { LogOutIcon } from "lucide-react-native";
 import { router } from "expo-router";
 import ChangePassword from "./ChangePassword";
+import LogoutActionSheet from "@/components/LogoutActionSheet";
 
 const AccountSettings = () => {
-  const { user, currentLocation, switchRole, setSwitchRole, logout } =
-    useGlobalStore();
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [view, setView] = useState<string>("");
+  const [isLogoutSheetOpen, setIsLogoutSheetOpen] = useState(false);
 
   const settings = [
     {
@@ -84,7 +79,7 @@ const AccountSettings = () => {
         ))}
         <Pressable
           onPress={() => {
-            logout();
+            setIsLogoutSheetOpen(true);
           }}
           className="flex flex-row items-center gap-4 mt-16 p-4 border-y border-gray-200 bg-gray-100 data-[active=true]:bg-transparent"
         >
@@ -99,6 +94,10 @@ const AccountSettings = () => {
       <ChangePassword
         isOpen={view === "Password Management"}
         onClose={() => setView("")}
+      />
+      <LogoutActionSheet
+        isOpen={isLogoutSheetOpen}
+        onClose={() => setIsLogoutSheetOpen(false)}
       />
     </VStack>
   );

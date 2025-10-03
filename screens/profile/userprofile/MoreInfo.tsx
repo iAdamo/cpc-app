@@ -15,7 +15,7 @@ import SocialMediaDetails from "./SocialLinks";
 import About from "./About";
 import MyServices from "../sections/provider/MyProjects";
 
-const TABS = [{ label: "About" }, { label: "Portfolio" }, { label: "Reviews" }];
+const TABS = [{ label: "About" }, { label: "Projects" }, { label: "Reviews" }];
 
 const MoreInfo = ({
   provider,
@@ -53,7 +53,7 @@ const MoreInfo = ({
           <About provider={provider} isEditable={isEditable} />
         </VStack>
       )}
-      {selectedTab === "Portfolio" && (
+      {selectedTab === "Projects" && (
         <MyServices providerId={provider?._id || ""} />
       )}
       {selectedTab === "Reviews" && <ReviewAndRating />}
