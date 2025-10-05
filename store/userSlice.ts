@@ -6,7 +6,7 @@ import {
   createProviderProfile,
   getUserProfile,
   toggleFollowProvider,
-} from "@/axios/user";
+} from "@/services/axios/user";
 import { StateCreator } from "zustand";
 import {
   GlobalStore,

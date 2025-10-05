@@ -10,7 +10,7 @@ import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { FormControl } from "@/components/ui/form-control";
 import { MapPinIcon, SlidersHorizontalIcon } from "lucide-react-native";
 import useGlobalStore from "@/store/globalStore";
-import { GooglePlaceService } from "@/services/GooglePlaceService";
+import { GooglePlaceService } from "@/services/googlePlaceService";
 import { Menu, MenuItem, MenuItemLabel } from "@/components/ui/menu";
 import { Place, ProviderData } from "@/types";
 import { debounce } from "lodash";
@@ -24,7 +24,7 @@ const SearchBar = ({ providers }: { providers?: ProviderData[] }) => {
   const [filterQuery, setFilterQuery] = useState<string>("");
 
   const pathname = usePathname();
-  const isHomeView = pathname === "/clients" || pathname === "/providers";
+  // const isHomeView = pathname === "/clients" || pathname === "/providers";
 
   const {
     setFilteredProviders,
@@ -34,7 +34,11 @@ const SearchBar = ({ providers }: { providers?: ProviderData[] }) => {
     executeSearch,
     isLoading,
     setError,
+    currentView,
   } = useGlobalStore();
+
+  const isHomeView = currentView === "Home";
+  const isChatView = currentView === "Chat";
 
   const debouncedFetchPredictions = useRef(
     debounce(async (query: string) => {
@@ -183,7 +187,7 @@ const SearchBar = ({ providers }: { providers?: ProviderData[] }) => {
           )}
         </Input>
       )}
-      {!isHomeView && (
+      {!isHomeView && !isChatView && (
         <Input className="m-4 rounded-2xl border-gray-300 h-14 data-[focus=true]:border-2 data-[focus=true]:border-brand-primary/60">
           <InputSlot className="pl-4">
             <InputIcon
@@ -194,6 +198,18 @@ const SearchBar = ({ providers }: { providers?: ProviderData[] }) => {
           </InputSlot>
           <InputField
             placeholder="Filter..."
+            className="placeholder:text-lg placeholder:text-gray-400"
+            onChangeText={(text) => setFilterQuery(text)}
+          />
+        </Input>
+      )}
+      {isChatView && (
+        <Input className="m-4 rounded-2xl border-gray-300 h-14 data-[focus=true]:border-2 data-[focus=true]:border-brand-primary/60">
+          <InputSlot className="pl-4">
+            <InputIcon size="xl" as={SearchIcon} className="text-gray-400" />
+          </InputSlot>
+          <InputField
+            placeholder="Search Chats"
             className="placeholder:text-lg placeholder:text-gray-400"
             onChangeText={(text) => setFilterQuery(text)}
           />

@@ -64,7 +64,7 @@ import {
   createService,
   deleteService,
   updateService,
-} from "@/axios/service";
+} from "@/services/axios/service";
 import EmptyState from "@/components/EmptyState";
 import { ServiceData, FileType } from "@/types";
 import MediaPicker from "@/components/media/MediaPicker";

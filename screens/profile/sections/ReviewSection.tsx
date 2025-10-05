@@ -25,7 +25,7 @@ import {
 import { Progress, ProgressFilledTrack } from "@/components/ui/progress";
 import { ScrollView } from "react-native";
 import { router } from "expo-router";
-import { getReviews } from "@/axios/reviews";
+import { getReviews } from "@/services/axios/reviews";
 import { ReviewData } from "@/types";
 import { MegaphoneIcon, Star } from "lucide-react-native";
 import { useLocalSearchParams } from "expo-router";

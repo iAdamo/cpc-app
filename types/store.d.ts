@@ -1,4 +1,4 @@
-import { updateProviderProfile } from "./../axios/user";
+import { updateProviderProfile } from "../services/axios/user";
 import { SignUpData, LoginData } from "./auth";
 import { UserData } from "./user";
 import { OnboardingData } from "./onboarding";
@@ -165,6 +165,32 @@ export interface MediaState {
   clearFiles: () => void;
 }
 
+export interface ChatState {
+  chats: Chat[];
+  selectedChatId: string | null;
+  messages: Message[];
+  chatLoading: boolean;
+  chatError: string | null;
+  createChat: (
+    participantIds: string,
+    isGroup?: boolean,
+    groupInfo?: Partial<Chat["groupInfo"]>
+  ) => Promise<Chat>;
+  fetchChats: () => Promise<void>;
+  sendTextMessage: (text: string, replyTo?: string) => Promise<void>;
+  // sendMediaMessage: (
+  //   type: Message["type"],
+  //   file: any,
+  //   options?: any
+  // ) => Promise<void>;
+  loadMoreMessages: () => Promise<void>;
+  markAsDelivered: () => Promise<void>;
+  startTyping: () => void;
+  stopTyping: () => void;
+  typingUsers: string[];
+  hasMoreMessages: boolean;
+}
+
 export type GlobalStore = AuthState &
   GlobalState &
   OnboardingState &
@@ -172,4 +198,5 @@ export type GlobalStore = AuthState &
   ProviderState &
   LocationState &
   ServiceState &
-  MediaState;
+  MediaState &
+  ChatState;

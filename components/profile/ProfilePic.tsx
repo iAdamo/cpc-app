@@ -23,7 +23,7 @@ import { Pressable } from "../ui/pressable";
 import { Camera, Image as Gallery } from "lucide-react-native";
 import { Spinner } from "../ui/spinner";
 import { Switch } from "../ui/switch";
-import MediaService from "@/services/MediaService";
+import MediaService from "@/services/mediaService";
 import useGlobalStore from "@/store/globalStore";
 import { FileType } from "@/types";
 
@@ -275,7 +275,9 @@ const ProfilePic = ({
                   />
                 </HStack>
               </ActionsheetItem>
-              <Text className="pl-6 mb-6">Clients will be able to see you are availble</Text>
+              <Text className="pl-6 mb-6">
+                Clients will be able to see you are availble
+              </Text>
             </VStack>
           )}
         </ActionsheetContent>

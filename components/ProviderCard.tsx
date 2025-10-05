@@ -20,7 +20,7 @@ import { router } from "expo-router";
 import { HeartIcon, StarIcon } from "lucide-react-native";
 import { usePathname, useLocalSearchParams } from "expo-router";
 import RatingSection from "./RatingFunction";
-import { ShareService } from "@/services/ShareService";
+import { ShareService } from "@/services/shareService";
 import { ProviderData } from "@/types";
 
 const ProviderCard = ({ provider }: { provider: ProviderData }) => {

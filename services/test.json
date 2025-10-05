@@ -1,0 +1,99 @@
+[
+  {
+    "_opts": {
+      "auth": {
+        "token": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OGQxOTAzZTRiZDM0ZDY2YTY1NjMyZjgiLCJlbWFpbCI6InR1bmRleTUyMEBnbWFpbC5jb20iLCJwaG9uZU51bWJlciI6IjA5MTM5MjkwNTQ5IiwiYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTk0MjMwMDYsImV4cCI6MTc2NzE5OTAwNn0.4YjcATRVU56ouKy38lSL3e0onsq6rnRyS2WFXkSrVNc"
+      },
+      "forceNew": true,
+      "hostname": "companiescenterllc.com",
+      "path": "/socket.io",
+      "port": "443",
+      "secure": true,
+      "transports": [["Function WS"]]
+    },
+    "_queue": [],
+    "_queueSeq": 0,
+    "acks": {},
+    "auth": {
+      "token": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OGQxOTAzZTRiZDM0ZDY2YTY1NjMyZjgiLCJlbWFpbCI6InR1bmRleTUyMEBnbWFpbC5jb20iLCJwaG9uZU51bWJlciI6IjA5MTM5MjkwNTQ5IiwiYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTk0MjMwMDYsImV4cCI6MTc2NzE5OTAwNn0.4YjcATRVU56ouKy38lSL3e0onsq6rnRyS2WFXkSrVNc"
+    },
+    "connected": false,
+    "flags": {},
+    "ids": 0,
+    "io": {
+      "_autoConnect": true,
+      "_callbacks": {
+        "$close": ["Array"],
+        "$error": ["Array"],
+        "$open": ["Array"],
+        "$packet": ["Array"]
+      },
+      "_randomizationFactor": 0.5,
+      "_readyState": "opening",
+      "_reconnection": true,
+      "_reconnectionAttempts": "Infinity",
+      "_reconnectionDelay": 1000,
+      "_reconnectionDelayMax": 5000,
+      "_timeout": 20000,
+      "backoff": {
+        "attempts": 0,
+        "factor": 2,
+        "jitter": 0.5,
+        "max": 5000,
+        "ms": 1000
+      },
+      "clearTimeoutFn": ["Function bound clearTimeout"],
+      "decoder": { "reviver": "undefined" },
+      "encoder": { "replacer": "undefined" },
+      "engine": {
+        "_callbacks": ["Object"],
+        "_maxPayload": -1,
+        "_pingInterval": -1,
+        "_pingTimeout": -1,
+        "_pingTimeoutTime": "Infinity",
+        "_prevBufferLen": 0,
+        "_transportsByName": ["Object"],
+        "_upgrades": ["Array"],
+        "binaryType": "arraybuffer",
+        "clearTimeoutFn": ["Function bound clearTimeout"],
+        "hostname": "companiescenterllc.com",
+        "opts": ["Object"],
+        "port": "443",
+        "readyState": "opening",
+        "secure": true,
+        "setTimeoutFn": ["Function bound setTimeout"],
+        "transport": ["WS"],
+        "transports": ["Array"],
+        "writeBuffer": ["Array"]
+      },
+      "nsps": { "/sanuxapi/chat": ["Circular"] },
+      "opts": {
+        "auth": ["Object"],
+        "forceNew": true,
+        "hostname": "companiescenterllc.com",
+        "path": "/socket.io",
+        "port": "443",
+        "secure": true,
+        "transports": ["Array"]
+      },
+      "setTimeoutFn": ["Function bound setTimeout"],
+      "skipReconnect": false,
+      "subs": [
+        ["Function anonymous"],
+        ["Function subDestroy"],
+        ["Function subDestroy"]
+      ],
+      "uri": "https://companiescenterllc.com/sanuxapi/chat"
+    },
+    "nsp": "/sanuxapi/chat",
+    "receiveBuffer": [],
+    "recovered": false,
+    "sendBuffer": [],
+    "subs": [
+      ["Function subDestroy"],
+      ["Function subDestroy"],
+      ["Function subDestroy"],
+      ["Function subDestroy"]
+    ]
+  }
+]

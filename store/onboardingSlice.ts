@@ -1,6 +1,6 @@
 import { StateCreator } from "zustand";
 import { OnboardingData, OnboardingState, GlobalStore } from "@/types";
-import { updateUserProfile } from "@/axios/user";
+import { updateUserProfile } from "@/services/axios/user";
 
 export const onboardingSlice: StateCreator<
   GlobalStore,

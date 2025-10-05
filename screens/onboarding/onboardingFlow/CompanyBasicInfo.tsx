@@ -29,7 +29,7 @@ import { useForm, Controller } from "react-hook-form";
 import PhoneInput from "react-native-phone-number-input";
 import { ScrollView } from "@/components/ui/scroll-view";
 import MediaPicker from "@/components/media/MediaPicker";
-import { GooglePlaceService } from "@/services/GooglePlaceService";
+import { GooglePlaceService } from "@/services/googlePlaceService";
 import { useCallback } from "react";
 import { FileType, Place } from "@/types";
 import { debounce } from "lodash";

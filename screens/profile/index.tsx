@@ -1,12 +1,6 @@
 import { useState, useEffect } from "react";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
-import {
-  Avatar,
-  AvatarFallbackText,
-  AvatarImage,
-} from "@/components/ui/avatar";
-import { Pressable } from "@/components/ui/pressable";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { Button, ButtonIcon } from "@/components/ui/button";
@@ -31,7 +25,6 @@ const ProfileView = () => {
     setCurrentStep,
     resetOnboarding,
     updateUserProfile,
-  
   } = useGlobalStore();
 
   useEffect(() => {

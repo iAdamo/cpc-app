@@ -10,7 +10,7 @@ import {
   resetPassword,
   sendCode,
   changePassword,
-} from "@/axios/auth";
+} from "@/services/axios/auth";
 import { th } from "zod/v4/locales";
 import { router } from "expo-router";
 

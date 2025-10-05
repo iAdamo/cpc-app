@@ -2,7 +2,7 @@ import { current } from "immer";
 import { StateCreator } from "zustand";
 import * as Location from "expo-location";
 import { GlobalStore, LocationState, Place, PlaceDetails } from "@/types";
-import { GooglePlaceService } from "@/services/GooglePlaceService";
+import { GooglePlaceService } from "@/services/googlePlaceService";
 
 export const locationSlice: StateCreator<GlobalStore, [], [], LocationState> = (
   set,

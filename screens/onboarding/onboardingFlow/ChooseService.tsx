@@ -9,7 +9,7 @@ import { Text } from "@/components/ui/text";
 import { ScrollView } from "@/components/ui/scroll-view";
 import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
 import useGlobalStore from "@/store/globalStore";
-import { getAllCategoriesWithSubcategories } from "@/axios/service";
+import { getAllCategoriesWithSubcategories } from "@/services/axios/service";
 import { Category, Subcategory } from "@/types";
 
 interface SelectedSubcategory extends Subcategory {

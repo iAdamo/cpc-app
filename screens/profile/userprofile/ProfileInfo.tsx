@@ -17,6 +17,7 @@ import { ProviderData, EditableFields } from "@/types";
 import useGlobalStore from "@/store/globalStore";
 import appendFormData from "@/utils/AppendFormData";
 import { Badge, BadgeText, BadgeIcon } from "@/components/ui/badge";
+import { router } from "expo-router";
 
 const ProfileInfo = ({
   provider,
@@ -37,8 +38,20 @@ const ProfileInfo = ({
   handleCancelEdit: () => void;
   onLayout: any;
 }) => {
-  const { switchRole, updateUserProfile, isAvailable } = useGlobalStore();
+  const {
+    switchRole,
+    updateUserProfile,
+    isAvailable,
+    createChat,
+    setCurrentView,
+  } = useGlobalStore();
   // console.log({ provider });
+
+  const handleCreateChat = async () => {
+    setCurrentView("Chat");
+    router.replace("/providers");
+    await createChat(provider.owner);
+  };
 
   return (
     <VStack
@@ -109,6 +122,7 @@ const ProfileInfo = ({
                     size="sm"
                     variant="outline"
                     className="border-0 bg-gray-200/50 px-2"
+                    onPress={handleCreateChat}
                   >
                     <ButtonIcon
                       as={MessageSquareTextIcon}

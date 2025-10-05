@@ -6,6 +6,7 @@ import useGlobalStore from "@/store/globalStore";
 import HomeView from "./providers/home";
 import TaskDisplay from "./clients/home";
 import ProfileView from "./profile";
+import Chat from "./chat";
 
 const Screen = () => {
   const { currentView, setCurrentView, switchRole } = useGlobalStore();
@@ -22,12 +23,7 @@ const Screen = () => {
           ) : (
             <Text>Provider Updates View</Text>
           ))}
-        {currentView === "Chat" &&
-          (switchRole === "Client" ? (
-            <Text>Client Messages View</Text>
-          ) : (
-            <Text>Provider Messages View</Text>
-          ))}
+        {currentView === "Chat" && switchRole === "Client" && <Chat />}
         {currentView === "Profile" && <ProfileView />}
       </VStack>
     </VStack>

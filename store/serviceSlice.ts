@@ -6,7 +6,7 @@ import {
   createService,
   updateService,
   deleteService,
-} from "@/axios/service";
+} from "@/services/axios/service";
 import { Category, Subcategory, ServiceData } from "@/types";
 import { GlobalStore, ServiceState } from "@/types";
 

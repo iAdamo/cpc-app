@@ -1,6 +1,6 @@
 import { StateCreator } from "zustand";
 import { GlobalStore, MediaState, FileType, MediaSource } from "@/types";
-import MediaService from "@/services/MediaService";
+import MediaService from "@/services/mediaService";
 
 export const mediaSlice: StateCreator<GlobalStore, [], [], MediaState> = (
   set,
@@ -16,12 +16,10 @@ export const mediaSlice: StateCreator<GlobalStore, [], [], MediaState> = (
     try {
       set({ isLoading: true });
       const files = await MediaService.pickMedia(source, pickerOptions);
-      const validation = MediaService.validateFiles(
-        files,
-        { maxCount: maxFiles - get().selectedFiles.length,
-          maxSize: maxSize * 1024 * 1024, // Convert MB to bytes
-        }
-      );
+      const validation = MediaService.validateFiles(files, {
+        maxCount: maxFiles - get().selectedFiles.length,
+        maxSize: maxSize * 1024 * 1024, // Convert MB to bytes
+      });
       if (!validation.valid) {
         console.log("Validation error:", validation.error);
         set({

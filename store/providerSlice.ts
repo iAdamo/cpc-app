@@ -8,8 +8,8 @@ import {
   SearchResultData,
   SortBy,
 } from "@/types";
-import { globalSearch } from "@/axios/search";
-import { setUserFavourites } from "@/axios/user";
+import { globalSearch } from "@/services/axios/search";
+import { setUserFavourites } from "@/services/axios/user";
 
 export const providerViewSlice: StateCreator<
   GlobalStore,

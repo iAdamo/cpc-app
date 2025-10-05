@@ -13,6 +13,7 @@ import { providerViewSlice } from "./providerSlice";
 import { locationSlice } from "./locationSlice";
 import { mediaSlice } from "./mediaSlice";
 import { serviceSlice } from "./serviceSlice";
+import { chatSlice } from "./chatSlice";
 
 type MyStateCreator = StateCreator<
   GlobalStore,
@@ -38,6 +39,7 @@ const useGlobalStore = create<GlobalStore>()(
           ...locationSlice(...a),
           ...mediaSlice(...a),
           ...serviceSlice(...a),
+          ...chatSlice(...a),
         })) as MyStateCreator,
         {
           name: "app-storage",

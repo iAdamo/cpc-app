@@ -3,7 +3,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "react-native";
 import { LocationPermission } from "@/components/LocationPermission";
 import { Linking } from "react-native";
-import { ShareService } from "@/services/ShareService";
+import { ShareService } from "@/services/shareService";
 import { useEffect } from "react";
 import { router } from "expo-router";
 import { BottomNavbar, TopNavbar } from "@/components/layout/Navbar";

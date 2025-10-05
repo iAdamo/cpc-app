@@ -9,11 +9,12 @@ import { useRouter } from "expo-router";
 import useGlobalStore from "@/store/globalStore";
 
 const FinalPage = () => {
-  const { user, logout } = useGlobalStore();
+  const { user, logout, completeOnboarding } = useGlobalStore();
   const router = useRouter();
   useEffect(() => {
     const finalizeProfile = async () => {
 // await logout();
+      completeOnboarding();
       setTimeout(() => {
         router.replace("/providers");
       }, 3000);

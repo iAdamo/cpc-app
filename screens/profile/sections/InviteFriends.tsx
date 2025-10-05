@@ -18,7 +18,7 @@ import {
 } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, ScrollView } from "react-native";
-import { ShareService } from "@/services/ShareService";
+import { ShareService } from "@/services/shareService";
 
 const InviteFriends = () => {
   return <VStack className="flex-1 bg-white"></VStack>;
