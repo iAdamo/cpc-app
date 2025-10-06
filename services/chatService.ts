@@ -10,11 +10,12 @@ import {
   SendMessageParams,
 } from "@/types";
 import useGlobalStore from "@/store/globalStore";
+import { th } from "zod/v4/locales";
 
 class ChatService {
   private axiosInstance;
   private socket;
-  private currentChatId: string | null = null;
+  private currentChat: Chat | null = null;
 
   constructor() {
     const { axiosInstance } = ApiClientSingleton.getInstance();
@@ -56,8 +57,21 @@ class ChatService {
   }
 
   // Real-time Messaging
+  async checkOnlineStatus(userId: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      const handler = (data: { userId: string; online: boolean }) => {
+        if (data.userId === userId) {
+          this.socket.offEvent("online_status", handler); // Clean up listener
+          resolve(data.online);
+        }
+      };
+      this.socket.onEvent("online_status", handler);
+      this.socket.emitEvent("check_online", { userId });
+    });
+  }
+
   async sendMessage(params: SendMessageParams): Promise<void> {
-    this.socket.emitEvent("sendMessage", params);
+    this.socket.emitEvent("send_message", params);
   }
 
   async sendTextMessage(
@@ -91,7 +105,7 @@ class ChatService {
 
   // Real-time Event Handling
   onNewMessage(callback: (message: Message) => void): void {
-    this.socket.onEvent("newMessage", callback);
+    this.socket.onEvent("new_message", callback);
   }
 
   onMessageError(callback: (error: any) => void): void {
@@ -128,16 +142,16 @@ class ChatService {
   }
 
   // Chat Room Management
-  joinChat(chatId: string): void {
-    this.currentChatId = chatId;
-    useGlobalStore.setState({ selectedChatId: chatId });
-    socketService.joinChat(chatId);
+  joinChat(chat: Chat): void {
+    this.currentChat = chat;
+    useGlobalStore.setState({ selectedChat: chat });
+    socketService.joinChat(chat._id);
   }
 
   leaveCurrentChat(): void {
-    if (this.currentChatId) {
-      socketService.leaveChat(this.currentChatId);
-      this.currentChatId = null;
+    if (this.currentChat) {
+      socketService.leaveChat(this.currentChat._id);
+      this.currentChat = null;
     }
   }
   // Cleanup

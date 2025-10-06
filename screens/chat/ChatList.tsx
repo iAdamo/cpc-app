@@ -1,13 +1,10 @@
 // components/ChatList.tsx
 import React from "react";
-import {
-  View,
-  FlatList,
-  Text,
-  TouchableOpacity,
-  ListRenderItem,
-} from "react-native";
+import { View, FlatList, TouchableOpacity, ListRenderItem } from "react-native";
 import { VStack } from "@/components/ui/vstack";
+import { HStack } from "@/components/ui/hstack";
+import { Heading } from "@/components/ui/heading";
+import { Text } from "@/components/ui/text";
 import { useNavigation } from "@react-navigation/native";
 import { Chat } from "@/types";
 import { useChat } from "@/hooks/useChat";
@@ -28,6 +25,9 @@ import NoActiveChat from "./NoActiveChat";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { SearchIcon } from "@/components/ui/icon";
 import ChatNavbar from "./ChatNavbar";
+import { UserData, ProviderData } from "@/types";
+
+type otherParticipantType = keyof UserData | keyof ProviderData;
 
 export const ChatList: React.FC = () => {
   const navigation = useNavigation();
@@ -53,31 +53,71 @@ export const ChatList: React.FC = () => {
 
     initializeChat();
   }, [fetchChats]);
-  const renderChatItem: ListRenderItem<Chat> = ({ item: chat }) => {
-    const otherParticipant = chat.participants[1];
 
-    return (
-      <Pressable className="flex-row flex-1 bg-typography-50 rounded-lg items-center p-4 m-4 ">
+  // const isChatTrue =
+
+  const renderChatItem: ListRenderItem<Chat> = ({ item: chat }) => {
+    const otherParticipant: Partial<UserData & ProviderData> =
+      switchRole === "Client"
+        ? chat.participants[0]?.activeRoleId ?? {}
+        : chat.participants[0] ?? {};
+
+    // console.log(chat);
+    // console.log("otherParticipant", otherParticipant);
+
+    return otherParticipant && Object.keys(otherParticipant).length > 0 ? (
+      <Pressable
+        className="flex-row flex-1 bg-typography-50 rounded-lg items-center p-4 m-4 "
+        onPress={() => {
+          useGlobalStore.setState({ selectedChat: chat }),
+            router.push({
+              pathname: "/chat/[id]",
+              params: { id: chat._id },
+            });
+        }}
+      >
         <Avatar size="md">
           <AvatarFallbackText>
-            {chat.participants[0]?.activeRoleId?.providerName}
+            {/* {(otherParticipant &&
+              (("providerName" in otherParticipant &&
+                otherParticipant.providerName) ||
+                ("firstName" in otherParticipant &&
+                  otherParticipant.firstName))) ||
+              ""} */}
+            {otherParticipant.providerName ||
+              (otherParticipant.firstName || "") +
+                " " +
+                (otherParticipant.lastName || "")}
           </AvatarFallbackText>
-          <AvatarImage
+          {/* <AvatarImage
             source={{
               uri:
                 chat.type === "group"
                   ? typeof chat.groupInfo?.avatarUrl === "string"
                     ? chat.groupInfo.avatarUrl
                     : undefined
-                  : typeof chat.participants[0]?.activeRoleId?.providerLogo ===
-                    "string"
-                  ? chat.participants[0]?.activeRoleId?.providerLogo
+                  : typeof otherParticipant?.providerLogo === "string"
+                  ? otherParticipant.providerLogo
+                  : typeof otherParticipant?.profilePicture === "string"
+                  ? otherParticipant.profilePicture
                   : undefined,
             }}
-          />
+          /> */}
         </Avatar>
+        <HStack>
+          <VStack>
+            <Heading>
+              {otherParticipant.providerName ||
+                (otherParticipant.firstName || "") +
+                  " " +
+                  (otherParticipant.lastName || "")}
+            </Heading>
+            <Text></Text>
+          </VStack>
+          <VStack></VStack>
+        </HStack>
       </Pressable>
-    );
+    ) : null;
   };
 
   return (
@@ -184,14 +224,14 @@ export const ChatList: React.FC = () => {
 //           >
 //             <Avatar size="sm">
 //               <AvatarFallbackText>
-//                 {chat.participants[0]?.activeRoleId?.providerName}
+//                 {otherParticipant?.activeRoleId?.providerName}
 //               </AvatarFallbackText>
 //               <AvatarImage
 //                 source={{
 //                   uri:
 //                     chat.type === "group"
 //                       ? chat.groupInfo?.avatarUrl
-//                       : chat.participants[0]?.activeRoleId?.providerLogo,
+//                       : otherParticipant?.activeRoleId?.providerLogo,
 //                 }}
 //               />
 //             </Avatar>
@@ -200,7 +240,7 @@ export const ChatList: React.FC = () => {
 //               <Text className="text-lg font-semibold">
 //                 {chat.type === "group"
 //                   ? chat.groupInfo?.name
-//                   : chat.participants[0]?.username}
+//                   : otherParticipant?.username}
 //               </Text>
 //               <Text className="text-gray-500" numberOfLines={1}>
 //                 {chat.lastMessage?.text || "No messages yet"}
@@ -245,7 +285,7 @@ export const ChatList: React.FC = () => {
 //       uri:
 //         chat.type === "group"
 //           ? chat.groupInfo?.avatarUrl
-//           : chat.participants[0]?.avatarUrl,
+//           : otherParticipant?.avatarUrl,
 //     }}
 //     style={styles.avatar}
 //     defaultSource={require("../assets/default-avatar.png")}
@@ -255,7 +295,7 @@ export const ChatList: React.FC = () => {
 //     <Text style={styles.chatName}>
 //       {chat.type === "group"
 //         ? chat.groupInfo?.name
-//         : chat.participants[0]?.username}
+//         : otherParticipant?.username}
 //     </Text>
 
 //     <Text style={styles.lastMessage} numberOfLines={1}>

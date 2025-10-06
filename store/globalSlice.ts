@@ -1,3 +1,4 @@
+import { updateUserProfile } from "@/services/axios/user";
 import { StateCreator } from "zustand";
 import { GlobalStore, GlobalState, ActiveRole } from "@/types";
 
@@ -17,7 +18,12 @@ export const globalSlice: StateCreator<GlobalStore, [], [], GlobalState> = (
   setLoading: (loading) => set({ isLoading: loading }),
   setError: (error) => set({ error }),
   switchRole: get()?.user?.activeRole === "Provider" ? "Provider" : "Client",
-  setSwitchRole: (role) => set({ switchRole: role }),
+  setSwitchRole: async (role) => {
+    const formData = new FormData();
+    formData.append("activeRole", role);
+    set({ switchRole: role });
+    await updateUserProfile(formData);
+  },
   paramsFrom: null,
   setParamsFrom: (params) => set({ paramsFrom: params }),
 });

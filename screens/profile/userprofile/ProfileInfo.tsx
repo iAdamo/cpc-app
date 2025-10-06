@@ -39,18 +39,30 @@ const ProfileInfo = ({
   onLayout: any;
 }) => {
   const {
+    chats,
     switchRole,
     updateUserProfile,
     isAvailable,
     createChat,
+    selectedChat,
     setCurrentView,
   } = useGlobalStore();
   // console.log({ provider });
 
-  const handleCreateChat = async () => {
+  const handleJoinChat = async () => {
     setCurrentView("Chat");
-    router.replace("/providers");
     await createChat(provider.owner);
+    if (!selectedChat) {
+      router.push({
+        pathname: "/chat/[id]",
+        params: { id: useGlobalStore.getState().selectedChat?._id || "" },
+      });
+      return;
+    }
+    router.push({
+      pathname: "/chat/[id]",
+      params: { id: selectedChat._id },
+    });
   };
 
   return (
@@ -122,7 +134,7 @@ const ProfileInfo = ({
                     size="sm"
                     variant="outline"
                     className="border-0 bg-gray-200/50 px-2"
-                    onPress={handleCreateChat}
+                    onPress={handleJoinChat}
                   >
                     <ButtonIcon
                       as={MessageSquareTextIcon}

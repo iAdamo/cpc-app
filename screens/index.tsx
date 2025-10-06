@@ -7,6 +7,7 @@ import HomeView from "./providers/home";
 import TaskDisplay from "./clients/home";
 import ProfileView from "./profile";
 import Chat from "./chat";
+import { router } from "expo-router";
 
 const Screen = () => {
   const { currentView, setCurrentView, switchRole } = useGlobalStore();

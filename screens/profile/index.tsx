@@ -28,7 +28,7 @@ const ProfileView = () => {
   } = useGlobalStore();
 
   useEffect(() => {
-    console.log("I ran");
+    // console.log("I ran");
     if (profilePic) {
       const updateProfilePicture = async () => {
         if (!user) return;

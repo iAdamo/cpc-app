@@ -11,3 +11,15 @@ import {
   SendMessageParams,
 } from "@/types";
 import useGlobalStore from "@/store/globalStore";
+
+const { axiosInstance } = ApiClientSingleton.getInstance();
+
+export const getLastSeen = async (userId: string): Promise<Date | null> => {
+  try {
+    const response = await axiosInstance.get(`/chat/lastseen/${userId}`);
+    return response.data.lastSeen;
+  } catch (error) {
+    console.error("Error fetching last seen:", error);
+    return null;
+  }
+};

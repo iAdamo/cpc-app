@@ -7,7 +7,7 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
   get
 ) => ({
   chats: [],
-  selectedChatId: null,
+  selectedChat: null,
   messages: [],
   chatLoading: false,
   chatError: null,
@@ -21,23 +21,28 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
   ): Promise<Chat> => {
     try {
       set({ chatLoading: true, chatError: null });
+console.log(participantIds);
       const newChat = await chatService.createDirectChat(participantIds);
+      console.log("Created chat:", newChat);
+      set({ selectedChat: newChat });
 
-      set((state) => {
-        const chatsMap = new Map(state.chats.map((c) => [c._id, c]));
-        chatsMap.set(newChat._id, newChat);
+      // set((state) => {
+      //   const chatsMap = new Map(state.chats.map((c) => [c._id, c]));
+      //   chatsMap.set(newChat._id, newChat);
 
-        return {
-          chats: Array.from(chatsMap.values()),
-          chatLoading: false,
-        };
-      });
+      //   return {
+      //     chats: Array.from(chatsMap.values()),
+      //     chatLoading: false,
+      //   };
+      // });
 
       return newChat;
     } catch (error: any) {
       set({
         chatError:
-          error instanceof Error ? error.message : "Failed to create chat",
+          error?.response?.data?.message ||
+          error?.message ||
+          "Failed to create chat",
         chatLoading: false,
       });
       throw error;
@@ -59,10 +64,20 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
     }
   },
   sendTextMessage: async (text: string, replyTo?: string) => {
-    const { selectedChatId } = get();
-    if (!selectedChatId) throw new Error("No chat selected");
+    const { selectedChat } = get();
+    if (!selectedChat) throw new Error("No chat selected");
     try {
-      await chatService.sendTextMessage(selectedChatId, text, replyTo);
+      await chatService.sendTextMessage(selectedChat._id, text, replyTo);
+      // if selectedChatId is not part of chat, then append it to it. NOTE: avoid duplicating
+      set((state) => {
+        const chatsMap = new Map(state.chats.map((c) => [c._id, c]));
+        chatsMap.set(selectedChat._id, selectedChat);
+
+        return {
+          chats: Array.from(chatsMap.values()),
+          chatLoading: false,
+        };
+      });
     } catch (error) {
       console.error("Failed to send text message:", error);
       throw error;
@@ -85,14 +100,14 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
   //     }
   //   },
   loadMoreMessages: async () => {
-    const { selectedChatId, messages, hasMoreMessages } = get();
-    if (!selectedChatId) return;
+    const { selectedChat, messages, hasMoreMessages } = get();
+    if (!selectedChat) return;
     if (!hasMoreMessages) return;
     try {
       set({ chatLoading: true });
       const nextPage = Math.floor(messages.length / 100) + 1;
       const chatMessages = await chatService.getChatMessages(
-        selectedChatId,
+        selectedChat._id,
         nextPage
       );
 
@@ -108,23 +123,23 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
     }
   },
   markAsDelivered: async () => {
-    const { selectedChatId } = get();
-    if (!selectedChatId) return;
+    const { selectedChat } = get();
+    if (!selectedChat) return;
     try {
-      await chatService.markMessagesAsDelivered(selectedChatId);
+      chatService.markMessagesAsDelivered(selectedChat._id);
     } catch (error) {
       console.error("Failed to mark messages as delivered:", error);
       throw error;
     }
   },
   startTyping: () => {
-    const { selectedChatId } = get();
-    if (!selectedChatId) return;
-    chatService.startTyping(selectedChatId);
+    const { selectedChat } = get();
+    if (!selectedChat) return;
+    chatService.startTyping(selectedChat._id);
   },
   stopTyping: () => {
-    const { selectedChatId } = get();
-    if (!selectedChatId) return;
-    chatService.stopTyping(selectedChatId);
+    const { selectedChat } = get();
+    if (!selectedChat) return;
+    chatService.stopTyping(selectedChat._id);
   },
 });

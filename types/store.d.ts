@@ -12,6 +12,7 @@ import {
 import { ProviderData } from "./provider";
 import { ServiceCategory, Subcategory, ServiceData } from "./service";
 import { FileType, MediaSource, MediaPickerOptions } from "./media";
+import { Chat } from "./chat";
 
 export type PersistedAppState = {
   state: {
@@ -167,7 +168,7 @@ export interface MediaState {
 
 export interface ChatState {
   chats: Chat[];
-  selectedChatId: string | null;
+  selectedChat: Chat | null;
   messages: Message[];
   chatLoading: boolean;
   chatError: string | null;
