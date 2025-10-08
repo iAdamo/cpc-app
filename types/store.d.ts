@@ -12,7 +12,7 @@ import {
 import { ProviderData } from "./provider";
 import { ServiceCategory, Subcategory, ServiceData } from "./service";
 import { FileType, MediaSource, MediaPickerOptions } from "./media";
-import { Chat } from "./chat";
+import { Chat, Message, LastMessage } from "./chat";
 
 export type PersistedAppState = {
   state: {
@@ -170,6 +170,7 @@ export interface ChatState {
   chats: Chat[];
   selectedChat: Chat | null;
   messages: Message[];
+  currentPage: number;
   chatLoading: boolean;
   chatError: string | null;
   createChat: (
@@ -184,7 +185,11 @@ export interface ChatState {
   //   file: any,
   //   options?: any
   // ) => Promise<void>;
+  loadMessages: (page?: number) => Promise<void>;
   loadMoreMessages: () => Promise<void>;
+  // addMessage: (message: Message) => void;
+  // updateChatLastMessage: (chatId: string, message: Message) => void;
+  // removeMessage: (messageId: string) => void;
   markAsDelivered: () => Promise<void>;
   startTyping: () => void;
   stopTyping: () => void;

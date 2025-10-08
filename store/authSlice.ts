@@ -169,6 +169,9 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       currentLocation: null,
       switchRole: "Client",
       paramsFrom: null,
+      selectedChat: null,
+      messages: [],
+      // chats: [],
     });
     await SecureStore.deleteItemAsync("accessToken");
     router.replace("/");

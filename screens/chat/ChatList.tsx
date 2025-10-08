@@ -5,6 +5,7 @@ import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
+import { Center } from "@/components/ui/center";
 import { useNavigation } from "@react-navigation/native";
 import { Chat } from "@/types";
 import { useChat } from "@/hooks/useChat";
@@ -26,6 +27,7 @@ import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { SearchIcon } from "@/components/ui/icon";
 import ChatNavbar from "./ChatNavbar";
 import { UserData, ProviderData } from "@/types";
+import DateFormatter from "@/utils/DateFormat";
 
 type otherParticipantType = keyof UserData | keyof ProviderData;
 
@@ -54,20 +56,22 @@ export const ChatList: React.FC = () => {
     initializeChat();
   }, [fetchChats]);
 
-  // const isChatTrue =
+  // console.log("Chats in ChatList:", chats);
 
   const renderChatItem: ListRenderItem<Chat> = ({ item: chat }) => {
-    const otherParticipant: Partial<UserData & ProviderData> =
-      switchRole === "Client"
-        ? chat.participants[0]?.activeRoleId ?? {}
-        : chat.participants[0] ?? {};
+    // Assuming 'participants' is an array and you want the participant that is not the current user
+    const otherParticipant: Partial<UserData & ProviderData> = Array.isArray(
+      chat?.participants
+    )
+      ? chat.participants.find((p: any) => p._id !== user?._id) || {}
+      : {};
 
-    // console.log(chat);
+    // console.log(otherParticipant);
     // console.log("otherParticipant", otherParticipant);
 
     return otherParticipant && Object.keys(otherParticipant).length > 0 ? (
       <Pressable
-        className="flex-row flex-1 bg-typography-50 rounded-lg items-center p-4 m-4 "
+        className="flex-row flex-1 gap-4 rounded-lg items-center p-4 mt-4"
         onPress={() => {
           useGlobalStore.setState({ selectedChat: chat }),
             router.push({
@@ -76,7 +80,7 @@ export const ChatList: React.FC = () => {
             });
         }}
       >
-        <Avatar size="md">
+        <Avatar size="lg">
           <AvatarFallbackText>
             {/* {(otherParticipant &&
               (("providerName" in otherParticipant &&
@@ -89,7 +93,7 @@ export const ChatList: React.FC = () => {
                 " " +
                 (otherParticipant.lastName || "")}
           </AvatarFallbackText>
-          {/* <AvatarImage
+          <AvatarImage
             source={{
               uri:
                 chat.type === "group"
@@ -102,19 +106,34 @@ export const ChatList: React.FC = () => {
                   ? otherParticipant.profilePicture
                   : undefined,
             }}
-          /> */}
+          />
         </Avatar>
-        <HStack>
-          <VStack>
-            <Heading>
+        <HStack className="flex-1 justify-between items-center">
+          <VStack space="sm" className="flex-1">
+            <Heading size="lg" className="font-medium">
               {otherParticipant.providerName ||
                 (otherParticipant.firstName || "") +
                   " " +
                   (otherParticipant.lastName || "")}
             </Heading>
-            <Text></Text>
+            <Text size="md" className="text-typography-500 line-clamp-1">
+              {(typeof chat?.lastMessage === "string"
+                ? chat.lastMessage
+                : chat?.lastMessage?.text) || "No messages yet"}
+            </Text>
           </VStack>
-          <VStack></VStack>
+          <VStack className="items-end h-full justify-between">
+            <Text size="sm" className="text-typography-500 items-start">
+              {chat?.lastMessage
+                ? DateFormatter.toRelative(chat.lastMessage.createdAt)
+                : ""}
+            </Text>
+            <Center className="bg-brand-primary h-6 w-6 rounded-full">
+              <Text size="md" className="text-brand-secondary font-medium">
+                1
+              </Text>
+            </Center>
+          </VStack>
         </HStack>
       </Pressable>
     ) : null;
@@ -153,167 +172,3 @@ export const ChatList: React.FC = () => {
     </VStack>
   );
 };
-
-// components/ChatList.tsx
-// import { useEffect } from "react";
-// import {
-//   View,
-//   FlatList,
-//   Text,
-//   TouchableOpacity,
-//   Image,
-//   StyleSheet,
-//   ListRenderItem,
-// } from "react-native";
-// // import { useNavigation } from "@react-navigation/native";
-// import { Card } from "@/components/ui/card";
-// import { Pressable } from "@/components/ui/pressable";
-// import {
-//   Avatar,
-//   AvatarBadge,
-//   AvatarFallbackText,
-//   AvatarImage,
-// } from "@/components/ui/avatar";
-// import { Chat } from "@/types";
-// import { useChat } from "@/hooks/useChat";
-// import { router } from "expo-router";
-// import { VStack } from "@/components/ui/vstack";
-// import chatService from "@/services/chatService";
-// import useGlobalStore from "@/store/globalStore";
-
-// export const ChatList = () => {
-//   const { fetchChats, chats } = useGlobalStore();
-
-//   useEffect(() => {
-//     const initializeChat = async () => {
-//       try {
-//         await fetchChats();
-//         await chatService.connect();
-//         // chatService.joinChat(chatId);
-//         // await chatService.getChatMessages(chatId, 1);
-//         // await markAsDelivered();
-//       } catch (error) {
-//         console.error("Failed to initialize chat:", error);
-//       }
-
-//       return () => {
-//         chatService.leaveCurrentChat();
-//         chatService.disconnect();
-//       };
-//     };
-
-//     initializeChat();
-//   }, []);
-//   // const navigation = useNavigation();
-//   // const { chats, loading } = useChat();
-//   return (
-//     <VStack className="flex-1">
-//       <FlatList
-//         onRefresh={fetchChats}
-//         data={chats}
-//         keyExtractor={(chat) => chat._id}
-//         renderItem={({ item: chat }: { item: Chat }) => (
-//           <Pressable
-//             className="flex-row items-center p-4 border-b border-gray-200"
-//             // onPress={() =>
-//             //   router.push({
-//             //     pathname: "/chat/[chatId]",
-//             //     params: { chatId: chat._id },
-//             //   })
-//             // }
-//           >
-//             <Avatar size="sm">
-//               <AvatarFallbackText>
-//                 {otherParticipant?.activeRoleId?.providerName}
-//               </AvatarFallbackText>
-//               <AvatarImage
-//                 source={{
-//                   uri:
-//                     chat.type === "group"
-//                       ? chat.groupInfo?.avatarUrl
-//                       : otherParticipant?.activeRoleId?.providerLogo,
-//                 }}
-//               />
-//             </Avatar>
-
-//             <View className="flex-1 ml-4">
-//               <Text className="text-lg font-semibold">
-//                 {chat.type === "group"
-//                   ? chat.groupInfo?.name
-//                   : otherParticipant?.username}
-//               </Text>
-//               <Text className="text-gray-500" numberOfLines={1}>
-//                 {chat.lastMessage?.text || "No messages yet"}
-//               </Text>
-//             </View>
-
-//             <View className="items-end">
-//               <Text className="text-gray-400 text-sm">
-//                 {chat.lastMessage
-//                   ? new Date(chat.lastMessage.createdAt).toLocaleTimeString(
-//                       [],
-//                       {
-//                         hour: "2-digit",
-//                         minute: "2-digit",
-//                       }
-//                     )
-//                   : ""}
-//               </Text>
-//               {/* You can add unread count badge here */}
-//             </View>
-//           </Pressable>
-//         )}
-// ListHeaderComponent={<SearchBar />}
-// ListFooterComponent={<View style={{ height: 100 }} />}
-// refreshing={loading}
-// />
-{
-  /* </VStack> */
-}
-// <TouchableOpacity
-//   style={styles.chatItem}
-//   //   onPress={() => navigation.navigate("Chat", { chatId: chat._id })}
-// //   onPress={() =>
-// //     router.push({
-// //       pathname: "/chat/[chatId]",
-// //       params: { chatId: chat._id },
-// //     })
-// //   }
-// >
-//   <Image
-//     source={{
-//       uri:
-//         chat.type === "group"
-//           ? chat.groupInfo?.avatarUrl
-//           : otherParticipant?.avatarUrl,
-//     }}
-//     style={styles.avatar}
-//     defaultSource={require("../assets/default-avatar.png")}
-//   />
-
-//   <View style={styles.chatInfo}>
-//     <Text style={styles.chatName}>
-//       {chat.type === "group"
-//         ? chat.groupInfo?.name
-//         : otherParticipant?.username}
-//     </Text>
-
-//     <Text style={styles.lastMessage} numberOfLines={1}>
-//       {chat.lastMessage?.text || "No messages yet"}
-//     </Text>
-//   </View>
-
-//   <View style={styles.chatMeta}>
-//     <Text style={styles.time}>
-//       {chat.lastMessage
-//         ? new Date(chat.lastMessage.createdAt).toLocaleTimeString([], {
-//             hour: "2-digit",
-//             minute: "2-digit",
-//           })
-//         : ""}
-//     </Text>
-//     {/* You can add unread count badge here */}
-//   </View>
-// </TouchableOpacity>
-//   );
-// };

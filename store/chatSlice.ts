@@ -1,3 +1,4 @@
+import { LastMessage } from "./../types/chat.d";
 import { StateCreator } from "zustand";
 import { GlobalStore, ChatState, Message, UserData, Chat } from "@/types";
 import chatService from "@/services/chatService";
@@ -8,6 +9,7 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
 ) => ({
   chats: [],
   selectedChat: null,
+  currentPage: 1,
   messages: [],
   chatLoading: false,
   chatError: null,
@@ -21,9 +23,9 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
   ): Promise<Chat> => {
     try {
       set({ chatLoading: true, chatError: null });
-console.log(participantIds);
+      // console.log(participantIds);
       const newChat = await chatService.createDirectChat(participantIds);
-      console.log("Created chat:", newChat);
+      // console.log("Created chat:", newChat);
       set({ selectedChat: newChat });
 
       // set((state) => {
@@ -53,7 +55,7 @@ console.log(participantIds);
     set({ chatLoading: true, chatError: null });
     try {
       const userChats = await chatService.getUserChats();
-      console.log("Fetched chats:", userChats);
+      // console.log("Fetched chats:", userChats);
       set({ chats: userChats, chatLoading: false });
     } catch (error: any) {
       set({
@@ -68,6 +70,15 @@ console.log(participantIds);
     if (!selectedChat) throw new Error("No chat selected");
     try {
       await chatService.sendTextMessage(selectedChat._id, text, replyTo);
+
+      // chatService.onNewMessage(({ message }: { message: Message }) => {
+      //   console.log("New message received via socket:", message);
+      //   return;
+      //   set((state) => ({
+      //     messages: [message, ...state.messages],
+      //   }));
+      // });
+
       // if selectedChatId is not part of chat, then append it to it. NOTE: avoid duplicating
       set((state) => {
         const chatsMap = new Map(state.chats.map((c) => [c._id, c]));
@@ -99,28 +110,41 @@ console.log(participantIds);
   //       throw error;
   //     }
   //   },
-  loadMoreMessages: async () => {
-    const { selectedChat, messages, hasMoreMessages } = get();
+
+  loadMessages: async (page: number = 1) => {
+    const { selectedChat } = get();
     if (!selectedChat) return;
-    if (!hasMoreMessages) return;
+
     try {
       set({ chatLoading: true });
-      const nextPage = Math.floor(messages.length / 100) + 1;
       const chatMessages = await chatService.getChatMessages(
         selectedChat._id,
-        nextPage
+        page
       );
-
+      // console.log("Loaded messages:", chatMessages);
       set((state) => ({
-        messages: [...chatMessages, ...state.messages],
+        messages:
+          page === 1 ? [...chatMessages] : [...chatMessages, ...state.messages],
         hasMoreMessages: chatMessages.length === 100,
         chatLoading: false,
+        currentPage: page,
       }));
     } catch (error) {
-      console.error("Failed to load more messages:", error);
+      console.error("Failed to load messages:", error);
       set({ chatLoading: false });
       throw error;
     }
+  },
+
+  loadMoreMessages: async () => {
+    const { selectedChat, hasMoreMessages, chatLoading, currentPage } = get();
+
+    if (!selectedChat || !hasMoreMessages || chatLoading) return;
+
+    set({ chatLoading: true });
+    const nextPage = (currentPage || 1) + 1;
+    await get().loadMessages(nextPage);
+    // console.log("Loaded more messages:", moreMessages);
   },
   markAsDelivered: async () => {
     const { selectedChat } = get();
@@ -132,6 +156,42 @@ console.log(participantIds);
       throw error;
     }
   },
+  // In your global store
+  // addMessage: (message: Message) => {
+  //   set((state) => {
+  //     // Avoid duplicating messages
+  //     if (state.messages.find((msg) => msg._id === message._id)) {
+  //       return state;
+  //     }
+  //     return { messages: [message, ...state.messages] };
+  //   });
+  // },
+
+  // updateChatLastMessage: (chatId: string, message: Message) => {
+  //   const { chats } = get();
+  //   set({
+  //     chats: chats.map((chat) =>
+  //       chat._id === chatId
+  //         ? {
+  //             ...chat,
+  //             lastMessage: {
+  //               messageId: message._id,
+  //               text: message.content?.text || "",
+  //               sender: message.senderId,
+  //               createdAt: message.createdAt,
+  //               // Add other LastMessage fields as needed
+  //             },
+  //           }
+  //         : chat
+  //     ),
+  //   });
+  // },
+
+  // removeMessage: (messageId: string) => {
+  //   set((state) => ({
+  //     messages: state.messages.filter((msg) => msg._id !== messageId),
+  //   }));
+  // },
   startTyping: () => {
     const { selectedChat } = get();
     if (!selectedChat) return;

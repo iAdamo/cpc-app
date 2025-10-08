@@ -35,6 +35,7 @@ export interface Message {
   replyTo?: Message;
   createdAt: string;
   updatedAt: string;
+  isOptimistic?: boolean;
 }
 
 export interface MessageContent {

@@ -104,7 +104,12 @@ class ChatService {
   }
 
   // Real-time Event Handling
-  onNewMessage(callback: (message: Message) => void): void {
+
+  offEvent(event: string, callback?: (data: any) => void): void {
+    this.socket.offEvent(event, callback);
+  }
+
+  onNewMessage(callback: (message: { message: Message }) => void): void {
     this.socket.onEvent("new_message", callback);
   }
 
