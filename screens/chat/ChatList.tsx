@@ -1,6 +1,4 @@
-// components/ChatList.tsx
-import React from "react";
-import { View, FlatList, TouchableOpacity, ListRenderItem } from "react-native";
+import { FlatList, ListRenderItem } from "react-native";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Heading } from "@/components/ui/heading";
@@ -8,28 +6,22 @@ import { Text } from "@/components/ui/text";
 import { Center } from "@/components/ui/center";
 import { useNavigation } from "@react-navigation/native";
 import { Chat } from "@/types";
-import { useChat } from "@/hooks/useChat";
 import { router } from "expo-router";
 import useGlobalStore from "@/store/globalStore";
 import { useEffect } from "react";
 import chatService from "@/services/chatService";
 import { Pressable } from "@/components/ui/pressable";
-import { Image } from "@/components/ui/image";
-import { Card } from "@/components/ui/card";
 import {
   Avatar,
   AvatarFallbackText,
   AvatarImage,
 } from "@/components/ui/avatar";
-import SearchBar from "@/components/SearchEngine";
 import NoActiveChat from "./NoActiveChat";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { SearchIcon } from "@/components/ui/icon";
 import ChatNavbar from "./ChatNavbar";
 import { UserData, ProviderData } from "@/types";
 import DateFormatter from "@/utils/DateFormat";
-
-type otherParticipantType = keyof UserData | keyof ProviderData;
 
 export const ChatList: React.FC = () => {
   const navigation = useNavigation();

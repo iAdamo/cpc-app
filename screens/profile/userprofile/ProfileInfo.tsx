@@ -39,7 +39,7 @@ const ProfileInfo = ({
   onLayout: any;
 }) => {
   const {
-    chats,
+    user,
     switchRole,
     updateUserProfile,
     isAvailable,
@@ -117,7 +117,7 @@ const ProfileInfo = ({
                 </BadgeText>
               </Badge>
             </HStack>
-            {switchRole === "Client" && (
+            {switchRole === "Client" && user?._id !== provider.owner && (
               <VStack>
                 <Text>Last active 2 hours ago</Text>
                 <HStack className="gap-2">

@@ -11,8 +11,8 @@ import {
   sendCode,
   changePassword,
 } from "@/services/axios/auth";
-import { th } from "zod/v4/locales";
 import { router } from "expo-router";
+import { socketService } from "@/services/socketService";
 
 export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
   set,
@@ -171,8 +171,11 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       paramsFrom: null,
       selectedChat: null,
       messages: [],
+      groupedMessages: [],
+      hasMoreMessages: true,
       // chats: [],
     });
+    socketService.disconnect();
     await SecureStore.deleteItemAsync("accessToken");
     router.replace("/");
   },

@@ -1,4 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  memo,
+  useMemo,
+  use,
+} from "react";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
@@ -6,7 +14,6 @@ import { Card } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
 import { Pressable } from "@/components/ui/pressable";
 import { Spinner } from "@/components/ui/spinner";
-import { Keyboard } from "react-native";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import {
@@ -15,32 +22,39 @@ import {
   AvatarImage,
   AvatarBadge,
 } from "@/components/ui/avatar";
+import { Fab, FabIcon } from "@/components/ui/fab";
 import {
   Icon,
-  ChevronLeftIcon,
-  EyeIcon,
-  EyeOffIcon,
   ArrowLeftIcon,
-  LinkIcon,
   PaperclipIcon,
   PhoneIcon,
   ThreeDotsIcon,
 } from "@/components/ui/icon";
-import { FlatList, ListRenderItem } from "react-native";
+import { FlatList, ListRenderItem, Keyboard, View } from "react-native";
 import useGlobalStore from "@/store/globalStore";
 import { Message } from "@/types";
 import { useLocalSearchParams } from "expo-router";
-import { CameraIcon, MicIcon, SendIcon, Clock3Icon } from "lucide-react-native";
-import { KeyboardAvoidingView, Platform } from "react-native";
+import {
+  CameraIcon,
+  MicIcon,
+  SendIcon,
+  Clock3Icon,
+  ChevronsDownIcon,
+} from "lucide-react-native";
+import { KeyboardAvoidingView, Platform, Animated } from "react-native";
 import { router } from "expo-router";
 import chatService from "@/services/chatService";
+import MessageItem from "./MessageItem";
+import DateHeader from "@/components/DateHeader";
+import { SectionList } from "react-native";
+import { MessageSection } from "@/types";
 
 const MessageView = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const {
     user,
     selectedChat,
-    messages,
+    groupedMessages,
     hasMoreMessages,
     loadMoreMessages,
     loadMessages,
@@ -48,6 +62,9 @@ const MessageView = () => {
   } = useGlobalStore();
 
   const [isSending, setIsSending] = useState(false);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const flatListRef = useRef<SectionList<Message, MessageSection>>(null);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   if (!selectedChat || selectedChat._id !== id) return <Text>Loading...</Text>;
 
@@ -62,18 +79,47 @@ const MessageView = () => {
     loadMessages(1);
 
     const handleNewMessage = ({ message }: { message: Message }) => {
-      console.log("New message received:", message);
+      // console.log("New message received:", message);
 
+      // remove all optimistic messages
       useGlobalStore.setState((state) => ({
-        messages: state.messages.filter((msg) => !msg.isOptimistic),
+        groupedMessages: state.groupedMessages.map(
+          (section: MessageSection) => ({
+            ...section,
+            data: section.data.filter((msg) => !msg.isOptimistic),
+          })
+        ),
       }));
 
-      useGlobalStore.setState((state) => {
-        if (state.messages.find((msg) => msg._id === message._id)) {
-          return state;
-        }
-        return { messages: [message, ...state.messages] };
-      });
+      // add to groupMessage without duplicates
+      useGlobalStore.setState((state) => ({
+        groupedMessages: (() => {
+          const todayTitle = "Today";
+          const existingSection = state.groupedMessages.find(
+            (section: MessageSection) => section.title === todayTitle
+          );
+          if (existingSection) {
+            // Avoid duplicates
+            if (
+              existingSection.data.find(
+                (msg: Message) => msg._id === message._id
+              )
+            ) {
+              return state.groupedMessages;
+            }
+            return state.groupedMessages.map((section: MessageSection) =>
+              section.title === todayTitle
+                ? { ...section, data: [message, ...section.data] }
+                : section
+            );
+          } else {
+            return [
+              { title: todayTitle, data: [message] },
+              ...state.groupedMessages,
+            ];
+          }
+        })(),
+      }));
     };
 
     const handleUserTyping = (data: { userId: string; typing: boolean }) => {
@@ -105,58 +151,42 @@ const MessageView = () => {
     };
   }, [selectedChat]);
 
-  const renderMessage: ListRenderItem<Message> = useCallback(
-    ({ item: message }) => {
-      const isOwnMessage = message.senderId._id === user?._id;
+  /** Scroll handler to toggle button visibility based on proximity to bottom */
+  // ...existing code...
+  const handleScroll = useCallback(
+    (event: any) => {
+      const { contentOffset } = event?.nativeEvent ?? {};
+      if (!contentOffset) return;
 
-      return (
-        <Pressable
-          className={`p-2 my-1 ${isOwnMessage ? "self-end" : "self-start"}`}
-        >
-          <VStack
-            className={`p-2 max-w-[80%] ${
-              isOwnMessage
-                ? "bg-blue-500 rounded-br-xl rounded-l-xl "
-                : " bg-gray-200 rounded-r-xl rounded-bl-xl"
-            }`}
-          >
-            <Text
-              size="lg"
-              className={`font-medium ${
-                isOwnMessage ? "text-white" : "text-brand-primary"
-              }`}
-            >
-              {message.content?.text}
-            </Text>
-            {message.isOptimistic && (
-              <Icon
-                size="xs"
-                className="text-gray-100 self-end mt-1"
-                as={Clock3Icon}
-              />
-            )}
-          </VStack>
-          <Text
-            size="xs"
-            className={`mt-1 ${
-              isOwnMessage ? "text-gray-500 self-end" : "text-gray-500 self-end"
-            }`}
-          >
-            {new Date(message.createdAt).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </Text>
-          {message.isOptimistic && (
-            <Text size="xs" className="text-yellow-300 mt-1">
-              Sending...
-            </Text>
-          )}
-        </Pressable>
-      );
+      // For inverted lists, y=0 is bottom (latest), y increases as you scroll up
+      if (contentOffset.y > 100 && !showScrollButton) {
+        setShowScrollButton(true);
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }).start();
+      } else if (contentOffset.y <= 100 && showScrollButton) {
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }).start(() => setShowScrollButton(false));
+      }
     },
-    [user]
+    [showScrollButton, fadeAnim]
   );
+
+  const scrollToBottom = () => {
+    if (!flatListRef.current || !groupedMessages.length) return;
+    // For inverted SectionList, scroll to the first section's first item (index 0, 0)
+    flatListRef.current.scrollToLocation({
+      sectionIndex: 0,
+      itemIndex: 0,
+      animated: true,
+      viewPosition: 0, // 0 = bottom when inverted
+    });
+  };
 
   const Headerbar = () => {
     const otherParticipant = selectedChat.participants[0];
@@ -250,41 +280,76 @@ const MessageView = () => {
   const FooterTextInput = () => {
     const [inputMessage, setInputMessage] = useState<string>("");
 
-    const handleSendMessage = async () => {
+    const handleSendMessage = useCallback(async () => {
       if (inputMessage.trim().length === 0 || isSending) return;
 
       const messageText = inputMessage.trim();
       setInputMessage("");
       setIsSending(true);
 
-      const optimisticMessage: Partial<Message> = {
-        _id: `temp-${Date.now()}`,
-        content: { text: messageText },
-        senderId: user!,
-        chatId: selectedChat._id,
-        createdAt: new Date().toISOString(),
-        isOptimistic: true,
+      const optimisticMessage: Partial<MessageSection> = {
+        title: "Today",
+        data: [
+          {
+            _id: `temp-${Date.now()}`,
+            content: { text: messageText },
+            senderId: user!,
+            chatId: selectedChat._id,
+            createdAt: new Date().toISOString(),
+            type: "text",
+            isOptimistic: true,
+          },
+        ],
       };
 
       try {
-        useGlobalStore.setState((state) => ({
-          messages: [optimisticMessage as Message, ...state.messages],
-        }));
-        // Send message via WebSocket
+        // ✅ Optimistically add to UI
+        useGlobalStore.setState((state) => {
+          const todayTitle = "Today";
+          const existingSection = state.groupedMessages.find(
+            (section: MessageSection) => section.title === todayTitle
+          );
+
+          if (existingSection) {
+            return {
+              groupedMessages: state.groupedMessages.map(
+                (section: MessageSection) =>
+                  section.title === todayTitle
+                    ? {
+                        ...section,
+                        data: [optimisticMessage.data?.[0], ...section.data],
+                      }
+                    : section
+              ),
+            };
+          } else {
+            return {
+              groupedMessages: [
+                { title: todayTitle, data: [optimisticMessage.data?.[0]] },
+                ...state.groupedMessages,
+              ],
+            };
+          }
+        });
+
+        // scrollToBottom();
         await sendTextMessage(messageText);
       } catch (error) {
         console.error("Failed to send message:", error);
-        // You might want to remove the optimistic message or mark it as failed
-        // useGlobalStore.getState().removeMessage(optimisticMessage._id ?? "");
-        useGlobalStore.setState((state) => ({
-          messages: state.messages.filter(
-            (msg) => msg._id !== optimisticMessage._id
-          ),
-        }));
       } finally {
         setIsSending(false);
+        setTimeout(() => {
+          scrollToBottom();
+        }, 100);
       }
-    };
+    }, [
+      inputMessage,
+      isSending,
+      user,
+      selectedChat,
+      sendTextMessage,
+      scrollToBottom,
+    ]);
 
     return (
       <VStack className="py-2 bg-white">
@@ -353,19 +418,45 @@ const MessageView = () => {
     );
   };
 
+  const renderSectionHeader = useCallback(
+    ({ section }: { section: MessageSection }) => {
+      return <DateHeader title={section.title} />;
+    },
+    []
+  );
+
+  const renderMessage: ListRenderItem<Message> = useCallback(
+    ({ item: message }) => (
+      <MessageItem key={message._id} message={message} user={user!} />
+    ),
+    []
+  );
+
+  const renderItem = useCallback(
+    ({ item }: { item: Message }) => {
+      return <MessageItem key={item._id} message={item} user={user!} />;
+    },
+    [user]
+  );
+
+  const keyExtractor = useCallback((item: Message) => item._id, []);
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: "white" }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
     >
-      <VStack className="flex-1">
+      <View style={{ flex: 1 }}>
         <Headerbar />
-        <FlatList
-          data={messages}
-          keyExtractor={(item) => item._id}
-          inverted
+        <SectionList
+          ref={flatListRef}
+          sections={groupedMessages}
+          keyExtractor={keyExtractor}
+          renderSectionFooter={renderSectionHeader}
           renderItem={renderMessage}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          inverted
           onEndReached={hasMoreMessages ? loadMoreMessages : undefined}
           onEndReachedThreshold={0.1}
           style={{ flex: 1 }}
@@ -386,9 +477,23 @@ const MessageView = () => {
               </Text>
             </VStack>
           )}
+          initialNumToRender={20}
+          maxToRenderPerBatch={10}
+          windowSize={21}
         />
+        {/* ↓ Floating scroll-to-bottom button */}
+        {showScrollButton && (
+          <Fab
+            placement="bottom center"
+            accessibilityLabel="Scroll to bottom"
+            className="bg-gray-100 shadow-lg mb-16 data-[active=true]:bg-gray-200"
+            onPress={scrollToBottom}
+          >
+            <FabIcon as={ChevronsDownIcon} className="text-brand-primary" />
+          </Fab>
+        )}
         <FooterTextInput />
-      </VStack>
+      </View>
     </KeyboardAvoidingView>
   );
 };

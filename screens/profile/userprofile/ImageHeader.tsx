@@ -48,6 +48,8 @@ const ImageHeader = ({ provider }: { provider: ProviderData }) => {
     { label: "Share", action: () => alert("Share") },
   ];
 
+  console.log(provider.providerImages[0]);
+
   return (
     <VStack className="h-72">
       <ImageBackground

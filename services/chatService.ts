@@ -1,3 +1,4 @@
+import { SectionList } from "react-native";
 import { ApiClientSingleton } from "./axios/conf";
 import { socketService } from "./socketService";
 import {
@@ -8,9 +9,9 @@ import {
   MessageContent,
   MessageStatus,
   SendMessageParams,
+  MessageSection,
 } from "@/types";
 import useGlobalStore from "@/store/globalStore";
-import { th } from "zod/v4/locales";
 
 class ChatService {
   private axiosInstance;
@@ -49,7 +50,7 @@ class ChatService {
     chatId: string,
     page: number = 1,
     limit: number = 100
-  ): Promise<Message[]> {
+  ): Promise<MessageSection[]> {
     const response = await this.axiosInstance.get(`/chat/${chatId}/messages`, {
       params: { page, limit },
     });
@@ -76,11 +77,13 @@ class ChatService {
 
   async sendTextMessage(
     chatId: string,
+    senderId: string,
     text: string,
     replyTo?: string
   ): Promise<void> {
     const messageParams: SendMessageParams = {
       chatId,
+      senderId,
       type: "text",
       content: { text },
       replyTo,

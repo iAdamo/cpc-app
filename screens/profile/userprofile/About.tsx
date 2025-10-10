@@ -45,10 +45,9 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
           "providerImages",
           {
             uri: photo.uri,
-            name: `${index}companyimage.jpg`,
+            name: photo.name || `photo${index}.jpg`,
             type: "image/jpeg",
           } as any,
-          `${index}companyimage.jpg`
         );
       });
       // console.log(Array.from(formData.entries()));

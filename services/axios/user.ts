@@ -51,6 +51,6 @@ export const setUserFavourites = async (
 export const toggleFollowProvider = async (
   providerId: string
 ): Promise<UserData> => {
-  const response = await axiosInstance.patch(`users/user/follow/${providerId}`);
+  const response = await axiosInstance.patch(`users/follow/${providerId}`);
   return response.data;
 };

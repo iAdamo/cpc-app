@@ -170,6 +170,7 @@ export interface ChatState {
   chats: Chat[];
   selectedChat: Chat | null;
   messages: Message[];
+  groupedMessages: MessageSection[];
   currentPage: number;
   chatLoading: boolean;
   chatError: string | null;

@@ -76,7 +76,11 @@ const CompanyBasicInfo = () => {
               typeof user.activeRoleId?.providerLogo === "string"
                 ? user.activeRoleId?.providerLogo
                 : "",
-            name: "companylogo.jpg",
+            name:
+              typeof user.activeRoleId?.providerLogo === "string"
+                ? user.activeRoleId?.providerLogo.split("/").pop() ||
+                  "companylogo.jpg"
+                : user.activeRoleId?.providerLogo.name || "companylogo.jpg",
             type: "image/jpeg",
           }
         : undefined,
@@ -86,7 +90,7 @@ const CompanyBasicInfo = () => {
               typeof img === "string"
                 ? {
                     uri: img,
-                    name: `${index}companyimage.jpg`,
+                    name: img.split("/").pop() || `companyimage${index}.jpg`,
                     type: "image/jpeg",
                   }
                 : img // already a FileType object

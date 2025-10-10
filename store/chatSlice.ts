@@ -11,6 +11,7 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
   selectedChat: null,
   currentPage: 1,
   messages: [],
+  groupedMessages: [],
   chatLoading: false,
   chatError: null,
   typingUsers: [],
@@ -69,7 +70,14 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
     const { selectedChat } = get();
     if (!selectedChat) throw new Error("No chat selected");
     try {
-      await chatService.sendTextMessage(selectedChat._id, text, replyTo);
+      const senderId = get().user?._id;
+      if (!senderId) throw new Error("User not authenticated");
+      await chatService.sendTextMessage(
+        selectedChat._id,
+        senderId,
+        text,
+        replyTo
+      );
 
       // chatService.onNewMessage(({ message }: { message: Message }) => {
       //   console.log("New message received via socket:", message);
@@ -121,14 +129,27 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
         selectedChat._id,
         page
       );
-      // console.log("Loaded messages:", chatMessages);
+
+      // set groupedMessages from chatMessages
       set((state) => ({
-        messages:
-          page === 1 ? [...chatMessages] : [...chatMessages, ...state.messages],
+        groupedMessages:
+          page === 1
+            ? [...chatMessages]
+            : [...chatMessages, ...state.groupedMessages],
         hasMoreMessages: chatMessages.length === 100,
         chatLoading: false,
         currentPage: page,
       }));
+
+      // console.log("Loaded messages:", chatMessages);
+
+      // set((state) => ({
+      //   messages:
+      //     page === 1 ? [...chatMessages] : [...chatMessages, ...state.messages],
+      //   hasMoreMessages: chatMessages.length === 100,
+      //   chatLoading: false,
+      //   currentPage: page,
+      // }));
     } catch (error) {
       console.error("Failed to load messages:", error);
       set({ chatLoading: false });
@@ -156,42 +177,6 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
       throw error;
     }
   },
-  // In your global store
-  // addMessage: (message: Message) => {
-  //   set((state) => {
-  //     // Avoid duplicating messages
-  //     if (state.messages.find((msg) => msg._id === message._id)) {
-  //       return state;
-  //     }
-  //     return { messages: [message, ...state.messages] };
-  //   });
-  // },
-
-  // updateChatLastMessage: (chatId: string, message: Message) => {
-  //   const { chats } = get();
-  //   set({
-  //     chats: chats.map((chat) =>
-  //       chat._id === chatId
-  //         ? {
-  //             ...chat,
-  //             lastMessage: {
-  //               messageId: message._id,
-  //               text: message.content?.text || "",
-  //               sender: message.senderId,
-  //               createdAt: message.createdAt,
-  //               // Add other LastMessage fields as needed
-  //             },
-  //           }
-  //         : chat
-  //     ),
-  //   });
-  // },
-
-  // removeMessage: (messageId: string) => {
-  //   set((state) => ({
-  //     messages: state.messages.filter((msg) => msg._id !== messageId),
-  //   }));
-  // },
   startTyping: () => {
     const { selectedChat } = get();
     if (!selectedChat) return;

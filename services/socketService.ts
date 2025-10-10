@@ -23,8 +23,9 @@ class SocketService {
     return SocketService.instance;
   }
   async connect(): Promise<void> {
-    // console.log("Attempting to connect to socket...");
+    console.log("Attempting to connect to socket...");
     if (this.socket?.connected || this.isConnected) return;
+    console.log("Creating new socket connection...");
 
     const token = await SecureStore.getItemAsync("accessToken");
 
@@ -78,7 +79,7 @@ class SocketService {
   }
 
   leaveChat(chatId: string): void {
-    this.socket?.emit("leave_chat", chatId);
+    this.socket?.emit("leave_chats", [chatId]);
   }
 
   onEvent<T>(event: string, callback: (data: T) => void): void {

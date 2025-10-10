@@ -56,7 +56,13 @@ export interface MessageStatus {
 
 export interface SendMessageParams {
   chatId: string;
+  senderId?: string;
   type: Message["type"];
   content?: Partial<MessageContent>;
   replyTo?: string;
+}
+
+export interface MessageSection {
+  title: string;
+  data: Partial<Message>[];
 }
