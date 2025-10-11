@@ -48,7 +48,7 @@ const ImageHeader = ({ provider }: { provider: ProviderData }) => {
     { label: "Share", action: () => alert("Share") },
   ];
 
-  console.log(provider.providerImages[0]);
+  // console.log(provider.providerImages[0]);
 
   return (
     <VStack className="h-72">
@@ -84,19 +84,19 @@ const ImageHeader = ({ provider }: { provider: ProviderData }) => {
           <HStack>
             <VStack>
               <Heading className="text-white">
-                {user?.activeRoleId?.reviewCount}
+                {provider.reviewCount}
               </Heading>
               <Text className="text-white">
-                {user?.activeRoleId?.reviewCount === 1 ? "review" : "reviews"}
+                {provider.reviewCount === 1 ? "review" : "reviews"}
               </Text>
             </VStack>
             <Divider orientation="vertical" className="mx-4 h-5 self-center" />
             <VStack>
               <Heading className="text-white">
-                {user?.activeRoleId?.favoriteCount}
+                {provider.followersCount}
               </Heading>
               <Text className="text-white">
-                {user?.activeRoleId?.favoriteCount === 1
+                {provider.favoriteCount === 1
                   ? "follower"
                   : "followers"}
               </Text>
@@ -107,28 +107,30 @@ const ImageHeader = ({ provider }: { provider: ProviderData }) => {
               <Text className="text-white">exp</Text>
             </VStack>
           </HStack>
-          <Button
-            size="sm"
-            variant="outline"
-            className={
-              isFollowing
-                ? "border-green-500 bg-green-600/20"
-                : "border-white bg-transparent"
-            }
-            onPress={handleFollow}
-          >
-            <ButtonIcon
-              as={isFollowing ? CheckIcon : AddIcon}
-              className={`${
-                isFollowing ? "text-white/80" : "text-white"
-              } w-4 h-4`}
-            />
-            <ButtonText
-              className={`${isFollowing ? "text-white/80" : "text-white"}`}
+          {user?._id !== provider.owner && (
+            <Button
+              size="sm"
+              variant="outline"
+              className={
+                isFollowing
+                  ? "border-green-500 bg-green-600/20"
+                  : "border-white bg-transparent"
+              }
+              onPress={handleFollow}
             >
-              {isFollowing ? "Following" : "Follow"}
-            </ButtonText>
-          </Button>
+              <ButtonIcon
+                as={isFollowing ? CheckIcon : AddIcon}
+                className={`${
+                  isFollowing ? "text-white/80" : "text-white"
+                } w-4 h-4`}
+              />
+              <ButtonText
+                className={`${isFollowing ? "text-white/80" : "text-white"}`}
+              >
+                {isFollowing ? "Following" : "Follow"}
+              </ButtonText>
+            </Button>
+          )}
         </HStack>
       </ImageBackground>
       <Actionsheet isOpen={showOptions} onClose={() => setShowOptions(false)}>

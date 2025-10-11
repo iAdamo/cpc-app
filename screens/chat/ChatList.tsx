@@ -11,6 +11,7 @@ import useGlobalStore from "@/store/globalStore";
 import { useEffect } from "react";
 import chatService from "@/services/chatService";
 import { Pressable } from "@/components/ui/pressable";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Avatar,
   AvatarFallbackText,
@@ -22,9 +23,9 @@ import { SearchIcon } from "@/components/ui/icon";
 import ChatNavbar from "./ChatNavbar";
 import { UserData, ProviderData } from "@/types";
 import DateFormatter from "@/utils/DateFormat";
+import SearchBar from "@/components/SearchEngine";
 
 export const ChatList: React.FC = () => {
-  const navigation = useNavigation();
   const { fetchChats, chats, chatLoading, switchRole, user } = useGlobalStore();
 
   useEffect(() => {
@@ -51,17 +52,9 @@ export const ChatList: React.FC = () => {
   // console.log("Chats in ChatList:", chats);
 
   const renderChatItem: ListRenderItem<Chat> = ({ item: chat }) => {
-    // Assuming 'participants' is an array and you want the participant that is not the current user
-    const otherParticipant: Partial<UserData & ProviderData> = Array.isArray(
-      chat?.participants
-    )
-      ? chat.participants.find((p: any) => p._id !== user?._id) || {}
-      : {};
-
-    // console.log(otherParticipant);
-    // console.log("otherParticipant", otherParticipant);
-
-    return otherParticipant && Object.keys(otherParticipant).length > 0 ? (
+    const otherParticipant = chat.participants[0];
+    const isClient = switchRole === "Client";
+    return (
       <Pressable
         className="flex-row flex-1 gap-4 rounded-lg items-center p-4 mt-4"
         onPress={() => {
@@ -74,16 +67,9 @@ export const ChatList: React.FC = () => {
       >
         <Avatar size="lg">
           <AvatarFallbackText>
-            {/* {(otherParticipant &&
-              (("providerName" in otherParticipant &&
-                otherParticipant.providerName) ||
-                ("firstName" in otherParticipant &&
-                  otherParticipant.firstName))) ||
-              ""} */}
-            {otherParticipant.providerName ||
-              (otherParticipant.firstName || "") +
-                " " +
-                (otherParticipant.lastName || "")}
+            {isClient
+              ? otherParticipant.activeRoleId?.providerName
+              : otherParticipant.firstName + otherParticipant.lastName}
           </AvatarFallbackText>
           <AvatarImage
             source={{
@@ -92,8 +78,11 @@ export const ChatList: React.FC = () => {
                   ? typeof chat.groupInfo?.avatarUrl === "string"
                     ? chat.groupInfo.avatarUrl
                     : undefined
-                  : typeof otherParticipant?.providerLogo === "string"
-                  ? otherParticipant.providerLogo
+                  : isClient
+                  ? typeof otherParticipant.activeRoleId?.providerLogo ===
+                    "string"
+                    ? otherParticipant.activeRoleId?.providerLogo
+                    : undefined
                   : typeof otherParticipant?.profilePicture === "string"
                   ? otherParticipant.profilePicture
                   : undefined,
@@ -103,8 +92,9 @@ export const ChatList: React.FC = () => {
         <HStack className="flex-1 justify-between items-center">
           <VStack space="sm" className="flex-1">
             <Heading size="lg" className="font-medium">
-              {otherParticipant.providerName ||
-                (otherParticipant.firstName || "") +
+              {isClient
+                ? otherParticipant.activeRoleId?.providerName
+                : (otherParticipant.firstName || "") +
                   " " +
                   (otherParticipant.lastName || "")}
             </Heading>
@@ -128,7 +118,7 @@ export const ChatList: React.FC = () => {
           </VStack>
         </HStack>
       </Pressable>
-    ) : null;
+    );
   };
 
   return (
@@ -137,9 +127,13 @@ export const ChatList: React.FC = () => {
         data={chats}
         renderItem={renderChatItem}
         keyExtractor={(item) => item._id}
-        // refreshing={chatLoading}
-        // onRefresh={() => fetchChats}
-        ListEmptyComponent={() => <NoActiveChat />}
+        ListEmptyComponent={() =>
+          chatLoading ? (
+            <Spinner size="large" className="flex-1" />
+          ) : (
+            <NoActiveChat />
+          )
+        }
         ListHeaderComponent={() => (
           <>
             <ChatNavbar />
@@ -159,7 +153,7 @@ export const ChatList: React.FC = () => {
             </Input>
           </>
         )}
-        StickyHeaderComponent={() => <ChatNavbar />}
+        stickyHeaderIndices={[0]}
       />
     </VStack>
   );

@@ -4,8 +4,8 @@ export interface UserData {
   id: string;
   _id: string;
   accessToken: string;
-  firstName?: string;
-  lastName?: string;
+  firstName: string;
+  lastName: string;
   activeRole: "Client" | "Provider";
   email: string;
   homeAddress: string;

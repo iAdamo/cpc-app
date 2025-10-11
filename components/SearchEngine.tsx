@@ -211,7 +211,7 @@ const SearchBar = ({ providers }: { providers?: ProviderData[] }) => {
           <InputField
             placeholder="Search Chats"
             className="placeholder:text-lg placeholder:text-gray-400"
-            onChangeText={(text) => setFilterQuery(text)}
+            // onChangeText={(text) => setFilterQuery(text)}
           />
         </Input>
       )}

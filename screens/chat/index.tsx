@@ -4,7 +4,6 @@ import { Text } from "@/components/ui/text";
 import { ScrollView } from "@/components/ui/scroll-view";
 import ChatNavbar from "./ChatNavbar";
 import SearchBar from "@/components/SearchEngine";
-import { ChatScreen } from "./ChatContainer";
 import chatService from "@/services/chatService";
 import useGlobalStore from "@/store/globalStore";
 import { ChatList } from "./ChatList";

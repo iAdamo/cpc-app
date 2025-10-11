@@ -74,19 +74,9 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
       if (!senderId) throw new Error("User not authenticated");
       await chatService.sendTextMessage(
         selectedChat._id,
-        senderId,
         text,
         replyTo
       );
-
-      // chatService.onNewMessage(({ message }: { message: Message }) => {
-      //   console.log("New message received via socket:", message);
-      //   return;
-      //   set((state) => ({
-      //     messages: [message, ...state.messages],
-      //   }));
-      // });
-
       // if selectedChatId is not part of chat, then append it to it. NOTE: avoid duplicating
       set((state) => {
         const chatsMap = new Map(state.chats.map((c) => [c._id, c]));

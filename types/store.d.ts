@@ -43,7 +43,6 @@ export interface GlobalState {
 
 export interface AuthState {
   user: UserData | null;
-  token: string | null;
   isAuthenticated: boolean;
 
   // Actions

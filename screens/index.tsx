@@ -8,9 +8,10 @@ import TaskDisplay from "./clients/home";
 import ProfileView from "./profile";
 import Chat from "./chat";
 import { router } from "expo-router";
+import { usePathname } from "expo-router";
 
 const Screen = () => {
-  const { currentView, setCurrentView, switchRole } = useGlobalStore();
+  const { currentView, switchRole } = useGlobalStore();
 
   return (
     <VStack className="flex-1 bg-white">
@@ -24,7 +25,7 @@ const Screen = () => {
           ) : (
             <Text>Provider Updates View</Text>
           ))}
-        {currentView === "Chat" && switchRole === "Client" && <Chat />}
+        {currentView === "Chat" && <Chat />}
         {currentView === "Profile" && <ProfileView />}
       </VStack>
     </VStack>

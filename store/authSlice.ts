@@ -19,7 +19,6 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
   get
 ) => ({
   user: null,
-  token: null,
   isAuthenticated: false,
 
   signUp: async (userData: SignUpData) => {
@@ -52,6 +51,7 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
         await SecureStore.setItemAsync("accessToken", response.accessToken);
         set({
           user: { ...response, accessToken: "" },
+          switchRole: response.activeRole,
           success: "Logged in successfully!",
           isAuthenticated: true,
           isOnboardingComplete: true,
@@ -167,7 +167,6 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       currentView: "Home",
       displayStyle: "Grid",
       currentLocation: null,
-      switchRole: "Client",
       paramsFrom: null,
       selectedChat: null,
       messages: [],

@@ -59,6 +59,7 @@ const MessageView = () => {
     loadMoreMessages,
     loadMessages,
     sendTextMessage,
+    switchRole,
   } = useGlobalStore();
 
   const [isSending, setIsSending] = useState(false);
@@ -67,6 +68,7 @@ const MessageView = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   if (!selectedChat || selectedChat._id !== id) return <Text>Loading...</Text>;
+  const isClient = switchRole === "Client";
 
   useEffect(() => {
     if (!selectedChat) return;
@@ -230,15 +232,23 @@ const MessageView = () => {
             <HStack className="items-center gap-2">
               <Avatar size="md">
                 <AvatarFallbackText>
-                  {otherParticipant?.activeRoleId?.providerName}
+                  {isClient
+                    ? otherParticipant?.activeRoleId?.providerName
+                    : otherParticipant?.firstName +
+                      " " +
+                      otherParticipant?.lastName}
                 </AvatarFallbackText>
                 <AvatarImage
-                  source={
-                    typeof otherParticipant?.activeRoleId?.providerLogo ===
-                    "string"
-                      ? { uri: otherParticipant?.activeRoleId?.providerLogo }
-                      : undefined
-                  }
+                  source={{
+                    uri: isClient
+                      ? typeof otherParticipant.activeRoleId?.providerLogo ===
+                        "string"
+                        ? otherParticipant.activeRoleId?.providerLogo
+                        : undefined
+                      : typeof otherParticipant?.profilePicture === "string"
+                      ? otherParticipant.profilePicture
+                      : undefined,
+                  }}
                 />
                 <AvatarBadge
                   size="lg"
@@ -247,7 +257,11 @@ const MessageView = () => {
               </Avatar>
               <VStack>
                 <Heading>
-                  {otherParticipant?.activeRoleId?.providerName}
+                  {isClient
+                    ? otherParticipant?.activeRoleId?.providerName
+                    : (otherParticipant?.firstName || "") +
+                      " " +
+                      (otherParticipant?.lastName || "")}
                 </Heading>
                 <Text size="sm" className="text-typography-500">
                   {isOnline ? "Online" : "Offline"}
@@ -470,13 +484,13 @@ const MessageView = () => {
             minIndexForVisible: 0,
             autoscrollToTopThreshold: 10,
           }}
-          ListEmptyComponent={() => (
-            <VStack className="flex-1 justify-center items-center py-8">
-              <Text className="text-gray-500 text-center">
-                No messages yet.{"\n"}Start a conversation!
-              </Text>
-            </VStack>
-          )}
+          // ListEmptyComponent={() => (
+          //   <VStack className="flex-1 justify-center items-center py-8">
+          //     <Text className="text-gray-500 text-center transform scale-x-[-1]">
+          //       No messages yet.{"\n"}Start a conversation!
+          //     </Text>
+          //   </VStack>
+          // )}
           initialNumToRender={20}
           maxToRenderPerBatch={10}
           windowSize={21}

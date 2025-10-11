@@ -77,13 +77,11 @@ class ChatService {
 
   async sendTextMessage(
     chatId: string,
-    senderId: string,
     text: string,
     replyTo?: string
   ): Promise<void> {
     const messageParams: SendMessageParams = {
       chatId,
-      senderId,
       type: "text",
       content: { text },
       replyTo,

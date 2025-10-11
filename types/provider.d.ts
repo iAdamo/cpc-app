@@ -33,6 +33,8 @@ export interface ProviderData {
   owner: string;
   favoritedBy: string[];
   favoriteCount: number;
+  followersCount: number;
+  followedBy: UserData[];
   ratings: number;
   createdAt: string;
   updatedAt: string;

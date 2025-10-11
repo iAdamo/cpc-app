@@ -17,12 +17,12 @@ export const globalSlice: StateCreator<GlobalStore, [], [], GlobalState> = (
   clearError: () => set({ error: null }),
   setLoading: (loading) => set({ isLoading: loading }),
   setError: (error) => set({ error }),
-  switchRole: get()?.user?.activeRole === "Provider" ? "Provider" : "Client",
+  switchRole: get()?.user?.activeRole!,
   setSwitchRole: async (role) => {
     const formData = new FormData();
     formData.append("activeRole", role);
-    set({ switchRole: role });
     await updateUserProfile(formData);
+    set({ switchRole: role, chats: [] });
   },
   paramsFrom: null,
   setParamsFrom: (params) => set({ paramsFrom: params }),
