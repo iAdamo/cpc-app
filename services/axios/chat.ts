@@ -23,3 +23,19 @@ export const getLastSeen = async (userId: string): Promise<Date | null> => {
     return null;
   }
 };
+
+export const uploadChatMedia = async (
+  file: FormData,
+  onProgress?: (progress: number) => void
+) => {
+  try {
+    return await ApiClientSingleton.instance.uploadFile(
+      "chat/upload",
+      file,
+      onProgress
+    );
+  } catch (error) {
+    console.error("Error uploading chat media:", error);
+    throw error;
+  }
+};

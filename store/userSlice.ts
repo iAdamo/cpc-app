@@ -83,6 +83,7 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
     set({ isLoading: true, error: null });
     try {
       const response = await getUserProfile(userId);
+      console.log("fetched user", response);
       if (response) {
         if (get().user && get().user?._id === response._id) {
           // If fetching own profile, update the user state
@@ -94,7 +95,7 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
           return;
         }
         set({
-          user: { ...response },
+          otherUser: { ...response },
           isLoading: false,
         });
       }
@@ -106,25 +107,31 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
     }
   },
   toggleFollow: async (providerId: string) => {
-    set({ isLoading: true, error: null });
+    set({ error: null });
     try {
       const response = await toggleFollowProvider(providerId);
-      // check if providerId is in user's following list
       if (response) {
         console.log("Follow toggle response:", response);
-        if (response.followedProviders.some((p) => p._id === providerId)) {
+        const currentUser = get().user;
+        const isSelf = currentUser && response._id === currentUser._id;
+        const updateObj = {
+          isFollowing: response.followedProviders.some(
+            (p) => p._id === providerId
+          ),
+          info: response.followedProviders.some((p) => p._id === providerId)
+            ? "Started following provider"
+            : "Unfollowed provider",
+          isLoading: false,
+        };
+        if (isSelf) {
           set({
             user: { ...response },
-            isFollowing: true,
-            info: "Started following provider",
-            isLoading: false,
+            ...updateObj,
           });
         } else {
           set({
-            user: { ...response },
-            isFollowing: false,
-            info: "Unfollowed provider",
-            isLoading: false,
+            otherUser: { ...response },
+            ...updateObj,
           });
         }
       }
@@ -132,7 +139,6 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
       set({
         error:
           error?.response?.data?.message || "Failed to update follow status",
-        isLoading: false,
       });
       throw error;
     }

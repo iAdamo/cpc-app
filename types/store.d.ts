@@ -180,11 +180,11 @@ export interface ChatState {
   ) => Promise<Chat>;
   fetchChats: () => Promise<void>;
   sendTextMessage: (text: string, replyTo?: string) => Promise<void>;
-  // sendMediaMessage: (
-  //   type: Message["type"],
-  //   file: any,
-  //   options?: any
-  // ) => Promise<void>;
+  sendMediaMessage: (
+    type: Message["type"],
+    file: any,
+    options?: any
+  ) => Promise<void>;
   loadMessages: (page?: number) => Promise<void>;
   loadMoreMessages: () => Promise<void>;
   // addMessage: (message: Message) => void;

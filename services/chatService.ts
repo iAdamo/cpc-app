@@ -92,12 +92,13 @@ class ChatService {
   async sendMediaMessage(
     chatId: string,
     mediaUrl: string,
+    type: "text" | "image" | "video" | "audio" | "file" | "system",
     options: Partial<MessageContent> = {},
     replyTo?: string
   ): Promise<void> {
     const messageParams: SendMessageParams = {
       chatId,
-      type: "image", // Adjust based on media type
+      type,
       content: { mediaUrl, ...options },
       replyTo,
     };

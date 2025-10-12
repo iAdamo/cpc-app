@@ -48,6 +48,8 @@ import MessageItem from "./MessageItem";
 import DateHeader from "@/components/DateHeader";
 import { SectionList } from "react-native";
 import { MessageSection } from "@/types";
+import MediaPicker from "@/components/media/MediaPicker";
+import AttactmentOptions from "./AttachmentPopover";
 
 const MessageView = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -60,6 +62,7 @@ const MessageView = () => {
     loadMessages,
     sendTextMessage,
     switchRole,
+    selectedFiles,
   } = useGlobalStore();
 
   const [isSending, setIsSending] = useState(false);
@@ -317,7 +320,6 @@ const MessageView = () => {
       };
 
       try {
-        // ✅ Optimistically add to UI
         useGlobalStore.setState((state) => {
           const todayTitle = "Today";
           const existingSection = state.groupedMessages.find(
@@ -368,15 +370,10 @@ const MessageView = () => {
     return (
       <VStack className="py-2 bg-white">
         <HStack space="sm" className="justify-center items-center px-2">
-          <Button
-            variant="outline"
-            className="border-0 p-0 w-10 h-10 data-[active=true]:bg-transparent"
-          >
-            <ButtonIcon
-              as={PaperclipIcon}
-              className="text-brand-primary w-7 h-7"
-            />
-          </Button>
+          {/** paperclip options */}
+
+          <AttactmentOptions />
+
           <Textarea className="flex-1 h-14 rounded-xl border-0 bg-typography-50 data-[focus=true]:border-brand-primary/30 focus:bg-white">
             <TextareaInput
               placeholder="Write your message..."

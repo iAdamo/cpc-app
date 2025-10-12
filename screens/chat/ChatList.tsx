@@ -129,7 +129,7 @@ export const ChatList: React.FC = () => {
         keyExtractor={(item) => item._id}
         ListEmptyComponent={() =>
           chatLoading ? (
-            <Spinner size="large" className="flex-1" />
+            <Spinner size="large" className="flex-1 justify-center items-center" />
           ) : (
             <NoActiveChat />
           )

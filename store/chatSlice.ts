@@ -2,6 +2,8 @@ import { LastMessage } from "./../types/chat.d";
 import { StateCreator } from "zustand";
 import { GlobalStore, ChatState, Message, UserData, Chat } from "@/types";
 import chatService from "@/services/chatService";
+import { uploadChatMedia } from "@/services/axios/chat";
+import appendFormData from "@/utils/AppendFormData";
 
 export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
   set,
@@ -72,11 +74,7 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
     try {
       const senderId = get().user?._id;
       if (!senderId) throw new Error("User not authenticated");
-      await chatService.sendTextMessage(
-        selectedChat._id,
-        text,
-        replyTo
-      );
+      await chatService.sendTextMessage(selectedChat._id, text, replyTo);
       // if selectedChatId is not part of chat, then append it to it. NOTE: avoid duplicating
       set((state) => {
         const chatsMap = new Map(state.chats.map((c) => [c._id, c]));
@@ -92,22 +90,30 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
       throw error;
     }
   },
-  //   sendMediaMessage: async (
-  //     type: Message["type"],
-  //     file: any,
-  //     options: Partial<Message["content"]> = {}
-  //   ) => {
-  //     const { selectedChatId } = get();
-  //     if (!selectedChatId) throw new Error("No chat selected");
-  //     try {
-  //       // Upload media and get URL (implementation depends on your setup)
-  //       const mediaUrl = await chatService.uploadMedia(file, type);
-  //       await chatService.sendMediaMessage(selectedChatId, mediaUrl, options);
-  //     } catch (error) {
-  //       console.error("Failed to send media message:", error);
-  //       throw error;
-  //     }
-  //   },
+  sendMediaMessage: async (
+    type: Message["type"],
+    file: any,
+    options: Partial<Message["content"]> = {}
+  ) => {
+    const { selectedChat } = get();
+    if (!selectedChat) throw new Error("No chat selected");
+    try {
+      const formData = new FormData();
+      appendFormData(formData, file, "file");
+      const mediaUrl = await uploadChatMedia(formData, (progress) => {
+        console.log(`Upload progress: ${progress}%`);
+      });
+      await chatService.sendMediaMessage(
+        selectedChat._id,
+        mediaUrl.file,
+        type,
+        options
+      );
+    } catch (error) {
+      console.error("Failed to send media message:", error);
+      throw error;
+    }
+  },
 
   loadMessages: async (page: number = 1) => {
     const { selectedChat } = get();

@@ -38,22 +38,22 @@ const MediaPicker = ({
 
   // console.log("Selected files:", selectedFiles);
 
-  const handlePickMedia = async (
-    source: "gallery" | "camera",
-    mediaType: ("images" | "videos")[]
-  ) => {
-    // console.log("Picking media of type:", mediaType, "from", source);
-    await pickMedia(
-      source,
-      {
-        allowsMultipleSelection: source === "gallery",
-        quality: source === "camera" ? 0.8 : 1,
-        mediaTypes: mediaType,
-      },
-      maxFiles,
-      maxSize
-    );
-  };
+  // const handlePickMedia = async (
+  //   source: "gallery" | "camera",
+  //   mediaType: ("images" | "videos")[]
+  // ) => {
+  //   // console.log("Picking media of type:", mediaType, "from", source);
+  //   await pickMedia(
+  //     source,
+  //     {
+  //       allowsMultipleSelection: source === "gallery",
+  //       quality: source === "camera" ? 0.8 : 1,
+  //       mediaTypes: mediaType,
+  //     },
+  //     maxFiles,
+  //     maxSize
+  //   );
+  // };
 
   const remainingSlots = maxFiles - selectedFiles.length;
 
@@ -127,13 +127,27 @@ const MediaPicker = ({
             <Pressable
               className="flex-1 h-52 rounded-lg border-2 border-dashed border-brand-primary/50 items-center justify-center"
               onPress={() =>
-                handlePickMedia(
+                // handlePickMedia(
+                //   "gallery",
+                //   showBothOptions
+                //     ? ["images", "videos"]
+                //     : showImageOption
+                //     ? ["images"]
+                //     : ["videos"]
+                // )
+                pickMedia(
                   "gallery",
-                  showBothOptions
-                    ? ["images", "videos"]
-                    : showImageOption
-                    ? ["images"]
-                    : ["videos"]
+                  {
+                    allowsMultipleSelection: true,
+                    quality: 1,
+                    mediaTypes: showBothOptions
+                      ? ["images", "videos"]
+                      : showImageOption
+                      ? ["images"]
+                      : ["videos"],
+                  },
+                  maxFiles,
+                  maxSize
                 )
               }
               disabled={isLoading}

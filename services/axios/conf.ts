@@ -70,4 +70,24 @@ export class ApiClientSingleton {
   public getAxiosInstance() {
     return this.axiosInstance;
   }
+
+  public async uploadFile(
+    url: string,
+    file: FormData,
+    onProgress?: (progress: number) => void
+  ): Promise<any> {
+    const response = await this.axiosInstance.post(url, file, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      onUploadProgress: (ProgressEvent) => {
+        if (onProgress && ProgressEvent.total) {
+          const progress = (ProgressEvent.loaded / ProgressEvent.total) * 100;
+          onProgress(Math.round(progress));
+        }
+      },
+    });
+
+    return response.data;
+  }
 }
