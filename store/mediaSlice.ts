@@ -39,6 +39,22 @@ export const mediaSlice: StateCreator<GlobalStore, [], [], MediaState> = (
       });
     }
   },
+  pickDocument: async () => {
+    try {
+      set({ isLoading: true });
+      const files = await MediaService.pickDocument({});
+
+      set((state) => ({
+        selectedFiles: [...state.selectedFiles, ...files],
+        isLoading: false,
+      }));
+    } catch (error: any) {
+      set({
+        error: error?.message || "Failed to pick document",
+        isLoading: false,
+      });
+    }
+  },
   removeFile: (uri: string) => {
     set((state) => ({
       selectedFiles: state.selectedFiles.filter((file) => file.uri !== uri),

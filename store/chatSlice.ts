@@ -93,16 +93,17 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
   sendMediaMessage: async (
     type: Message["type"],
     file: any,
-    options: Partial<Message["content"]> = {}
+    options: Partial<Message["content"]> = {},
+    onProgress?: (progress: number) => void
   ) => {
     const { selectedChat } = get();
     if (!selectedChat) throw new Error("No chat selected");
     try {
+      // console.log(file);
       const formData = new FormData();
       appendFormData(formData, file, "file");
-      const mediaUrl = await uploadChatMedia(formData, (progress) => {
-        console.log(`Upload progress: ${progress}%`);
-      });
+      const mediaUrl = await uploadChatMedia(formData, onProgress);
+      // console.log({ mediaUrl });
       await chatService.sendMediaMessage(
         selectedChat._id,
         mediaUrl.file,

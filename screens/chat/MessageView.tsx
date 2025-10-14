@@ -50,6 +50,7 @@ import { SectionList } from "react-native";
 import { MessageSection } from "@/types";
 import MediaPicker from "@/components/media/MediaPicker";
 import AttactmentOptions from "./AttachmentPopover";
+import { Progress, ProgressFilledTrack } from "@/components/ui/progress";
 
 const MessageView = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -63,6 +64,9 @@ const MessageView = () => {
     sendTextMessage,
     switchRole,
     selectedFiles,
+    setProgress,
+    progress,
+    sendMediaMessage,
   } = useGlobalStore();
 
   const [isSending, setIsSending] = useState(false);
@@ -367,12 +371,54 @@ const MessageView = () => {
       scrollToBottom,
     ]);
 
+    // Helper to map MIME type to allowed message type
+    const mapMimeTypeToMessageType = (
+      mimeType: string
+    ): "text" | "image" | "video" | "audio" | "file" | "system" => {
+      console.log("Mapping MIME type:", mimeType);
+      if (mimeType.startsWith("image")) return "image";
+      if (mimeType.startsWith("video")) return "video";
+      if (mimeType.startsWith("audio")) return "audio";
+      if (
+        mimeType === "application/pdf" ||
+        mimeType === "application/msword" ||
+        mimeType ===
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+        mimeType === "application/vnd.ms-excel" ||
+        mimeType ===
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+        mimeType === "text/plain" ||
+        mimeType === "application/rtf"
+      ) {
+        return "file";
+      }
+      return "file";
+    };
+
+    // Handle sending media files from AttachmentPopover
+    const handleSendMedia = useCallback(async (files: any[]) => {
+      for (const file of files) {
+        if (file.type) {
+          const fileType = mapMimeTypeToMessageType(file.type);
+          try {
+            setIsSending(true);
+            await sendMediaMessage(fileType, file, {}, setProgress);
+          } catch (error) {
+            console.error("Failed to send media message:", error);
+          } finally {
+            setIsSending(false);
+          }
+        }
+      }
+    }, []);
+
+    console.log("progress", progress);
+
     return (
       <VStack className="py-2 bg-white">
         <HStack space="sm" className="justify-center items-center px-2">
-          {/** paperclip options */}
-
-          <AttactmentOptions />
+          {/* paperclip options */}
+          <AttactmentOptions onSendMedia={handleSendMedia} />
 
           <Textarea className="flex-1 h-14 rounded-xl border-0 bg-typography-50 data-[focus=true]:border-brand-primary/30 focus:bg-white">
             <TextareaInput
@@ -492,6 +538,15 @@ const MessageView = () => {
           maxToRenderPerBatch={10}
           windowSize={21}
         />
+
+        {progress > 0 && progress < 100 ? (
+          <Progress
+            value={progress}
+            className=" h-1 rounded-full w-3/4 mx-auto mb-2"
+          >
+            <ProgressFilledTrack className="bg-brand-secondary" />
+          </Progress>
+        ) : null}
         {/* ↓ Floating scroll-to-bottom button */}
         {showScrollButton && (
           <Fab

@@ -36,25 +36,6 @@ const MediaPicker = ({
     onFilesChange && onFilesChange?.(selectedFiles);
   }, [selectedFiles]);
 
-  // console.log("Selected files:", selectedFiles);
-
-  // const handlePickMedia = async (
-  //   source: "gallery" | "camera",
-  //   mediaType: ("images" | "videos")[]
-  // ) => {
-  //   // console.log("Picking media of type:", mediaType, "from", source);
-  //   await pickMedia(
-  //     source,
-  //     {
-  //       allowsMultipleSelection: source === "gallery",
-  //       quality: source === "camera" ? 0.8 : 1,
-  //       mediaTypes: mediaType,
-  //     },
-  //     maxFiles,
-  //     maxSize
-  //   );
-  // };
-
   const remainingSlots = maxFiles - selectedFiles.length;
 
   // Determine if we should show both image and video options

@@ -1,6 +1,9 @@
 import * as ImagePicker from "expo-image-picker";
+import * as DocumentPicker from "expo-document-picker";
+import * as FileSystem from "expo-file-system";
 import {
   FileType,
+  MediaPickerProps,
   MediaServiceInterface,
   MediaSource,
   ValidationConstraints,
@@ -39,6 +42,7 @@ class MediaService implements MediaServiceInterface {
         mediaTypes: options.mediaTypes,
         allowsMultipleSelection: options.allowsMultipleSelection ?? true,
         quality: options.quality ?? (mediaTypes === "videos" ? undefined : 1),
+        videoMaxDuration: options.videoMaxDuration ?? 60,
         ...options,
       };
 
@@ -55,23 +59,80 @@ class MediaService implements MediaServiceInterface {
 
       const files: FileType[] = await Promise.all(
         result.assets.map(async (asset) => {
+          // console.log("Processing asset:", asset);
+          // For iOS, we might need to fetch additional info using FileSystem
+          // For simplicity, we'll assume asset contains all necessary info
+          // In a real-world scenario, consider using FileSystem.getInfoAsync(asset.uri)
+          let fileInfo: FileSystem.FileInfo | null = null;
+          try {
+            fileInfo = await FileSystem.getInfoAsync(asset.uri, { size: true });
+            console.log("File info:", fileInfo);
+          } catch (e) {
+            console.warn("Failed to get file info:", e);
+          }
           return {
             uri: asset.uri,
-            name: asset.fileName ?? asset.uri.split("/").pop() ?? undefined,
-            type: asset.type as "image" | "video",
-            size: asset.fileSize,
-            width: asset.width,
-            height: asset.height,
-            duration: asset.duration ? Math.round(asset.duration) : undefined,
+            name: asset.fileName || asset.uri.split("/").pop() || "unknown",
+            type: asset.type as FileType["type"],
+            size:
+              fileInfo && "size" in fileInfo
+                ? (fileInfo as any).size
+                : asset.fileSize,
+            duration: asset.duration != null ? asset.duration : undefined, // in seconds, for videos
+            width: asset.width, // in pixels, for images
+            height: asset.height, // in pixels, for images
           };
         })
       );
-      // console.log("Processed files:", files);
+      // return {
+      //       uri: asset.uri,
+      //       name: asset.fileName ?? asset.uri.split("/").pop() ?? undefined,
+      //       type: asset.type as "image" | "video",
+      //       size: asset.fileSize,
+      //       width: asset.width,
+      //       height: asset.height,
+      //       duration: asset.duration ? Math.round(asset.duration) : undefined,
+      //     };
+      //   })
+      // );
+      // // console.log("Processed files:", files);
+      // return files;
       return files;
     } catch (error) {
       console.error("Error picking media:", error);
       throw error;
     }
+  }
+
+  async pickDocument(
+    options: DocumentPicker.DocumentPickerOptions
+  ): Promise<FileType[]> {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "text/plain",
+        "application/rtf",
+      ],
+      multiple: options.multiple || false,
+      copyToCacheDirectory: options.copyToCacheDirectory || true,
+      ...options,
+    });
+    if (result.canceled) {
+      return [];
+    }
+    const files = Array.isArray(result.assets)
+      ? result.assets
+      : [result.assets];
+    return files.map((file) => ({
+      uri: file.uri,
+      name: file.name,
+      type: file.mimeType as FileType["type"],
+      size: file.size,
+    }));
   }
 
   async hasPermission(source: MediaSource): Promise<boolean> {

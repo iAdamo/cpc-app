@@ -95,11 +95,11 @@ const UserProfile = () => {
     fetchUserData();
   }, [id, user, fetchUserProfile, updateUserProfile]);
 
-  if (isLoading || loading) {
-    return (
-      <Spinner size="large" className="flex-1 justify-center items-center" />
-    );
-  }
+  // if (isLoading ) {
+  //   return (
+  //     <Spinner size="large" className="flex-1 justify-center items-center" />
+  //   );
+  // }
   if (!provider) {
     return (
       <EmptyState

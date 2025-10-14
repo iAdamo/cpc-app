@@ -83,7 +83,7 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
     set({ isLoading: true, error: null });
     try {
       const response = await getUserProfile(userId);
-      console.log("fetched user", response);
+      // console.log("fetched user", response);
       if (response) {
         if (get().user && get().user?._id === response._id) {
           // If fetching own profile, update the user state
@@ -111,7 +111,7 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
     try {
       const response = await toggleFollowProvider(providerId);
       if (response) {
-        console.log("Follow toggle response:", response);
+        // console.log("Follow toggle response:", response);
         const currentUser = get().user;
         const isSelf = currentUser && response._id === currentUser._id;
         const updateObj = {

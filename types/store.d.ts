@@ -39,6 +39,8 @@ export interface GlobalState {
   clearInfo: () => void;
   clearSuccess: () => void;
   clearError: () => void;
+  progress: number;
+  setProgress: (progress: number) => void;
 }
 
 export interface AuthState {
@@ -161,6 +163,7 @@ export interface MediaState {
     maxFiles?: number,
     maxSize?: number
   ) => Promise<void>;
+  pickDocument: () => void;
   removeFile: (uri: string) => void;
   clearFiles: () => void;
 }
@@ -183,7 +186,8 @@ export interface ChatState {
   sendMediaMessage: (
     type: Message["type"],
     file: any,
-    options?: any
+    options?: any,
+    onProgress?: (progress: number) => void
   ) => Promise<void>;
   loadMessages: (page?: number) => Promise<void>;
   loadMoreMessages: () => Promise<void>;

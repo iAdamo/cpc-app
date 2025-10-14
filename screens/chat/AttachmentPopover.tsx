@@ -22,33 +22,29 @@ import {
 } from "lucide-react-native";
 import useGlobalStore from "@/store/globalStore";
 
-const AttactmentOptions = () => {
-  const { selectedFiles, pickMedia, removeFile, sendMediaMessage } =
-    useGlobalStore();
+const AttactmentOptions = ({
+  onSendMedia,
+}: {
+  onSendMedia?: (files: any[]) => void;
+}) => {
+  const {
+    selectedFiles,
+    pickMedia,
+    pickDocument,
+    removeFile,
+    setProgress,
+    // sendMediaMessage, // No longer used here
+  } = useGlobalStore();
 
-  const handleOnClose = async () => {
-    console.log("Selected files to send:", selectedFiles);
-    if (selectedFiles.length > 0) {
-      for (const file of selectedFiles) {
-        if (file.type) {
-          await sendMediaMessage(file.type, file);
-        } else {
-          // Optionally handle the case where file.type is undefined
-          console.warn(
-            "File type is undefined, skipping sendMediaMessage.",
-            file
-          );
-        }
-        removeFile(file.uri);
-      }
-    }
-  };
-
+  // Call parent callback when files are selected and popover closes
   useEffect(() => {
-    if (selectedFiles.length > 0) {
-      handleOnClose();
+    if (selectedFiles.length > 0 && onSendMedia) {
+      onSendMedia(selectedFiles);
+      // Optionally clear selected files after sending
+      selectedFiles.forEach((file) => removeFile(file.uri));
+      setProgress(0);
     }
-  }, [selectedFiles]);
+  }, [selectedFiles, onSendMedia, removeFile]);
 
   const options = [
     {
@@ -61,20 +57,30 @@ const AttactmentOptions = () => {
             mediaTypes: ["images", "videos"],
           },
           5,
-          10
+          50
         ),
       icon: ImagesIcon,
       color: "blue",
     },
     {
       label: "Camera",
-      action: () => alert("Camera"),
+      action: () =>
+        pickMedia(
+          "camera",
+          {
+            videoMaxDuration: 60,
+            allowsMultipleSelection: false,
+            mediaTypes: ["images", "videos"],
+          },
+          1,
+          10
+        ),
       icon: CameraIcon,
       color: "green",
     },
     {
       label: "Document",
-      action: () => alert("Document"),
+      action: () => pickDocument(),
       icon: FileTextIcon,
       color: "orange",
     },
@@ -96,7 +102,6 @@ const AttactmentOptions = () => {
     <Popover
       size="full"
       offset={15}
-      // crossOffset={40}
       isKeyboardDismissable={false}
       trigger={(triggerProps) => {
         return (

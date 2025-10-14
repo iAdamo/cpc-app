@@ -82,7 +82,10 @@ export class ApiClientSingleton {
       },
       onUploadProgress: (ProgressEvent) => {
         if (onProgress && ProgressEvent.total) {
-          const progress = (ProgressEvent.loaded / ProgressEvent.total) * 100;
+          const progress = Math.min(
+            (ProgressEvent.loaded / ProgressEvent.total) * 100,
+            100
+          );
           onProgress(Math.round(progress));
         }
       },

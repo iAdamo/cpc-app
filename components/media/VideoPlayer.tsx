@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import * as VideoThumbnails from "expo-video-thumbnails";
 import { useEvent } from "expo";
-import { useVideoPlayer, VideoView } from "expo-video";
+import { useVideoPlayer, VideoView, createVideoPlayer } from "expo-video";
 import { Image } from "../ui/image";
 import { Pressable } from "../ui/pressable";
 import { StyleSheet, View, ActivityIndicator } from "react-native";
@@ -13,6 +13,8 @@ interface VideoPlayerProps {
   autoPlay?: boolean;
   showControls?: boolean;
   thumbnailTime?: number;
+  loadThumbnail?: boolean;
+  fullScreen?: boolean;
 }
 
 export default function VideoPlayer({
@@ -20,6 +22,8 @@ export default function VideoPlayer({
   autoPlay = false,
   showControls = true,
   thumbnailTime = 1000,
+  loadThumbnail = true,
+  fullScreen = true,
 }: VideoPlayerProps) {
   const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,6 +52,10 @@ export default function VideoPlayer({
     };
 
     if (uri) {
+      if (!loadThumbnail) {
+        setIsLoading(false);
+        return;
+      }
       generateThumbnail();
     }
   }, [uri, thumbnailTime]);
@@ -78,7 +86,7 @@ export default function VideoPlayer({
   }, [isPlaying, showVideo, player]);
 
   const handleVideoPress = () => {
-    if (showControls) {
+    if (!showControls) {
       togglePlayPause();
     }
   };
@@ -114,20 +122,21 @@ export default function VideoPlayer({
     <View style={styles.container}>
       <Pressable
         onPress={handleVideoPress}
-        disabled={!showControls}
-        className="flex-1"
+        // disabled={!showControls}
+        className="flex-1 flex flex-col w-full justify-center bg-red-500 "
       >
         {showVideo ? (
           <View style={styles.videoWrapper}>
             <VideoView
               style={styles.video}
               player={player}
-              allowsFullscreen
+              allowsFullscreen={fullScreen}
               allowsPictureInPicture
+              nativeControls={showControls}
             />
 
             {/* Custom play/pause overlay */}
-            {showControls && (
+            {!showControls && (
               <View style={styles.controlsOverlay}>
                 <View style={styles.playButton}>
                   <Ionicons
@@ -170,6 +179,8 @@ export default function VideoPlayer({
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+    width: "100%",
     overflow: "hidden",
     backgroundColor: "#000",
   },
@@ -178,7 +189,7 @@ const styles = StyleSheet.create({
   },
   video: {
     width: "100%",
-    height: 275,
+    height: "100%",
     backgroundColor: "#000",
   },
   thumbnailContainer: {
@@ -208,7 +219,7 @@ const styles = StyleSheet.create({
     height: 275,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#000",
   },
   errorContainer: {
     height: 275,

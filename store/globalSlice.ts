@@ -1,3 +1,4 @@
+import { Progress } from "@/components/ui/progress";
 import { updateUserProfile } from "@/services/axios/user";
 import { StateCreator } from "zustand";
 import { GlobalStore, GlobalState, ActiveRole } from "@/types";
@@ -26,4 +27,6 @@ export const globalSlice: StateCreator<GlobalStore, [], [], GlobalState> = (
   },
   paramsFrom: null,
   setParamsFrom: (params) => set({ paramsFrom: params }),
+  progress: 0,
+  setProgress: (progress) => set({ progress }),
 });
