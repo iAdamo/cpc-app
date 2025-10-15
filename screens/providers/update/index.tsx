@@ -1,17 +1,21 @@
 import { VStack } from "@/components/ui/vstack";
+import useGlobalStore from "@/store/globalStore";
 import { HStack } from "@/components/ui/hstack";
 import { Heading } from "@/components/ui/heading";
-import { PhoneCallIcon } from "lucide-react-native";
+import {
+  BellDotIcon,
+  NavigationIcon,
+  PhoneCallIcon,
+} from "lucide-react-native";
 import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
-import useGlobalStore from "@/store/globalStore";
+
 import { LinearGradient } from "expo-linear-gradient";
-
-const ChatNavbar = () => {
-  const { switchRole } = useGlobalStore();
+const Update = () => {
+  const { switchRole } =
+    useGlobalStore();
   const isProvider = switchRole === "Provider";
-
   return (
-    <VStack className="bg-white">
+    <VStack className="flex-1">
       <HStack className="w-full relative">
         <LinearGradient
           colors={
@@ -31,36 +35,19 @@ const ChatNavbar = () => {
       <VStack className="pt-10 gap-4">
         <HStack className="p-4 justify-between">
           <Heading size="2xl" className="font-medium text-brand-primary">
-            Chats
+            Updates
           </Heading>
-          <Button
+          {/* <Button
             variant="outline"
             className="bg-brand-primary/40 rounded-3xl px-4"
           >
             <ButtonIcon as={PhoneCallIcon} className="text-brand-primary" />
             <ButtonText className="text-brand-primary">Call</ButtonText>
-          </Button>
+          </Button> */}
         </HStack>
-        {/* <HStack className="w-full p-4 items-center">
-            <Avatar size="md">
-              <AvatarFallbackText>{`${user?.firstName} ${user?.lastName}`}</AvatarFallbackText>
-              <AvatarImage
-                source={{
-                  uri:
-                    typeof user?.activeRoleId?.providerLogo === "string"
-                      ? user.activeRoleId.providerLogo
-                      : undefined,
-                }}
-              />
-            </Avatar>
-
-
-          </HStack> */}
-        {/** Search bar */}
-        {/* <SearchBar /> */}
       </VStack>
     </VStack>
   );
 };
 
-export default ChatNavbar;
+export default Update;

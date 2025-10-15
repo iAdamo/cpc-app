@@ -11,7 +11,8 @@ export const globalSearch = async (
   lat?: string,
   long?: string,
   address?: string,
-  sortBy?: string
+  sortBy?: string,
+  categories?: string[]
 ): Promise<{
   providers: ProviderData[];
   services?: ServiceData[];
@@ -26,6 +27,7 @@ export const globalSearch = async (
   if (long) params.long = long;
   if (address) params.address = address;
   if (sortBy) params.sortBy = sortBy;
+  if (categories) params.categories = categories;
 
   const response = await axiosInstance.get("search/providers", { params });
   return response.data;

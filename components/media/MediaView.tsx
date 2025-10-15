@@ -58,7 +58,10 @@ const MediaView = ({
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={() => {
+        player.release();
+        onClose();
+      }}
       closeOnOverlayClick={true}
       className="bg-black flex-1"
     >
@@ -90,6 +93,7 @@ const MediaView = ({
               loadThumbnail={false}
               autoPlay={true}
               showControls={false}
+              player={player}
             />
           )}
         </ModalBody>

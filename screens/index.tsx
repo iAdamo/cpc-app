@@ -7,8 +7,7 @@ import HomeView from "./providers/home";
 import TaskDisplay from "./clients/home";
 import ProfileView from "./profile";
 import Chat from "./chat";
-import { router } from "expo-router";
-import { usePathname } from "expo-router";
+import Update from "./providers/update";
 
 const Screen = () => {
   const { currentView, switchRole } = useGlobalStore();
@@ -21,7 +20,7 @@ const Screen = () => {
           (switchRole === "Client" ? <HomeView /> : <TaskDisplay />)}
         {currentView === "Updates" &&
           (switchRole === "Client" ? (
-            <Text>Client Updates View</Text>
+            <Update />
           ) : (
             <Text>Provider Updates View</Text>
           ))}

@@ -15,6 +15,7 @@ interface VideoPlayerProps {
   thumbnailTime?: number;
   loadThumbnail?: boolean;
   fullScreen?: boolean;
+  player?: ReturnType<typeof createVideoPlayer>;
 }
 
 export default function VideoPlayer({
@@ -24,11 +25,16 @@ export default function VideoPlayer({
   thumbnailTime = 1000,
   loadThumbnail = true,
   fullScreen = true,
+  player: externalPlayer,
 }: VideoPlayerProps) {
   const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showVideo, setShowVideo] = useState(autoPlay);
+  const [showPlayButton, setShowPlayButton] = useState(!autoPlay);
+  const [overlayTimeout, setOverlayTimeout] = useState<ReturnType<
+    typeof setTimeout
+  > | null>(null);
 
   // Generate thumbnail
   useEffect(() => {
@@ -61,16 +67,48 @@ export default function VideoPlayer({
   }, [uri, thumbnailTime]);
 
   // Initialize video player
-  const player = useVideoPlayer(uri, (player) => {
-    player.loop = false;
-    if (autoPlay) {
-      player.play();
-    }
-  });
+  if (!externalPlayer) {
+    externalPlayer = useVideoPlayer(uri, (player) => {
+      player.loop = false;
+      if (autoPlay) {
+        player.play();
+      }
+    });
+  }
+  const player = externalPlayer;
 
   const { isPlaying } = useEvent(player, "playingChange", {
     isPlaying: player.playing,
   });
+
+  // Show overlay for 3 seconds after touch
+  const showOverlay = useCallback(() => {
+    setShowPlayButton(true);
+    if (overlayTimeout) clearTimeout(overlayTimeout);
+    const timeout = setTimeout(() => {
+      setShowPlayButton(false);
+    }, 2000);
+    setOverlayTimeout(timeout);
+  }, [overlayTimeout]);
+
+  // Always show overlay on touch, hide after 3s
+  const handleVideoPress = () => {
+    showOverlay();
+    if (!showControls) {
+      togglePlayPause();
+    }
+  };
+
+  // Hide overlay after 3s when playing
+  useEffect(() => {
+    if (isPlaying && !showControls) {
+      showOverlay();
+    }
+    // Cleanup on unmount
+    return () => {
+      if (overlayTimeout) clearTimeout(overlayTimeout);
+    };
+  }, [isPlaying, showControls]);
 
   const togglePlayPause = useCallback(() => {
     if (!showVideo) {
@@ -84,12 +122,6 @@ export default function VideoPlayer({
       }
     }
   }, [isPlaying, showVideo, player]);
-
-  const handleVideoPress = () => {
-    if (!showControls) {
-      togglePlayPause();
-    }
-  };
 
   const handleReload = () => {
     setError(null);
@@ -122,7 +154,6 @@ export default function VideoPlayer({
     <View style={styles.container}>
       <Pressable
         onPress={handleVideoPress}
-        // disabled={!showControls}
         className="flex-1 flex flex-col w-full justify-center bg-red-500 "
       >
         {showVideo ? (
@@ -136,7 +167,7 @@ export default function VideoPlayer({
             />
 
             {/* Custom play/pause overlay */}
-            {!showControls && (
+            {!showControls && showPlayButton && (
               <View style={styles.controlsOverlay}>
                 <View style={styles.playButton}>
                   <Ionicons

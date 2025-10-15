@@ -80,7 +80,7 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
     }
   },
   fetchUserProfile: async (userId?: string) => {
-    set({ isLoading: true, error: null });
+    set({ error: null });
     try {
       const response = await getUserProfile(userId);
       // console.log("fetched user", response);
@@ -102,7 +102,6 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
     } catch (error: any) {
       set({
         error: error?.response?.data?.message || "Failed to fetch user profile",
-        isLoading: false,
       });
     }
   },

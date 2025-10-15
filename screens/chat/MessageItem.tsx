@@ -50,7 +50,7 @@ const MessageItem = memo(
             } ${
               isOwnMessage
                 ? "bg-brand-primary rounded-br-xl rounded-l-xl"
-                : " bg-brand-secondary rounded-r-xl rounded-bl-xl"
+                : " bg-gray-100 rounded-r-xl rounded-bl-xl"
             }`}
           >
             {message.isOptimistic && (
@@ -62,7 +62,14 @@ const MessageItem = memo(
             )}
 
             {message.type === "text" ? (
-              <Text size="lg" className="font-medium text-gray-100">
+              <Text
+                size="lg"
+                className={`font-medium ${
+                  isOwnMessage
+                    ? "text-typography-200 rounded-br-xl rounded-l-xl"
+                    : " text-brand-primary rounded-r-xl rounded-bl-xl"
+                }`}
+              >
                 {message.content?.text}
               </Text>
             ) : message.type === "image" ? (

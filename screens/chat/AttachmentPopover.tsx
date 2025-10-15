@@ -19,6 +19,7 @@ import {
   FileTextIcon,
   MapPinIcon,
   HeadphonesIcon,
+  VideoIcon,
 } from "lucide-react-native";
 import useGlobalStore from "@/store/globalStore";
 
@@ -63,20 +64,35 @@ const AttactmentOptions = ({
       color: "blue",
     },
     {
-      label: "Camera",
+      label: "Photo",
       action: () =>
         pickMedia(
           "camera",
           {
-            videoMaxDuration: 60,
             allowsMultipleSelection: false,
-            mediaTypes: ["images", "videos"],
+            mediaTypes: ["images"],
           },
           1,
           10
         ),
       icon: CameraIcon,
       color: "green",
+    },
+    {
+      label: "Video",
+      action: () =>
+        pickMedia(
+          "camera",
+          {
+            videoMaxDuration: 60,
+            allowsMultipleSelection: false,
+            mediaTypes: ["videos"],
+          },
+          1,
+          50
+        ),
+      icon: VideoIcon,
+      color: "yellow",
     },
     {
       label: "Document",

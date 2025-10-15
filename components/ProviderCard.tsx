@@ -45,6 +45,8 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
     await setSavedProviders(provider._id);
   };
 
+  // console.log("Rendering ProviderCard:", provider);
+
   return (
     <Card
       className={`rounded-lg p-0 ${

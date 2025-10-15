@@ -67,11 +67,21 @@ export const providerViewSlice: StateCreator<
     long?: number;
     address?: string;
     sortBy?: string;
+    categories?: string[];
   }) => {
     set({ error: null, success: null });
     try {
-      const { page, limit, engine, searchInput, lat, long, address, sortBy } =
-        params;
+      const {
+        page,
+        limit,
+        engine,
+        searchInput,
+        lat,
+        long,
+        address,
+        sortBy,
+        categories,
+      } = params;
       const response = await globalSearch(
         page,
         limit,
@@ -80,7 +90,8 @@ export const providerViewSlice: StateCreator<
         lat?.toString(),
         long?.toString(),
         address,
-        sortBy
+        sortBy,
+        categories
       );
       set({
         searchResults: {

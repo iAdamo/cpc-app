@@ -48,7 +48,6 @@ import MessageItem from "./MessageItem";
 import DateHeader from "@/components/DateHeader";
 import { SectionList } from "react-native";
 import { MessageSection } from "@/types";
-import MediaPicker from "@/components/media/MediaPicker";
 import AttactmentOptions from "./AttachmentPopover";
 import { Progress, ProgressFilledTrack } from "@/components/ui/progress";
 
@@ -67,6 +66,8 @@ const MessageView = () => {
     setProgress,
     progress,
     sendMediaMessage,
+    startTyping,
+    stopTyping,
   } = useGlobalStore();
 
   const [isSending, setIsSending] = useState(false);
@@ -300,6 +301,7 @@ const MessageView = () => {
 
   const FooterTextInput = () => {
     const [inputMessage, setInputMessage] = useState<string>("");
+    const typingTimeout = useRef<number | null>(null);
 
     const handleSendMessage = useCallback(async () => {
       if (inputMessage.trim().length === 0 || isSending) return;
@@ -375,7 +377,6 @@ const MessageView = () => {
     const mapMimeTypeToMessageType = (
       mimeType: string
     ): "text" | "image" | "video" | "audio" | "file" | "system" => {
-      console.log("Mapping MIME type:", mimeType);
       if (mimeType.startsWith("image")) return "image";
       if (mimeType.startsWith("video")) return "video";
       if (mimeType.startsWith("audio")) return "audio";
@@ -412,7 +413,19 @@ const MessageView = () => {
       }
     }, []);
 
-    console.log("progress", progress);
+    // Typing indicator logic
+    const handleInputChange = (text: string) => {
+      setInputMessage(text);
+      if (typingTimeout.current) clearTimeout(typingTimeout.current);
+      if (text.length > 0) {
+        startTyping();
+        typingTimeout.current = setTimeout(() => {
+          stopTyping();
+        }, 2000);
+      } else {
+        stopTyping();
+      }
+    };
 
     return (
       <VStack className="py-2 bg-white">
@@ -423,7 +436,7 @@ const MessageView = () => {
           <Textarea className="flex-1 h-14 rounded-xl border-0 bg-typography-50 data-[focus=true]:border-brand-primary/30 focus:bg-white">
             <TextareaInput
               placeholder="Write your message..."
-              onChangeText={setInputMessage}
+              onChangeText={handleInputChange}
               value={inputMessage}
               className=" focus:bg-blue-50 text-lg rounded-xl "
               multiline
@@ -450,15 +463,6 @@ const MessageView = () => {
             </Button>
           ) : (
             <HStack className="items-center">
-              <Button
-                variant="outline"
-                className="border-0 p-0 w-10 h-10 data-[active=true]:bg-transparent"
-              >
-                <ButtonIcon
-                  as={CameraIcon}
-                  className="text-brand-primary w-7 h-7"
-                />
-              </Button>
               <Button
                 variant="outline"
                 className="border-0 p-0 w-10 h-10 data-[active=true]:bg-transparent"
@@ -498,6 +502,10 @@ const MessageView = () => {
 
   const keyExtractor = useCallback((item: Message) => item._id, []);
 
+  // Typing indicator UI
+  const { typingUsers } = useGlobalStore();
+  const otherTyping = typingUsers && typingUsers.length > 0;
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: "white" }}
@@ -527,17 +535,17 @@ const MessageView = () => {
             minIndexForVisible: 0,
             autoscrollToTopThreshold: 10,
           }}
-          // ListEmptyComponent={() => (
-          //   <VStack className="flex-1 justify-center items-center py-8">
-          //     <Text className="text-gray-500 text-center transform scale-x-[-1]">
-          //       No messages yet.{"\n"}Start a conversation!
-          //     </Text>
-          //   </VStack>
-          // )}
           initialNumToRender={20}
           maxToRenderPerBatch={10}
           windowSize={21}
         />
+
+        {/* Typing indicator */}
+        {otherTyping && (
+          <VStack className="w-full items-start px-6 pb-2">
+            <Text className="text-xs text-gray-500">Someone is typing...</Text>
+          </VStack>
+        )}
 
         {progress > 0 && progress < 100 ? (
           <Progress

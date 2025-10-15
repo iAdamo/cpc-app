@@ -112,6 +112,7 @@ export interface ProviderState {
     long?: number;
     address?: string;
     sortBy?: string;
+    categories?: string[];
   }) => Promise<void>;
   clearSearchResults: () => void;
 }

@@ -40,7 +40,7 @@ const Categories = () => {
   const { width } = Dimensions.get("window");
 
   return (
-    <VStack className="mx-4">
+    <VStack className="mx-4 my-2">
       {/* Progress Indicator */}
       <HStack className="justify-center mb-2">
         {Array.from({ length: totalPages }).map((_, i) => (
@@ -74,7 +74,7 @@ const Categories = () => {
               .map((category, index) => (
                 <Pressable
                   key={category.name}
-                  className="w-[4.5rem] h-[4.5rem] p-4 bg-gray-100 rounded-xl items-center justify-center"
+                  className="w-[4.5rem] h-[4.5rem] p-4 bg-gray-100 rounded-xl items-center justify-center data-[active=true]:bg-brand-primary/40 "
                 >
                   <Text size="2xl" className="mb-2">
                     {category.icon}

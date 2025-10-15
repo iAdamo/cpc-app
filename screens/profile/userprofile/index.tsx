@@ -12,6 +12,7 @@ import { ScrollView } from "@/components/ui/scroll-view";
 import { ProviderData, EditableFields } from "@/types";
 import appendFormData from "@/utils/AppendFormData";
 import { set } from "lodash";
+import { tr } from "zod/v4/locales";
 
 const UserProfile = () => {
   const {
@@ -44,7 +45,7 @@ const UserProfile = () => {
     try {
       const formData = new FormData();
       appendFormData(formData, editingFields);
-      console.log(Array.from(formData.entries()));
+      // console.log(Array.from(formData.entries()));
       await updateUserProfile("Provider", formData);
     } catch (error) {
       console.error("Error saving profile changes:", error);
@@ -63,43 +64,37 @@ const UserProfile = () => {
   };
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      setLoading(true);
-      if (typeof id !== "string") return null;
-      if (
-        user?.activeRoleId &&
-        typeof user.activeRoleId._id === "string" &&
-        user.activeRoleId._id === id
-      ) {
-        setIsEditable(true);
-        setProvider(user.activeRoleId as ProviderData);
-      } else {
-        // const foundProvider = searchResults.providers.find(
-        //   (p) => p.owner === id
-        // );
-        // setIsEditable(false);
-        // if (foundProvider) {
-        //   setProvider(foundProvider);
-        // } else {
-        await fetchUserProfile(id);
-        const other = useGlobalStore.getState().otherUser;
-        setIsEditable(false);
-        if (other?.activeRoleId && typeof other.activeRoleId._id === "string") {
-          setProvider(other.activeRoleId as ProviderData);
-        } else {
-          setProvider(undefined);
-        }
-      }
-      setLoading(false);
-    };
-    fetchUserData();
-  }, [id, user, fetchUserProfile, updateUserProfile]);
+    setLoading(true);
+    if (typeof id !== "string") return;
+    if (
+      user?.activeRoleId &&
+      typeof user.activeRoleId._id === "string" &&
+      user.activeRoleId._id === id
+    ) {
+      setIsEditable(true);
+      setProvider(user.activeRoleId as ProviderData);
+    } else {
+      setIsEditable(false);
+      fetchUserProfile(id);
+    }
+    setLoading(false);
+  }, [id, user]);
 
-  // if (isLoading ) {
-  //   return (
-  //     <Spinner size="large" className="flex-1 justify-center items-center" />
-  //   );
-  // }
+  useEffect(() => {
+    if (
+      !isEditable &&
+      otherUser?.activeRoleId &&
+      typeof otherUser.activeRoleId._id === "string"
+    ) {
+      setProvider(otherUser.activeRoleId as ProviderData);
+    }
+  }, [otherUser, isEditable]);
+
+  if (loading) {
+    return (
+      <Spinner size="large" className="flex-1 justify-center items-center" />
+    );
+  }
   if (!provider) {
     return (
       <EmptyState
