@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import Categories from "./Categories";
 import { ScrollView } from "react-native";
 import { VStack } from "@/components/ui/vstack";
@@ -6,9 +7,6 @@ import SortBar from "./SortBar";
 import useGlobalStore from "@/store/globalStore";
 import { TopNavbar } from "@/components/layout/Navbar";
 import SearchBar from "@/components/SearchEngine";
-
-import { useEffect } from "react";
-import { useState } from "react";
 import { ProviderData } from "@/types";
 
 const HomeView = () => {
@@ -18,11 +16,19 @@ const HomeView = () => {
     executeSearch,
     currentLocation,
     displayStyle,
+    categories,
   } = useGlobalStore();
   const [providers, setProviders] = useState<ProviderData[]>([]);
+  const [isSearchFocus, setIsSearchFocus] = useState(false);
 
   useEffect(() => {
     const handleProvidersSearch = async () => {
+      // console.log("Fetching providers with:", {
+      //   sortBy,
+      //   lat: currentLocation?.coords.latitude,
+      //   long: currentLocation?.coords.longitude,
+      //   categories,
+      // });
       await executeSearch({
         page: 1,
         limit: 30,
@@ -30,10 +36,12 @@ const HomeView = () => {
         sortBy: sortBy,
         lat: currentLocation?.coords.latitude,
         long: currentLocation?.coords.longitude,
+        categories: categories,
       });
     };
+    // console.log(sortBy, currentLocation, categories);
     handleProvidersSearch();
-  }, [sortBy, currentLocation]);
+  }, [sortBy, currentLocation, categories]);
 
   useEffect(() => {
     if (searchResults && searchResults.providers) {
@@ -43,8 +51,8 @@ const HomeView = () => {
 
   return (
     <VStack className="flex-1">
-      <SearchBar />
-      <Categories />
+      <SearchBar isSearchFocus={setIsSearchFocus} />
+      {!isSearchFocus && <Categories />}
       <SortBar />
       <ContentDisplay providers={providers} displayStyle={displayStyle} />
     </VStack>

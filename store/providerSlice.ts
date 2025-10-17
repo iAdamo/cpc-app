@@ -20,6 +20,8 @@ export const providerViewSlice: StateCreator<
   currentView: "Home",
   displayStyle: "Grid",
   sortBy: "Relevance",
+  categories: [],
+  setCategories: (categories: string[]) => set({ categories }),
   setSortBy: (sortBy: SortBy) => set({ sortBy }),
   setDisplayStyle: (style: DisplayStyle) => set({ displayStyle: style }),
   setCurrentView: (view: ProviderView) => set({ currentView: view }),

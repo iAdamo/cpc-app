@@ -96,6 +96,8 @@ export interface ProviderState {
   displayStyle: DisplayStyle;
   setDisplayStyle: (style: DisplayStyle) => void;
   sortBy: sortByType;
+  categories: string[];
+  setCategories: (categories: string[]) => void;
   setSortBy: (sortBy: SortBy) => void;
   searchResults: SearchResultData;
   filteredProviders: ProviderData[];

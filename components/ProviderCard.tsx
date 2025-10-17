@@ -66,7 +66,7 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
           }
         >
           <VStack className="flex-1">
-            <Box className="relative w-full h-1/2 mb-2">
+            <Box className="relative w-full h-[55%] mb-2">
               <Image
                 source={
                   typeof provider.providerImages[0] === "string"

@@ -35,7 +35,7 @@ const SortBar = () => {
   ];
   return (
     <VStack className="p-4 bg-white">
-      <HStack className="justify-between items-center mt-2">
+      <HStack className="justify-between items-center">
         <HStack space="xs" className="items-center">
           <Text size="lg">Sort by:</Text>
           <Button

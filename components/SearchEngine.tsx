@@ -16,7 +16,13 @@ import { Place, ProviderData } from "@/types";
 import { debounce } from "lodash";
 import { usePathname } from "expo-router";
 
-const SearchBar = ({ providers }: { providers?: ProviderData[] }) => {
+const SearchBar = ({
+  providers,
+  isSearchFocus,
+}: {
+  providers?: ProviderData[];
+  isSearchFocus?: (focus: boolean) => void;
+}) => {
   const [locationInput, setLocationInput] = useState<boolean>(false);
   const [locationQuery, setLocationQuery] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -127,7 +133,10 @@ const SearchBar = ({ providers }: { providers?: ProviderData[] }) => {
     ? currentLocation.formattedAddress
     : "Get Location";
 
-  const handleFocus = useCallback(() => setLocationInput(true), []);
+  const handleFocus = useCallback(() => {
+    isHomeView && setLocationInput(true);
+    isSearchFocus && isSearchFocus(true);
+  }, []);
 
   return (
     <FormControl className="gap-4">
@@ -178,7 +187,11 @@ const SearchBar = ({ providers }: { providers?: ProviderData[] }) => {
             onChangeText={(text) => setSearchQuery(text)}
             value={searchQuery}
             onFocus={handleFocus}
-            onBlur={handleSearchExecute}
+            onBlur={() => {
+              isSearchFocus && isSearchFocus(false),
+                setLocationInput(false),
+                handleSearchExecute;
+            }}
           />
           {isLoading && (
             <InputSlot className="pr-3">
@@ -203,7 +216,7 @@ const SearchBar = ({ providers }: { providers?: ProviderData[] }) => {
           />
         </Input>
       )}
-      {isChatView && (
+      {/* {isChatView && (
         <Input className="m-4 rounded-2xl border-gray-300 h-14 data-[focus=true]:border-2 data-[focus=true]:border-brand-primary/60">
           <InputSlot className="pl-4">
             <InputIcon size="xl" as={SearchIcon} className="text-gray-400" />
@@ -214,7 +227,7 @@ const SearchBar = ({ providers }: { providers?: ProviderData[] }) => {
             // onChangeText={(text) => setFilterQuery(text)}
           />
         </Input>
-      )}
+      )} */}
     </FormControl>
   );
 };

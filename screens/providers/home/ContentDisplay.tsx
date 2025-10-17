@@ -24,7 +24,7 @@ const ContentDisplay = ({
       key={isGrid ? "grid" : "list"}
       numColumns={isGrid ? 2 : 1}
       renderItem={({ item }) => (
-        <View style={isGrid ? { flex: 1, margin: 4 } : { marginVertical: 4 }}>
+        <View style={{ flex: 1 }}>
           <ProviderCard provider={item} />
         </View>
       )}

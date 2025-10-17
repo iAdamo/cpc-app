@@ -96,13 +96,20 @@ export const TopNavbar = () => {
       <VStack className="pt-10 gap-4">
         <HStack className="w-full p-4 items-center">
           <Avatar size="md">
-            <AvatarFallbackText>{`${user?.firstName} ${user?.lastName}`}</AvatarFallbackText>
+            <AvatarFallbackText>
+              {isProvider
+                ? user?.activeRoleId?.providerName
+                : user?.firstName || "" + user?.lastName || ""}
+            </AvatarFallbackText>
             <AvatarImage
               source={{
-                uri:
-                  typeof user?.activeRoleId?.providerLogo === "string"
-                    ? user.activeRoleId.providerLogo
-                    : undefined,
+                uri: isProvider
+                  ? typeof user?.activeRoleId?.providerLogo === "string"
+                    ? user?.activeRoleId?.providerLogo
+                    : undefined
+                  : typeof user?.profilePicture === "string"
+                  ? user?.profilePicture
+                  : undefined,
               }}
             />
           </Avatar>

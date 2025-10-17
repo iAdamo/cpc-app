@@ -5,10 +5,12 @@ import { Text } from "@/components/ui/text";
 import { Card } from "@/components/ui/card";
 import { ScrollView, View, Dimensions } from "react-native";
 import { Pressable } from "@/components/ui/pressable";
+import useGlobalStore from "@/store/globalStore";
 
 const CATEGORIES_PER_PAGE = 5;
 
 const Categories = () => {
+  const { categories: selectedCategories, setCategories } = useGlobalStore();
   const categories = [
     { name: "Plumbing", icon: "🚰" },
     { name: "Electrical", icon: "💡" },
@@ -40,7 +42,7 @@ const Categories = () => {
   const { width } = Dimensions.get("window");
 
   return (
-    <VStack className="mx-4 my-2">
+    <VStack className="mx-2 mt-2">
       {/* Progress Indicator */}
       <HStack className="justify-center mb-2">
         {Array.from({ length: totalPages }).map((_, i) => (
@@ -65,7 +67,7 @@ const Categories = () => {
         style={{ width }}
       >
         {Array.from({ length: totalPages }).map((_, pageIndex) => (
-          <HStack key={pageIndex} style={{ width }} space="xs" className="">
+          <HStack key={pageIndex} style={{ width }} space="sm" className="">
             {categories
               .slice(
                 pageIndex * CATEGORIES_PER_PAGE,
@@ -74,7 +76,23 @@ const Categories = () => {
               .map((category, index) => (
                 <Pressable
                   key={category.name}
-                  className="w-[4.5rem] h-[4.5rem] p-4 bg-gray-100 rounded-xl items-center justify-center data-[active=true]:bg-brand-primary/40 "
+                  className={`w-[4.5rem] h-[4.5rem] p-2 bg-gray-100 rounded-xl items-center justify-center ${
+                    selectedCategories.includes(category.name)
+                      ? "bg-brand-primary/20 border-2 border-brand-primary/80"
+                      : ""
+                  }`}
+
+                  onPress={() => {
+                    if (selectedCategories.includes(category.name)) {
+                      setCategories(
+                        selectedCategories.filter(
+                          (cat) => cat !== category.name
+                        )
+                      );
+                    } else {
+                      setCategories([...selectedCategories, category.name]);
+                    }
+                  }}
                 >
                   <Text size="2xl" className="mb-2">
                     {category.icon}
