@@ -8,11 +8,12 @@ import {
   PhoneCallIcon,
 } from "lucide-react-native";
 import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
-import FeaturedCompanies from "./featuredCompanies";
+import renderFeaturedCompanies from "./FeaturedCompanies";
+import { FlatList } from "react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
 const Update = () => {
-  const { switchRole } = useGlobalStore();
+  const { switchRole, savedProviders } = useGlobalStore();
   const isProvider = switchRole === "Provider";
   return (
     <VStack className="flex-1">
@@ -46,7 +47,12 @@ const Update = () => {
           </Button> */}
         </HStack>
       </VStack>
-      <FeaturedCompanies />
+      <FlatList
+        data={savedProviders}
+        keyExtractor={(item) => item._id}
+        renderItem={renderFeaturedCompanies}
+        contentContainerStyle={{ paddingBottom: 20 }}
+      />
     </VStack>
   );
 };

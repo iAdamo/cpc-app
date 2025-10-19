@@ -56,8 +56,8 @@ export const BottomNavbar = () => {
               className={`${
                 currentView === button.label
                   ? isProvider
-                    ? "text-brand-secondary"
-                    : "text-brand-primary"
+                    ? "text-brand-secondary font-bold"
+                    : "text-brand-primary font-bold"
                   : "text-gray-500"
               } mt-1`}
             >

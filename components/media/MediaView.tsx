@@ -50,7 +50,6 @@ const MediaView = ({
   const isVideo = mediaType === "video";
   const isDoc = mediaType === "doc";
 
-  console.log("I always run");
   const player = useVideoPlayer(url, (player) => {
     player.loop = false;
     player.play();

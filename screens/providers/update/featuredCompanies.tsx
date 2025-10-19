@@ -13,79 +13,24 @@ import {
   AvatarFallbackText,
   AvatarImage,
 } from "@/components/ui/avatar";
+import MediaScroll from "./MediaScroll";
 import { Dimensions, View, StyleSheet, Image } from "react-native";
+import { ListRenderItem } from "react-native";
+import { ProviderData } from "@/types";
 
 const { width } = Dimensions.get("window");
 
-export function ImageScroll({ images }: { images: any[] }) {
-  const imageUrls = (images || [])
-    .map((img) => (typeof img === "string" ? img : img && (img.uri || img.url)))
-    .filter(Boolean) as string[];
+// const renderChatItem: ListRenderItem<Chat> = ({ item: chat }) => {
 
-  let imageWidth;
-
-  if (imageUrls.length === 1) {
-    imageWidth = width; // full width
-  } else if (imageUrls.length === 2) {
-    imageWidth = width / 2 - 10; // half width per image
-  } else {
-    imageWidth = width / 3 - 12; // about 3 per view
-  }
-
-  return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.scrollContent}
-    >
-      {imageUrls.map((img, idx) => (
-        <View key={idx} style={[styles.imageContainer, { width: imageWidth }]}>
-          <Image
-            source={{ uri: img }}
-            style={styles.image}
-            resizeMode="cover"
-          />
-        </View>
-      ))}
-      {imageUrls.map((img, idx) => (
-        <View key={idx} style={[styles.imageContainer, { width: imageWidth }]}>
-          <Image
-            source={{ uri: img }}
-            style={styles.image}
-            resizeMode="cover"
-          />
-        </View>
-      ))}
-    </ScrollView>
-  );
-}
-
-const styles = StyleSheet.create({
-  scrollContent: {
-    alignItems: "center",
-    paddingHorizontal: 6,
-    backgroundColor: "#f9f9f9",
-  },
-  imageContainer: {
-    marginRight: 6,
-    borderRadius: 10,
-    overflow: "hidden",
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 10,
-  },
-});
-
-const FeaturedCompanies = () => {
-  const { savedProviders: providers } = useGlobalStore();
+const renderFeaturedCompanies: ListRenderItem<ProviderData> = ({
+  item: providers,
+}) => {
   return (
     <VStack className="flex-1 mt-8 gap-2">
       <Heading size="xl" className="font-medium px-4 text-brand-primary">
         Featured Companies
       </Heading>
-      {providers.map((provider) => (
+      {[providers].map((provider) => (
         <VStack key={provider._id} className="justify-center h-80 bg-white">
           <HStack space="lg" className="items-center p-4 w-full">
             <Avatar size="md">
@@ -108,16 +53,25 @@ const FeaturedCompanies = () => {
             <Button
               size="sm"
               variant="outline"
-              className="ml-auto rotate-90 bg-gray-200 border-0"
+              className="ml-auto rotate-90 bg-black/30 border-0"
             >
-              <ButtonIcon as={ThreeDotsIcon} />
+              <ButtonIcon as={ThreeDotsIcon} size="xl" className="text-white" />
             </Button>
           </HStack>
-          <ImageScroll images={provider.providerImages} />
+          <MediaScroll
+            mediaItems={(provider.providerImages || []).map((m) =>
+              typeof m === "string"
+                ? { type: "image", uri: m }
+                : {
+                    type: (m as any).type || "image",
+                    uri: (m as any).uri || (m as any).url || "",
+                  }
+            )}
+          />
         </VStack>
       ))}
     </VStack>
   );
 };
 
-export default FeaturedCompanies;
+export default renderFeaturedCompanies;
