@@ -16,7 +16,7 @@ const { width } = Dimensions.get("window");
 export default function MediaScroll({
   mediaItems,
 }: {
-  mediaItems: { type: string; uri: string }[];
+  mediaItems: { type: string; uri: string; thumbnail?: string }[];
 }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,88 +25,46 @@ export default function MediaScroll({
     {}
   );
 
-  const generateThumbnail = async (
-    url: string
-  ): Promise<string | undefined> => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const { uri: thumbnailUri } = await VideoThumbnails.getThumbnailAsync(
-        url,
-        { time: 1000 }
-      );
-      return thumbnailUri;
-    } catch (e) {
-      console.warn("Failed to generate thumbnail:", e);
-      setError("Failed to load video thumbnail");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const media = [
+    ...mediaItems,
+    {
+      type: "image",
+      uri: "https://picsum.photos/401/600",
+      thumbnail: "https://picsum.photos/401/600",
+    },
+    {
+      type: "image",
+      uri: "https://picsum.photos/400/600",
+      thumbnail: "https://picsum.photos/400/600",
+    },
+    {
+      type: "image",
+      uri: "https://picsum.photos/401/600",
+      thumbnail: "https://picsum.photos/401/600",
+    },
+    {
+      type: "video",
+      uri: "https://www.w3schools.com/html/mov_bbb.mp4",
+      thumbnail: "https://picsum.photos/402/600",
+    },
+    {
+      type: "video",
+      uri: "https://companiescenterllc.com/uploads/iadamo.inc@gmail.com/chats/1760334328663/1000649711.mp4",
+      thumbnail: "https://picsum.photos/403/600",
+    },
+    {
+      type: "video",
+      uri: "https://www.w3schools.com/html/mov_bbb.mp4",
+      thumbnail: "https://picsum.photos/404/600",
+    },
+    // etc.
+  ];
 
-  // const media = [
-  //   { type: "image", uri: "https://picsum.photos/401/600" },
-  //   { type: "image", uri: "https://picsum.photos/400/600" },
-  //   { type: "image", uri: "https://picsum.photos/401/600" },
-  //   { type: "video", uri: "https://www.w3schools.com/html/mov_bbb.mp4" },
-  //   {
-  //     type: "video",
-  //     uri: "https://companiescenterllc.com/uploads/iadamo.inc@gmail.com/chats/1760334328663/1000649711.mp4",
-  //   },
-  //   // gimme another diff video
-
-  //   { type: "video", uri: "https://www.w3schools.com/html/mov_bbb.mp4" },
-  //   // etc.
-  // ];
-
-  useEffect(() => {
-    const source = mediaItems || [];
-
-    let mounted = true;
-
-    (async () => {
-      setIsLoading(true);
-      try {
-        if (thumbnails && Object.keys(thumbnails).length > 0) return;
-        const settled = await Promise.allSettled(
-          source.map(async (item, idx) => {
-            if (item?.type === "video") {
-              try {
-                const uri = await generateThumbnail(item.uri);
-                return { idx, uri };
-              } catch (e) {
-                return { idx, uri: undefined };
-              }
-            }
-            return { idx, uri: undefined };
-          })
-        );
-
-        if (!mounted) return;
-
-        const map: Record<number, string> = {};
-        for (const r of settled) {
-          if (r.status === "fulfilled" && r.value?.uri) {
-            map[r.value.idx] = r.value.uri;
-          }
-        }
-        setThumbnails(map);
-      } catch (e) {
-        console.warn("Thumbnail generation failed:", e);
-      } finally {
-        if (mounted) setIsLoading(false);
-      }
-    })();
-
-    return () => {
-      mounted = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mediaItems]);
+  console.log("MediaScroll mediaItems:", mediaItems);
 
   let imageWidth;
-  if (mediaItems.length === 1) imageWidth = width;
-  else if (mediaItems.length === 2) imageWidth = width / 2 - 10;
+  if (media.length === 1) imageWidth = width;
+  else if (media.length === 2) imageWidth = width / 2 - 10;
   else imageWidth = width / 3 - 8;
 
   return (
@@ -116,7 +74,7 @@ export default function MediaScroll({
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {mediaItems.map((item, idx) => {
+        {media.map((item, idx) => {
           return (
             <TouchableOpacity
               key={idx}
@@ -124,7 +82,7 @@ export default function MediaScroll({
                 router.push({
                   pathname: "/update",
                   params: {
-                    media: JSON.stringify(mediaItems),
+                    media: JSON.stringify(media),
                     startIndex: String(idx),
                   },
                 })
@@ -132,11 +90,7 @@ export default function MediaScroll({
             >
               <View style={[styles.imageContainer, { width: imageWidth }]}>
                 <Image
-                  // use pre-generated thumbnail URI for videos (string), avoiding Promise in source
-                  source={{
-                    uri:
-                      item.type === "video" ? thumbnails[idx] ?? "" : item.uri,
-                  }}
+                  source={{ uri: item.thumbnail || item.uri }}
                   alt={"media"}
                   style={styles.image}
                   contentFit="cover"

@@ -75,8 +75,9 @@ import {
   AvatarFallbackText,
   AvatarImage,
 } from "@/components/ui/avatar";
-import VideoPlayer from "@/components/media/VideoPlayer";
+import MediaView from "@/components/media/MediaView";
 import { Badge, BadgeText } from "@/components/ui/badge";
+import useVideoThumbnails from "@/hooks/useVideoThumbnails";
 
 export const MyServices = ({ providerId }: { providerId?: string }) => {
   const [loading, setLoading] = useState(false);
@@ -832,69 +833,75 @@ export const CreateServiceModal = ({
     </VStack>
   );
 
-  const renderPreview = () => (
-    <VStack className="mt-4 gap-4">
-      {/* <Text className="text-typography-700 mx-4 font-medium">
+  const renderPreview = () => {
+    const [viewMedia, setViewMedia] = useState<string | null>(null);
+
+    return (
+      <VStack className="mt-4 gap-4">
+        {/* <Text className="text-typography-700 mx-4 font-medium">
         {categoryName ||
           `${project?.subcategoryId.categoryId.name} | ${project?.subcategoryId.name}`}
       </Text> */}
 
-      <Card variant="filled" className="mx-4">
-        <Heading size="md" className="text-typography-600 mb-2">
-          Project Description
-        </Heading>
-        <Text className="text-typography-600">
-          {getValues("description") || project?.description}
-        </Text>
-      </Card>
+        <Card variant="filled" className="mx-4">
+          <Heading size="md" className="text-typography-600 mb-2">
+            Project Description
+          </Heading>
+          <Text className="text-typography-600">
+            {getValues("description") || project?.description}
+          </Text>
+        </Card>
 
-      <Card variant="filled" className="mx-4">
-        <Heading size="md" className="text-typography-600 mb-2">
-          Location
-        </Heading>
-        <Text className="text-typography-700">
-          {getValues("location") || project?.location}
-        </Text>
-      </Card>
+        <Card variant="filled" className="mx-4">
+          <Heading size="md" className="text-typography-600 mb-2">
+            Location
+          </Heading>
+          <Text className="text-typography-700">
+            {getValues("location") || project?.location}
+          </Text>
+        </Card>
 
-      <Card variant="filled" className="mx-4">
-        <Heading size="md" className="text-typography-600 mb-2">
-          Price Range
-        </Heading>
-        <Text className="text-typography-700">
-          {getValues("minPrice") && getValues("maxPrice")
-            ? `$${getValues("minPrice")} - $${getValues("maxPrice")}`
-            : project
-            ? `$${project.minPrice} - $${project.maxPrice}`
-            : ""}
-        </Text>
-      </Card>
+        <Card variant="filled" className="mx-4">
+          <Heading size="md" className="text-typography-600 mb-2">
+            Price Range
+          </Heading>
+          <Text className="text-typography-700">
+            {getValues("minPrice") && getValues("maxPrice")
+              ? `$${getValues("minPrice")} - $${getValues("maxPrice")}`
+              : project
+              ? `$${project.minPrice} - $${project.maxPrice}`
+              : ""}
+          </Text>
+        </Card>
 
-      <Card variant="filled" className="mx-4">
-        <Heading size="md" className="text-typography-600 mb-2">
-          Estimated Duration
-        </Heading>
-        <Text className="text-typography-700">
-          {getValues("duration") || project?.duration} days
-        </Text>
-      </Card>
+        <Card variant="filled" className="mx-4">
+          <Heading size="md" className="text-typography-600 mb-2">
+            Estimated Duration
+          </Heading>
+          <Text className="text-typography-700">
+            {getValues("duration") || project?.duration} days
+          </Text>
+        </Card>
 
-      {project?.media &&
-        project.media.length > 0 &&
-        project.media.map((mediaUrl, index) =>
-          mediaUrl.endsWith(".mp4") || mediaUrl.endsWith(".mov") ? (
-            <VideoPlayer key={index} uri={mediaUrl} />
-          ) : (
-            <Image
+        {project?.media &&
+          project.media.length > 0 &&
+          project.media.map((item, index) => (
+            <Pressable
               key={index}
-              source={{ uri: mediaUrl }}
-              className="w-full h-80 object-cover"
-              alt={`Project media ${index + 1}`}
-            />
-          )
-        )}
-    </VStack>
-  );
+              onPress={() => setViewMedia(item as string)}
+            >
+              <Image
+                source={{
+                  uri: (item as any).thumbnail,
+                }}
+                className="w-full h-80 object-cover"
+                alt={`Project media ${index + 1}`}
+              />
+            </Pressable>
+          ))}
+      </VStack>
+    );
+  };
 
   const renderFormFooter = () => {
     if (!isEditable) return null;

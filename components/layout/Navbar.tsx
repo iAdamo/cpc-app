@@ -107,8 +107,8 @@ export const TopNavbar = () => {
                   ? typeof user?.activeRoleId?.providerLogo === "string"
                     ? user?.activeRoleId?.providerLogo
                     : undefined
-                  : typeof user?.profilePicture === "string"
-                  ? user?.profilePicture
+                  : typeof user?.profilePicture?.thumbnail === "string"
+                  ? user?.profilePicture.thumbnail
                   : undefined,
               }}
             />

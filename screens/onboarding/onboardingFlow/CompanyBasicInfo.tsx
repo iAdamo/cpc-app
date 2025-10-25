@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, use } from "react";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Card } from "@/components/ui/card";
@@ -31,7 +31,7 @@ import { ScrollView } from "@/components/ui/scroll-view";
 import MediaPicker from "@/components/media/MediaPicker";
 import { GooglePlaceService } from "@/services/googlePlaceService";
 import { useCallback } from "react";
-import { FileType, Place } from "@/types";
+import { FileType, Place, MediaItem } from "@/types";
 import { debounce } from "lodash";
 import ProfilePic from "@/components/profile/ProfilePic";
 
@@ -71,29 +71,53 @@ const CompanyBasicInfo = () => {
       providerEmail: user.activeRoleId?.providerEmail || "",
       providerPhoneNumber: user.activeRoleId?.providerPhoneNumber || "",
       providerLogo: user.activeRoleId?.providerLogo
-        ? {
-            uri:
-              typeof user.activeRoleId?.providerLogo === "string"
-                ? user.activeRoleId?.providerLogo
-                : "",
-            name:
-              typeof user.activeRoleId?.providerLogo === "string"
-                ? user.activeRoleId?.providerLogo.split("/").pop() ||
-                  "companylogo.jpg"
-                : user.activeRoleId?.providerLogo.name || "companylogo.jpg",
-            type: "image/jpeg",
-          }
+        ? typeof (user?.activeRoleId?.providerLogo as MediaItem)?.thumbnail ===
+          "string"
+          ? {
+              uri: (user?.activeRoleId?.providerLogo as MediaItem).thumbnail,
+              name:
+                (user.activeRoleId?.providerLogo as MediaItem).url
+                  .split("/")
+                  .pop() || "companylogo.jpg",
+              type: (user.activeRoleId?.providerLogo as MediaItem).url.endsWith(
+                ".mp4"
+              )
+                ? "video/mp4"
+                : "image/jpeg",
+            }
+          : undefined
         : undefined,
-      providerImages: Array.isArray(user.activeRoleId?.providerImages)
-        ? user.activeRoleId.providerImages.map(
-            (img, index) =>
-              typeof img === "string"
-                ? {
-                    uri: img,
-                    name: img.split("/").pop() || `companyimage${index}.jpg`,
-                    type: "image/jpeg",
-                  }
-                : img // already a FileType object
+      // providerLogo: user.activeRoleId?.providerLogo
+      //   ? {
+      //       uri:
+      //         typeof user.activeRoleId?.providerLogo === "string"
+      //           ? user.activeRoleId?.providerLogo
+      //           : "",
+      //       name:
+      //         typeof user.activeRoleId?.providerLogo === "string"
+      //           ? user.activeRoleId?.providerLogo.split("/").pop() ||
+      //             "companylogo.jpg"
+      //           : user.activeRoleId?.providerLogo.name || "companylogo.jpg",
+      //       type: typeof user.activeRoleId?.providerLogo === "string"
+      //         ? user.activeRoleId?.providerLogo.endsWith(".mp4")
+      //           ? "video/mp4"
+      //           : "image/jpeg"
+      //         : user.activeRoleId?.providerLogo.type || "image/jpeg",
+      //     }
+      //   : undefined,
+      //  user?.activeRoleId?.providerLogo
+      //             ? typeof (user?.activeRoleId?.providerLogo as MediaItem)?.thumbnail === "string"
+      //               ? (user?.activeRoleId?.providerLogo as MediaItem).thumbnail
+      //               : undefined
+      //             : undefined
+      providerImages: Array.isArray(user?.activeRoleId?.providerImages)
+        ? user?.activeRoleId?.providerImages.map((img, idx) =>
+            typeof (img as MediaItem).thumbnail === "string"
+              ? {
+                  uri: (img as MediaItem).url,
+                  type: "image/jpeg" as FileType["type"],
+                }
+              : (img as FileType)
           )
         : [],
 
@@ -109,7 +133,7 @@ const CompanyBasicInfo = () => {
     const mappedFiles = files.map((file, index) => ({
       ...file,
       name: file.name ?? "", // Ensure name is always a string
-      type: "image/jpeg", // Default to image/jpeg if type is missing
+      // type: "image/jpeg", // Default to image/jpeg if type is missing
     }));
     setValue("providerImages", mappedFiles);
     if (files.length > 0) {

@@ -1,11 +1,9 @@
-import React, { useState } from "react";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import { Heading } from "@/components/ui/heading";
-import { Image } from "@/components/ui/image";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import {
   DotIcon,
@@ -15,7 +13,6 @@ import {
 } from "lucide-react-native";
 import { ProviderData, EditableFields } from "@/types";
 import useGlobalStore from "@/store/globalStore";
-import appendFormData from "@/utils/AppendFormData";
 import { Badge, BadgeText, BadgeIcon } from "@/components/ui/badge";
 import { router } from "expo-router";
 

@@ -35,7 +35,7 @@ const MyCompanies = () => {
                   onPress={() =>
                     router.push({
                       pathname: "/profile/[id]",
-                      params: { id: provider?._id ?? "" },
+                      params: { id: provider?.owner ?? "" },
                     })
                   }
                   className="bg-brand-primary shadow-xl"

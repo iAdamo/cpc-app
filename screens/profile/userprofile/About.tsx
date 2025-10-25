@@ -1,17 +1,19 @@
-import { useState } from "react";
+import { use, useState } from "react";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Card } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
+import { Pressable } from "@/components/ui/pressable";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Input, InputField } from "@/components/ui/input";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
 import { Image } from "@/components/ui/image";
 import { PencilLineIcon, TrashIcon } from "lucide-react-native";
 import MediaPicker from "@/components/media/MediaPicker";
+import MediaView from "@/components/media/MediaView";
 import useGlobalStore from "@/store/globalStore";
-import { ProviderData, FileType } from "@/types";
+import { ProviderData, FileType, MediaItem } from "@/types";
 import SocialMediaDetails from "./SocialLinks";
 
 interface AboutProps {
@@ -20,20 +22,37 @@ interface AboutProps {
 }
 
 const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
-  const { updateUserProfile } = useGlobalStore();
+  const { updateUserProfile, selectedFiles } = useGlobalStore();
   const [isImageEdit, setIsImageEdit] = useState(false);
   const [isDescEdit, setIsDescEdit] = useState(false);
   const [desc, setDesc] = useState(provider.providerDescription || "");
   const [photos, setPhotos] = useState<FileType[]>(
     Array.isArray(provider.providerImages)
       ? provider.providerImages.map((img, idx) =>
-          typeof img === "string"
-            ? { uri: img, type: "image/jpeg" as FileType["type"] }
-            : img
+          typeof (img as MediaItem).thumbnail === "string"
+            ? {
+                uri: (img as MediaItem).thumbnail!,
+                name:
+                  (img as MediaItem).url.split("/").pop() || `photo${idx}.jpg`,
+                type: "image/jpeg" as FileType["type"],
+                url: (img as MediaItem).url,
+                thumbnail: (img as MediaItem).thumbnail,
+                index: idx,
+              }
+            : (img as FileType)
         )
       : []
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [viewingPhoto, setViewingPhoto] = useState<string>("");
+
+  const openPhotoViewer = (url: string) => {
+    setViewingPhoto(url);
+  };
+
+  const handleDeletePhoto = (index: number) => {
+    setPhotos((prevPhotos) => prevPhotos.filter((_, idx) => idx !== index));
+  };
 
   const handleSave = async () => {
     setIsSubmitting(true);
@@ -41,14 +60,15 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
       const formData = new FormData();
       formData.append("providerDescription", desc);
       photos.forEach((photo, index) => {
-        formData.append(
-          "providerImages",
-          {
-            uri: photo.uri,
-            name: photo.name || `photo${index}.jpg`,
-            type: "image/jpeg",
-          } as any,
-        );
+        const fileName =
+          typeof (photo as FileType).name === "string"
+            ? (photo as FileType).name
+            : photo.uri.split("/").pop() || `photo${index}.jpg`;
+        formData.append("providerImages", {
+          uri: photo.uri,
+          name: fileName,
+          type: "image/jpeg",
+        } as any);
       });
       // console.log(Array.from(formData.entries()));
       await updateUserProfile("Provider", formData);
@@ -71,7 +91,10 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
           {isEditable && !isDescEdit && (
             <Button
               variant="link"
-              onPress={() => setIsDescEdit(true)}
+              onPress={() => {
+                setIsDescEdit(true);
+                useGlobalStore.setState({ selectedFiles: [] });
+              }}
               className="ml-auto"
             >
               <ButtonIcon
@@ -144,23 +167,30 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
             </Button>
           )}
         </HStack>
-
         {isImageEdit ? (
           <MediaPicker
             maxFiles={6}
             maxSize={10}
-            initialFiles={photos}
+            initialFiles={photos as FileType[]}
             onFilesChange={setPhotos}
             allowedTypes={["image", "video"]}
           />
         ) : photos.length > 0 ? (
-          photos.map((item, idx) => (
-            <Image
+          (photos as any).map((item: MediaItem, idx: number) => (
+            <Pressable
               key={idx}
-              source={typeof item === "string" ? item : item.uri}
-              alt={`Portfolio ${item.name || idx}`}
-              className="w-full h-60 rounded-md bg-gray-200 mb-4"
-            />
+              onPress={() => {
+                openPhotoViewer(item.url);
+              }}
+            >
+              <VStack className="relative">
+                <Image
+                  source={{ uri: item.thumbnail }}
+                  alt={`Portfolio ${idx}`}
+                  className="w-full h-60 rounded-md bg-gray-200 mb-4"
+                />
+              </VStack>
+            </Pressable>
           ))
         ) : (
           <Text className="text-gray-500 italic">No photos uploaded yet.</Text>
@@ -184,18 +214,24 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
                 setPhotos(
                   Array.isArray(provider.providerImages)
                     ? provider.providerImages.map((img, idx) =>
-                        typeof img === "string"
+                        typeof (img as MediaItem).thumbnail === "string"
                           ? {
-                              uri: img,
-                              name: `photo${idx}.jpg`,
-                              type: "image/jpeg" as FileType["type"],
+                              uri: (img as MediaItem).thumbnail!,
+                              name:
+                                (img as MediaItem).url.split("/").pop() ||
+                                `photo${idx}.jpg`,
+                              type: (img as MediaItem).type as FileType["type"],
+                              url: (img as MediaItem).url,
+                              thumbnail: (img as MediaItem).thumbnail,
+                              index: idx,
                             }
-                          : img
+                          : (img as FileType)
                       )
                     : []
                 );
+                useGlobalStore.setState({ selectedFiles: [] });
               }}
-              disabled={isSubmitting}
+              isDisabled={isSubmitting}
               className="bg-gray-200/50 border-0"
             >
               <ButtonText>Cancel</ButtonText>
@@ -203,6 +239,13 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
           </HStack>
         )}
       </VStack>
+      {viewingPhoto && (
+        <MediaView
+          isOpen={viewingPhoto !== null}
+          onClose={() => setViewingPhoto("")}
+          url={viewingPhoto}
+        />
+      )}
     </Card>
   );
 };

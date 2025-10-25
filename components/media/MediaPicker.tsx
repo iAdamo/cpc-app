@@ -25,6 +25,9 @@ const MediaPicker = ({
   const { selectedFiles, isLoading, pickMedia, removeFile, error } =
     useGlobalStore();
 
+  // console.log("initialFiles in MediaPicker:", initialFiles);
+  // console.log("selectedFiles in MediaPicker:", selectedFiles);
+
   useEffect(() => {
     if (initialFiles.length > 0 && selectedFiles.length === 0) {
       useGlobalStore.setState({ selectedFiles: initialFiles });
@@ -73,7 +76,7 @@ const MediaPicker = ({
             }}
           >
             {selectedFiles.map((file, index) => (
-              <Box key={file.uri} className="relative mr-2">
+              <Box key={index} className="relative mr-2">
                 <Image
                   source={{ uri: file.uri }}
                   alt={file.name || `Selected media ${index + 1}`}

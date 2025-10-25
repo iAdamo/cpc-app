@@ -1,5 +1,13 @@
 import { ProviderData } from "./provider";
 
+
+export interface MediaItem {
+  type: "image" | "video";
+  url: string;
+  thumbnail?: string;
+  index?: number;
+}
+
 export interface UserData {
   id: string;
   _id: string;
@@ -15,7 +23,7 @@ export interface UserData {
   followingCount: number;
   followedProviders: ProviderData[];
   phoneEditCount: number;
-  profilePicture?: string;
+  profilePicture?: MediaItem;
   purchasedServices: any[];
   createdAt: string;
   updatedAt: string;

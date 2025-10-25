@@ -15,6 +15,7 @@ import { Menu, MenuItem, MenuItemLabel } from "@/components/ui/menu";
 import { Place, ProviderData } from "@/types";
 import { debounce } from "lodash";
 import { usePathname } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 
 const SearchBar = ({
   providers,
@@ -30,7 +31,7 @@ const SearchBar = ({
   const [filterQuery, setFilterQuery] = useState<string>("");
 
   const pathname = usePathname();
-  // const isHomeView = pathname === "/clients" || pathname === "/providers";
+  const params = useLocalSearchParams();
 
   const {
     setFilteredProviders,
@@ -42,6 +43,11 @@ const SearchBar = ({
     setError,
     currentView,
   } = useGlobalStore();
+
+  const isSavedCompaniesView =
+    pathname === "/profile" && params.section === "saved-companies";
+
+  const isUpdateView = currentView === "Updates";
 
   const isHomeView = currentView === "Home";
   const isChatView = currentView === "Chat";
@@ -189,7 +195,7 @@ const SearchBar = ({
             onFocus={handleFocus}
             onBlur={() => {
               isSearchFocus && isSearchFocus(false),
-                setLocationInput(false),
+                // setLocationInput(false),
                 handleSearchExecute;
             }}
           />
@@ -200,7 +206,7 @@ const SearchBar = ({
           )}
         </Input>
       )}
-      {!isHomeView && !isChatView && (
+      {isSavedCompaniesView || isUpdateView && (
         <Input className="m-4 rounded-2xl border-gray-300 h-14 data-[focus=true]:border-2 data-[focus=true]:border-brand-primary/60">
           <InputSlot className="pl-4">
             <InputIcon
@@ -210,24 +216,24 @@ const SearchBar = ({
             />
           </InputSlot>
           <InputField
-            placeholder="Filter..."
+            placeholder={isSavedCompaniesView ? "Filter..." : "Search for companies..."}
             className="placeholder:text-lg placeholder:text-gray-400"
             onChangeText={(text) => setFilterQuery(text)}
           />
         </Input>
       )}
-      {/* {isChatView && (
+      {isChatView && (
         <Input className="m-4 rounded-2xl border-gray-300 h-14 data-[focus=true]:border-2 data-[focus=true]:border-brand-primary/60">
           <InputSlot className="pl-4">
             <InputIcon size="xl" as={SearchIcon} className="text-gray-400" />
           </InputSlot>
           <InputField
-            placeholder="Search Chats"
+            placeholder="Search Chats..."
             className="placeholder:text-lg placeholder:text-gray-400"
             // onChangeText={(text) => setFilterQuery(text)}
           />
         </Input>
-      )} */}
+      )}
     </FormControl>
   );
 };

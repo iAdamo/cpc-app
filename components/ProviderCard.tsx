@@ -21,7 +21,7 @@ import { HeartIcon, StarIcon } from "lucide-react-native";
 import { usePathname, useLocalSearchParams } from "expo-router";
 import RatingSection from "./RatingFunction";
 import { ShareService } from "@/services/shareService";
-import { ProviderData } from "@/types";
+import { ProviderData, MediaItem } from "@/types";
 
 const ProviderCard = ({ provider }: { provider: ProviderData }) => {
   const {
@@ -69,8 +69,12 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
             <Box className="relative w-full h-[55%] mb-2">
               <Image
                 source={
-                  typeof provider.providerImages[0] === "string"
-                    ? { uri: provider.providerImages[0] }
+                  typeof (provider.providerImages[0] as MediaItem).thumbnail ===
+                  "string"
+                    ? {
+                        uri: (provider.providerImages[0] as MediaItem)
+                          .thumbnail,
+                      }
                     : undefined
                 }
                 alt={provider.providerName}
@@ -114,8 +118,12 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
                     </AvatarFallbackText>
                     <AvatarImage
                       source={
-                        typeof provider?.providerLogo === "string"
-                          ? { uri: provider.providerLogo }
+                        typeof (provider?.providerLogo as MediaItem)
+                          .thumbnail === "string"
+                          ? {
+                              uri: (provider.providerLogo as MediaItem)
+                                .thumbnail,
+                            }
                           : undefined
                       }
                     />
@@ -156,8 +164,12 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
             <Box className="relative w-1/2 h-full mr-4">
               <Image
                 source={
-                  typeof provider.providerImages[0] === "string"
-                    ? { uri: provider.providerImages[0] }
+                  typeof (provider.providerImages[0] as MediaItem).thumbnail ===
+                  "string"
+                    ? {
+                        uri: (provider.providerImages[0] as MediaItem)
+                          .thumbnail,
+                      }
                     : undefined
                 }
                 alt={provider.providerName}
@@ -202,8 +214,12 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
                       </AvatarFallbackText>
                       <AvatarImage
                         source={
-                          typeof provider?.providerLogo === "string"
-                            ? { uri: provider.providerLogo }
+                          typeof (provider?.providerLogo as MediaItem)
+                            .thumbnail === "string"
+                            ? {
+                                uri: (provider.providerLogo as MediaItem)
+                                  .thumbnail,
+                              }
                             : undefined
                         }
                       />

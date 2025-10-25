@@ -87,7 +87,7 @@ export default function VideoPlayer({
     if (overlayTimeout) clearTimeout(overlayTimeout);
     const timeout = setTimeout(() => {
       setShowPlayButton(false);
-    }, 2000);
+    }, 3000);
     setOverlayTimeout(timeout);
   }, [overlayTimeout]);
 
@@ -217,6 +217,8 @@ const styles = StyleSheet.create({
   },
   videoWrapper: {
     position: "relative",
+    width: "100%",
+    height: "100%",
   },
   video: {
     width: "100%",

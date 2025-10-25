@@ -166,6 +166,7 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       currentStep: 1,
       currentView: "Home",
       displayStyle: "Grid",
+      selectedFiles: [],
       currentLocation: null,
       paramsFrom: null,
       selectedChat: null,

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
 });
 const ImageHeader = ({ provider }: { provider: ProviderData }) => {
   const [showOptions, setShowOptions] = useState(false);
-  const { toggleFollow, isFollowing, user } = useGlobalStore();
+  const { toggleFollow, isFollowing, user, otherUser } = useGlobalStore();
 
   const handleFollow = async () => {
     if (!provider || !provider._id) return;
@@ -49,6 +49,16 @@ const ImageHeader = ({ provider }: { provider: ProviderData }) => {
   ];
 
   // console.log(provider.providerImages[0]);
+
+  useEffect(() => {
+    useGlobalStore.setState((state) => {
+      state.isFollowing = Boolean(
+        otherUser?.activeRoleId?.followedBy?.includes(
+          state.user?._id || ""
+        )
+      );
+    });
+  }, [otherUser, isFollowing, user]);
 
   return (
     <VStack className="h-72">
@@ -83,9 +93,7 @@ const ImageHeader = ({ provider }: { provider: ProviderData }) => {
         <HStack className="w-full bg-white/20 backdrop-blur-3xl px-4 py-2 justify-between items-center">
           <HStack>
             <VStack>
-              <Heading className="text-white">
-                {provider.reviewCount}
-              </Heading>
+              <Heading className="text-white">{provider.reviewCount}</Heading>
               <Text className="text-white">
                 {provider.reviewCount === 1 ? "review" : "reviews"}
               </Text>
@@ -96,9 +104,7 @@ const ImageHeader = ({ provider }: { provider: ProviderData }) => {
                 {provider.followersCount}
               </Heading>
               <Text className="text-white">
-                {provider.favoriteCount === 1
-                  ? "follower"
-                  : "followers"}
+                {provider.favoriteCount === 1 ? "follower" : "followers"}
               </Text>
             </VStack>
             <Divider orientation="vertical" className="mx-4 h-5 self-center" />

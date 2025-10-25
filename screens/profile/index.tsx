@@ -12,7 +12,7 @@ import useGlobalStore from "@/store/globalStore";
 import ProfileSection from "./ProfileSection";
 import { router } from "expo-router";
 import ProfilePic from "@/components/profile/ProfilePic";
-import { FileType } from "@/types";
+import { FileType, MediaItem } from "@/types";
 
 const ProfileView = () => {
   const [profilePic, setProfilePic] = useState<FileType | null>(null);
@@ -93,12 +93,14 @@ const ProfileView = () => {
                 showChangeButton={false}
                 isLogo={true}
                 imageUri={
-                  typeof (switchRole === "Client"
-                    ? user?.profilePicture
-                    : user?.activeRoleId?.providerLogo) === "string"
-                    ? switchRole === "Client"
-                      ? (user?.profilePicture as string | undefined)
-                      : (user?.activeRoleId?.providerLogo as string | undefined)
+                  switchRole === "Client"
+                    ? typeof user?.profilePicture?.thumbnail === "string"
+                      ? user?.profilePicture.thumbnail
+                      : undefined
+                    : user?.activeRoleId?.providerLogo
+                    ? typeof (user?.activeRoleId?.providerLogo as MediaItem)?.thumbnail === "string"
+                      ? (user?.activeRoleId?.providerLogo as MediaItem).thumbnail
+                      : undefined
                     : undefined
                 }
                 onImageSelected={(file) => setProfilePic(file)}

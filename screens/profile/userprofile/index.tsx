@@ -11,8 +11,6 @@ import EmptyState from "@/components/EmptyState";
 import { ScrollView } from "@/components/ui/scroll-view";
 import { ProviderData, EditableFields } from "@/types";
 import appendFormData from "@/utils/AppendFormData";
-import { set } from "lodash";
-import { tr } from "zod/v4/locales";
 
 const UserProfile = () => {
   const {
@@ -69,7 +67,7 @@ const UserProfile = () => {
     if (
       user?.activeRoleId &&
       typeof user.activeRoleId._id === "string" &&
-      user.activeRoleId._id === id
+      user._id === id
     ) {
       setIsEditable(true);
       setProvider(user.activeRoleId as ProviderData);

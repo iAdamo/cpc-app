@@ -89,7 +89,6 @@ const MediaView = ({
           {isVideo && (
             <VideoPlayer
               uri={url}
-              loadThumbnail={false}
               autoPlay={true}
               showControls={false}
               player={player}

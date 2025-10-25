@@ -7,7 +7,7 @@ const createClient = () => {
     baseURL:
       process.env.NODE_ENV === "production"
         ? process.env.EXPO_PUBLIC_API_URL
-        : "https://companiescenterllc.com/sanuxapi",
+        : "https://ljv0w2p0-3333.uks1.devtunnels.ms/", // dev tunnel URL for local testing
     headers: {
       "Content-Type": "application/json",
     },

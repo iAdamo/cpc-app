@@ -84,6 +84,8 @@ const ProfileInfo = () => {
     }
   };
 
+  console.log("Rendering ProfileInfo with user:", user);
+
   return (
     <VStack className="px-6 mt-4 gap-10">
       <VStack space="md">
@@ -103,7 +105,7 @@ const ProfileInfo = () => {
           size="lg"
           isEditable={true}
           showChangeButton={false}
-          imageUri={user?.profilePicture}
+          imageUri={user?.profilePicture?.thumbnail}
           onImageSelected={(file) => setProfilePic(file)}
         />
       </VStack>
