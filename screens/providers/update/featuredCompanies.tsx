@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/avatar";
 import MediaScroll from "./MediaScroll";
 import { Dimensions, View, StyleSheet, Image } from "react-native";
-import { ProviderData } from "@/types";
+import { MediaItem, ProviderData } from "@/types";
 import { ShareService } from "@/services/shareService";
 
 const { width } = Dimensions.get("window");
@@ -146,8 +146,9 @@ function FeaturedCompanyItem({ provider }: { provider: ProviderData }) {
           <AvatarImage
             source={{
               uri:
-                typeof provider.providerLogo === "string"
-                  ? provider.providerLogo
+                typeof (provider.providerLogo as MediaItem).thumbnail ===
+                "string"
+                  ? (provider.providerLogo as MediaItem).thumbnail
                   : undefined,
             }}
           />
@@ -165,16 +166,12 @@ function FeaturedCompanyItem({ provider }: { provider: ProviderData }) {
         </Button>
       </HStack>
       <MediaScroll
-        mediaItems={(provider.providerImages || []).map((m) =>
-          typeof m === "string"
-            ? { type: "image", uri: m }
-            : {
-                type: (m as any).type || "image",
-                uri: (m as any).uri || (m as any).url || "",
-              }
-        )}
+        mediaItems={(provider.providerImages || []).map((m) => ({
+          type: (m as MediaItem).type,
+          uri: (m as MediaItem).url,
+          thumbnail: (m as MediaItem).thumbnail,
+        }))}
       />
-
       {isOptionsOpen && (
         <ProviderOptions
           isOpen={isOptionsOpen}
@@ -192,9 +189,6 @@ export default function FeaturedCompanies() {
     ({ item }: ListRenderItemInfo<ProviderData>) => {
       return (
         <VStack>
-          <Heading size="xl" className="px-4 text-brand-primary">
-            Featured Companies
-          </Heading>
           <FeaturedCompanyItem provider={item} />
         </VStack>
       );

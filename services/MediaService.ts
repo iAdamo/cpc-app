@@ -9,6 +9,7 @@ import {
   ValidationConstraints,
   ValidationResult,
 } from "@/types";
+import { removeFile } from "./axios/user";
 
 class MediaService implements MediaServiceInterface {
   private static instance: MediaService;

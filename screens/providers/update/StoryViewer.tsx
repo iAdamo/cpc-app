@@ -25,6 +25,8 @@ export default function StoryViewer() {
     ? Math.max(0, Number(params.startIndex))
     : 0;
 
+    // console.log("StoryViewer mediaItems:", mediaItems);
+
   const [currentIndex, setCurrentIndex] = useState(startIndex);
   const [paused, setPaused] = useState(false);
   const progressAnimations = useRef(
@@ -36,6 +38,8 @@ export default function StoryViewer() {
 
   const currentItem = mediaItems[currentIndex];
   const isVideo = currentItem?.type === "video";
+
+  console.log("StoryViewer currentItem:", currentItem);
 
   const player = useVideoPlayer(currentItem.uri, (player) => {
     player.loop = false;

@@ -1,4 +1,4 @@
-import { use, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Card } from "@/components/ui/card";
@@ -25,6 +25,7 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
   const { updateUserProfile, selectedFiles } = useGlobalStore();
   const [isImageEdit, setIsImageEdit] = useState(false);
   const [isDescEdit, setIsDescEdit] = useState(false);
+  const [isPhotoSavable, setIsPhotoSavable] = useState(false);
   const [desc, setDesc] = useState(provider.providerDescription || "");
   const [photos, setPhotos] = useState<FileType[]>(
     Array.isArray(provider.providerImages)
@@ -37,7 +38,7 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
                 type: "image/jpeg" as FileType["type"],
                 url: (img as MediaItem).url,
                 thumbnail: (img as MediaItem).thumbnail,
-                index: idx,
+                index: (img as MediaItem).index || idx,
               }
             : (img as FileType)
         )
@@ -45,6 +46,16 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [viewingPhoto, setViewingPhoto] = useState<string>("");
+
+  const initialPhotoUrlsRef = useRef<string[]>([]);
+
+  useEffect(() => {
+    initialPhotoUrlsRef.current = Array.isArray(provider.providerImages)
+      ? (provider.providerImages as any[])
+          .map((img) => (img as MediaItem).url)
+          .filter(Boolean)
+      : [];
+  }, [provider.providerImages]);
 
   const openPhotoViewer = (url: string) => {
     setViewingPhoto(url);
@@ -55,11 +66,35 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
   };
 
   const handleSave = async () => {
+    // console.log("Saving description and photos...", photos);
+    // console.log("Selected files from store:", selectedFiles);
     setIsSubmitting(true);
     try {
+      // Determine what actually changed:
+      const initialUrls = initialPhotoUrlsRef.current || [];
+      const currentUrls = photos
+        .filter((p) => (p as any).url)
+        .map((p) => (p as any).url as string);
+
+      const removedUrls = initialUrls.filter((u) => !currentUrls.includes(u));
+      const addedFiles = photos.filter((p) => !(p as any).url);
+
+      const descChanged =
+        (provider.providerDescription || "").trim() !== desc.trim();
+
+      // If nothing changed, avoid calling backend and just close editors.
+      if (!descChanged && removedUrls.length === 0 && addedFiles.length === 0) {
+        setIsSubmitting(false);
+        setIsDescEdit(false);
+        setIsImageEdit(false);
+        return;
+      }
+
       const formData = new FormData();
-      formData.append("providerDescription", desc);
-      photos.forEach((photo, index) => {
+      if (descChanged) formData.append("providerDescription", desc);
+
+      // Append newly added files only
+      addedFiles.forEach((photo, index) => {
         const fileName =
           typeof (photo as FileType).name === "string"
             ? (photo as FileType).name
@@ -67,19 +102,45 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
         formData.append("providerImages", {
           uri: photo.uri,
           name: fileName,
-          type: "image/jpeg",
+          type: (photo as FileType).type || "image/jpeg",
         } as any);
       });
-      // console.log(Array.from(formData.entries()));
+
+      // Inform backend which images were removed (if any)
+      if (removedUrls.length > 0) {
+        formData.append("deletedImages", JSON.stringify(removedUrls));
+      }
+
+      // Only call update if something changed (checked above)
       await updateUserProfile("Provider", formData);
+
+      // After successful save, update our snapshot to the current state so
+      // further saves without changes are ignored.
+      initialPhotoUrlsRef.current = currentUrls;
+
       setIsDescEdit(false);
       setIsImageEdit(false);
     } catch (e) {
-      // handle error
+      // handle error (optionally show toast)
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // Derived dirty flags for UI (disable Save when nothing changed)
+  const photosHaveChanges = useMemo(() => {
+    const initial = initialPhotoUrlsRef.current || [];
+    const current = photos
+      .filter((p) => (p as any).url)
+      .map((p) => (p as any).url as string);
+    const removed = initial.filter((u) => !current.includes(u));
+    const added = photos.filter((p) => !(p as any).url);
+    return removed.length > 0 || added.length > 0;
+  }, [photos]);
+
+  const descIsDirty = useMemo(() => {
+    return (provider.providerDescription || "").trim() !== desc.trim();
+  }, [desc, provider.providerDescription]);
 
   return (
     <Card className="p-0">
@@ -126,7 +187,7 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
               size="xs"
               variant="outline"
               onPress={handleSave}
-              isDisabled={isSubmitting || !desc.trim()}
+              isDisabled={isSubmitting || !descIsDirty}
               className="bg-brand-secondary/30 border-0"
             >
               <ButtonText>{isSubmitting ? "Saving..." : "Save"}</ButtonText>
@@ -201,7 +262,7 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
               size="xs"
               variant="outline"
               onPress={handleSave}
-              isDisabled={isSubmitting}
+              isDisabled={isSubmitting || !photosHaveChanges}
               className="bg-brand-secondary/30 border-0"
             >
               <ButtonText>{isSubmitting ? "Saving..." : "Save"}</ButtonText>

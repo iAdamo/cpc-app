@@ -25,42 +25,7 @@ export default function MediaScroll({
     {}
   );
 
-  const media = [
-    ...mediaItems,
-    {
-      type: "image",
-      uri: "https://picsum.photos/401/600",
-      thumbnail: "https://picsum.photos/401/600",
-    },
-    {
-      type: "image",
-      uri: "https://picsum.photos/400/600",
-      thumbnail: "https://picsum.photos/400/600",
-    },
-    {
-      type: "image",
-      uri: "https://picsum.photos/401/600",
-      thumbnail: "https://picsum.photos/401/600",
-    },
-    {
-      type: "video",
-      uri: "https://www.w3schools.com/html/mov_bbb.mp4",
-      thumbnail: "https://picsum.photos/402/600",
-    },
-    {
-      type: "video",
-      uri: "https://companiescenterllc.com/uploads/iadamo.inc@gmail.com/chats/1760334328663/1000649711.mp4",
-      thumbnail: "https://picsum.photos/403/600",
-    },
-    {
-      type: "video",
-      uri: "https://www.w3schools.com/html/mov_bbb.mp4",
-      thumbnail: "https://picsum.photos/404/600",
-    },
-    // etc.
-  ];
-
-  console.log("MediaScroll mediaItems:", mediaItems);
+  const media = [...mediaItems];
 
   let imageWidth;
   if (media.length === 1) imageWidth = width;

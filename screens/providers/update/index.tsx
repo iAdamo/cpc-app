@@ -56,7 +56,12 @@ const Update = () => {
         {searchOn ? (
           <SearchBar providers={savedProviders} />
         ) : (
-          <FeaturedCompanies />
+          <VStack>
+            <Heading size="xl" className="px-4 text-brand-primary">
+              Featured Companies
+            </Heading>
+            <FeaturedCompanies />
+          </VStack>
         )}
       </VStack>
     </VStack>

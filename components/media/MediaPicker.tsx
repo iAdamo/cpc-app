@@ -12,6 +12,7 @@ import { Icon, CloseIcon, TrashIcon } from "@/components/ui/icon";
 import { Pressable } from "@/components/ui/pressable";
 import useGlobalStore from "@/store/globalStore";
 import { MediaPickerProps } from "@/types";
+import { removeFile } from "@/services/axios/user";
 
 const MediaPicker = ({
   maxFiles = 5,
@@ -29,9 +30,20 @@ const MediaPicker = ({
   // console.log("selectedFiles in MediaPicker:", selectedFiles);
 
   useEffect(() => {
+    // Only initialize the global selectedFiles from initialFiles when the
+    // global store is empty. This prevents overwriting the user's current
+    // selection when navigating back into the editor without changes.
     if (initialFiles.length > 0 && selectedFiles.length === 0) {
-      useGlobalStore.setState({ selectedFiles: initialFiles });
-      onFilesChange && onFilesChange(initialFiles);
+      // Dedupe initialFiles by uri (stable key) before setting
+      const seen = new Set<string>();
+      const deduped = initialFiles.filter((f) => {
+        const key = (f as any).uri || (f as any).url || JSON.stringify(f);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+      useGlobalStore.setState({ selectedFiles: deduped });
+      onFilesChange && onFilesChange(deduped);
     }
   }, [initialFiles]);
 

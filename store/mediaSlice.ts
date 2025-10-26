@@ -1,6 +1,7 @@
 import { StateCreator } from "zustand";
 import { GlobalStore, MediaState, FileType, MediaSource } from "@/types";
 import MediaService from "@/services/mediaService";
+import { removeFile } from "@/services/axios/user";
 
 export const mediaSlice: StateCreator<GlobalStore, [], [], MediaState> = (
   set,

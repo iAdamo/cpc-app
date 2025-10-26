@@ -54,11 +54,6 @@ import {
 } from "@/components/ui/modal";
 import useGlobalStore from "@/store/globalStore";
 import {
-  SpeakerIcon,
-  MegaphoneIcon,
-  ArrowUpRightIcon,
-} from "lucide-react-native";
-import {
   getServicesByProvider,
   getServiceById,
   createService,
@@ -77,7 +72,6 @@ import {
 } from "@/components/ui/avatar";
 import MediaView from "@/components/media/MediaView";
 import { Badge, BadgeText } from "@/components/ui/badge";
-import useVideoThumbnails from "@/hooks/useVideoThumbnails";
 
 export const MyServices = ({ providerId }: { providerId?: string }) => {
   const [loading, setLoading] = useState(false);
@@ -90,12 +84,6 @@ export const MyServices = ({ providerId }: { providerId?: string }) => {
 
   const [services, setServices] = useState<ServiceData[]>([]);
 
-  // Filter services based on active tab
-  const filteredServices =
-    activeTab === "published"
-      ? services.filter((service) => service.isActive)
-      : draftProjects.filter((project) => !project.isActive);
-
   useEffect(() => {
     const fetchServices = async () => {
       setLoading(true);
@@ -106,7 +94,7 @@ export const MyServices = ({ providerId }: { providerId?: string }) => {
           const response = await getServicesByProvider(id);
           if (response.length === 0) {
             setLoading(false);
-            setIsModalOpen(true);
+            if (!providerId) setIsModalOpen(true);
             return;
           }
 
@@ -130,6 +118,12 @@ export const MyServices = ({ providerId }: { providerId?: string }) => {
     };
     fetchServices();
   }, [providerId, user?.activeRoleId?._id]);
+
+  // Filter services based on active tab
+  const filteredServices =
+    activeTab === "published"
+      ? services.filter((service) => service.isActive)
+      : draftProjects.filter((project) => !project.isActive);
 
   const isEditable = !providerId;
 
@@ -331,7 +325,7 @@ export const MyServices = ({ providerId }: { providerId?: string }) => {
         </HStack>
       )}
 
-      <VStack className="flex-1 pt-4">
+      <VStack className="flex-1">
         {loading ? (
           <Spinner className="mt-8" />
         ) : filteredServices.length === 0 ? (
@@ -886,10 +880,7 @@ export const CreateServiceModal = ({
         {project?.media &&
           project.media.length > 0 &&
           project.media.map((item, index) => (
-            <Pressable
-              key={index}
-              onPress={() => setViewMedia(item as string)}
-            >
+            <Pressable key={index} onPress={() => setViewMedia(item as string)}>
               <Image
                 source={{
                   uri: (item as any).thumbnail,
