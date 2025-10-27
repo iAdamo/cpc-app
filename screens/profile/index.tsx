@@ -51,7 +51,7 @@ const ProfileView = () => {
 
   const handleCompanyOnboarding = () => {
     if (!user) return false;
-
+    console.log(switchRole);
     if (user.activeRoleId?.owner && switchRole === "Client") {
       setSwitchRole("Provider");
       router.push("/clients");
@@ -98,8 +98,10 @@ const ProfileView = () => {
                       ? user?.profilePicture.thumbnail
                       : undefined
                     : user?.activeRoleId?.providerLogo
-                    ? typeof (user?.activeRoleId?.providerLogo as MediaItem)?.thumbnail === "string"
-                      ? (user?.activeRoleId?.providerLogo as MediaItem).thumbnail
+                    ? typeof (user?.activeRoleId?.providerLogo as MediaItem)
+                        ?.thumbnail === "string"
+                      ? (user?.activeRoleId?.providerLogo as MediaItem)
+                          .thumbnail
                       : undefined
                     : undefined
                 }

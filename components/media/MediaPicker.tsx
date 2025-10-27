@@ -12,7 +12,6 @@ import { Icon, CloseIcon, TrashIcon } from "@/components/ui/icon";
 import { Pressable } from "@/components/ui/pressable";
 import useGlobalStore from "@/store/globalStore";
 import { MediaPickerProps } from "@/types";
-import { removeFile } from "@/services/axios/user";
 
 const MediaPicker = ({
   maxFiles = 5,
@@ -23,7 +22,7 @@ const MediaPicker = ({
   classname = "",
   allowedTypes = ["image", "video"], // New prop to specify allowed types
 }: MediaPickerProps) => {
-  const { selectedFiles, isLoading, pickMedia, removeFile, error } =
+  const { selectedFiles, isLoading, pickMedia, removeLocalFile, error } =
     useGlobalStore();
 
   // console.log("initialFiles in MediaPicker:", initialFiles);
@@ -98,7 +97,7 @@ const MediaPicker = ({
                 <Button
                   size="md"
                   className="absolute top-0 right-0 w-10 h-10 rounded-full shadow-md bg-red-800/20"
-                  onPress={() => removeFile(file.uri)}
+                  onPress={() => removeLocalFile(file.uri)}
                 >
                   <ButtonIcon
                     as={TrashIcon}

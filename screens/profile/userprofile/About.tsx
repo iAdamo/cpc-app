@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { use, useEffect, useMemo, useRef, useState } from "react";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Card } from "@/components/ui/card";
@@ -22,27 +22,45 @@ interface AboutProps {
 }
 
 const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
-  const { updateUserProfile, selectedFiles } = useGlobalStore();
+  const { removeServerFiles, updateUserProfile, selectedFiles } =
+    useGlobalStore();
   const [isImageEdit, setIsImageEdit] = useState(false);
   const [isDescEdit, setIsDescEdit] = useState(false);
   const [isPhotoSavable, setIsPhotoSavable] = useState(false);
   const [desc, setDesc] = useState(provider.providerDescription || "");
+  // helper to safely extract a uri string from various shapes
+  const extractUri = (val: any): string | undefined => {
+    if (!val) return undefined;
+    if (typeof val === "string") return val;
+    if (typeof val === "object") {
+      if (typeof val.uri === "string") return val.uri;
+      if (typeof val.url === "string") return val.url;
+    }
+    return undefined;
+  };
+
+  const normalizeProviderImages = (imgs: any[] = []): FileType[] =>
+    imgs.map((img: any, idx: number) => {
+      const thumbnail = extractUri((img as MediaItem).thumbnail);
+      const url = extractUri((img as MediaItem).url);
+      const uri = thumbnail || url || extractUri((img as any).uri) || "";
+      const name =
+        (img && (img as any).name) ||
+        (url ? url.split("/").pop() : `photo${idx}.jpg`);
+      return {
+        uri,
+        name,
+        type: (img as any).type || "image",
+        url,
+        thumbnail: thumbnail || url,
+        index: (img as any).index ?? idx,
+      } as FileType;
+    });
+
   const [photos, setPhotos] = useState<FileType[]>(
-    Array.isArray(provider.providerImages)
-      ? provider.providerImages.map((img, idx) =>
-          typeof (img as MediaItem).thumbnail === "string"
-            ? {
-                uri: (img as MediaItem).thumbnail!,
-                name:
-                  (img as MediaItem).url.split("/").pop() || `photo${idx}.jpg`,
-                type: "image/jpeg" as FileType["type"],
-                url: (img as MediaItem).url,
-                thumbnail: (img as MediaItem).thumbnail,
-                index: (img as MediaItem).index || idx,
-              }
-            : (img as FileType)
-        )
-      : []
+    normalizeProviderImages(
+      Array.isArray(provider.providerImages) ? provider.providerImages : []
+    )
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [viewingPhoto, setViewingPhoto] = useState<string>("");
@@ -57,8 +75,20 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
       : [];
   }, [provider.providerImages]);
 
+  useEffect(() => {
+    if (!isImageEdit) {
+      setPhotos(
+        normalizeProviderImages(
+          Array.isArray(provider.providerImages) ? provider.providerImages : []
+        )
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [provider.providerImages, isImageEdit]);
+
   const openPhotoViewer = (url: string) => {
-    setViewingPhoto(url);
+    const safe = extractUri(url);
+    if (safe) setViewingPhoto(safe);
   };
 
   const handleDeletePhoto = (index: number) => {
@@ -69,6 +99,8 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
     // console.log("Saving description and photos...", photos);
     // console.log("Selected files from store:", selectedFiles);
     setIsSubmitting(true);
+    setIsDescEdit(false);
+    setIsImageEdit(false);
     try {
       // Determine what actually changed:
       const initialUrls = initialPhotoUrlsRef.current || [];
@@ -78,48 +110,51 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
 
       const removedUrls = initialUrls.filter((u) => !currentUrls.includes(u));
       const addedFiles = photos.filter((p) => !(p as any).url);
-
+      // console.log({ removedUrls, addedFiles });
       const descChanged =
         (provider.providerDescription || "").trim() !== desc.trim();
 
       // If nothing changed, avoid calling backend and just close editors.
-      if (!descChanged && removedUrls.length === 0 && addedFiles.length === 0) {
-        setIsSubmitting(false);
-        setIsDescEdit(false);
-        setIsImageEdit(false);
-        return;
-      }
+      // if (!descChanged && removedUrls.length === 0 && addedFiles.length === 0) {
+      //   // clear any temporary selection and exit edit mode
+      //   useGlobalStore.setState({ selectedFiles: [] });
+      //   setIsSubmitting(false);
+      //   setIsDescEdit(false);
+      //   setIsImageEdit(false);
+      //   return;
+      // }
 
       const formData = new FormData();
       if (descChanged) formData.append("providerDescription", desc);
 
-      // Append newly added files only
-      addedFiles.forEach((photo, index) => {
-        const fileName =
-          typeof (photo as FileType).name === "string"
-            ? (photo as FileType).name
-            : photo.uri.split("/").pop() || `photo${index}.jpg`;
-        formData.append("providerImages", {
-          uri: photo.uri,
-          name: fileName,
-          type: (photo as FileType).type || "image/jpeg",
-        } as any);
-      });
-
-      // Inform backend which images were removed (if any)
-      if (removedUrls.length > 0) {
-        formData.append("deletedImages", JSON.stringify(removedUrls));
+      if (addedFiles.length > 0) {
+        // Append newly added files only
+        addedFiles.forEach((photo, index) => {
+          const fileName =
+            typeof (photo as FileType).name === "string"
+              ? (photo as FileType).name
+              : photo.uri.split("/").pop() || `photo${index}.jpg`;
+          formData.append("providerImages", {
+            uri: photo.uri,
+            name: fileName,
+            type:
+              (photo as FileType).type === "image" ? "image/jpeg" : "video/mp4",
+          } as any);
+        });
       }
+      if (descChanged || addedFiles.length > 0)
+        await updateUserProfile("Provider", formData);
 
-      // Only call update if something changed (checked above)
-      await updateUserProfile("Provider", formData);
-
-      // After successful save, update our snapshot to the current state so
-      // further saves without changes are ignored.
+      if (removedUrls.length > 0) {
+        try {
+          await removeServerFiles(removedUrls);
+        } catch (err) {
+          console.warn("Failed to delete images after update:", err);
+        }
+      }
       initialPhotoUrlsRef.current = currentUrls;
 
-      setIsDescEdit(false);
-      setIsImageEdit(false);
+      useGlobalStore.setState({ selectedFiles: [] });
     } catch (e) {
       // handle error (optionally show toast)
     } finally {
@@ -230,29 +265,41 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
         </HStack>
         {isImageEdit ? (
           <MediaPicker
-            maxFiles={6}
+            maxFiles={16}
             maxSize={10}
             initialFiles={photos as FileType[]}
             onFilesChange={setPhotos}
             allowedTypes={["image", "video"]}
           />
         ) : photos.length > 0 ? (
-          (photos as any).map((item: MediaItem, idx: number) => (
-            <Pressable
-              key={idx}
-              onPress={() => {
-                openPhotoViewer(item.url);
-              }}
-            >
-              <VStack className="relative">
-                <Image
-                  source={{ uri: item.thumbnail }}
-                  alt={`Portfolio ${idx}`}
-                  className="w-full h-60 rounded-md bg-gray-200 mb-4"
-                />
-              </VStack>
-            </Pressable>
-          ))
+          (photos as any).map((item: MediaItem, idx: number) => {
+            const safeUri =
+              extractUri((item as any).thumbnail) ||
+              extractUri((item as any).url) ||
+              extractUri((item as any).uri);
+            return (
+              <Pressable
+                key={idx}
+                onPress={() => {
+                  openPhotoViewer((item as any).url);
+                }}
+              >
+                <VStack className="relative">
+                  {safeUri ? (
+                    <Image
+                      source={{ uri: safeUri }}
+                      alt={`Portfolio ${idx}`}
+                      className="w-full h-60 rounded-md bg-gray-200 mb-4"
+                    />
+                  ) : (
+                    <VStack className="w-full h-60 rounded-md bg-gray-200 mb-4 items-center justify-center">
+                      <Text className="text-gray-400">Image unavailable</Text>
+                    </VStack>
+                  )}
+                </VStack>
+              </Pressable>
+            );
+          })
         ) : (
           <Text className="text-gray-500 italic">No photos uploaded yet.</Text>
         )}

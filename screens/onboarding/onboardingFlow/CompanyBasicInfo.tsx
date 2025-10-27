@@ -145,7 +145,7 @@ const CompanyBasicInfo = () => {
     setValue("providerLogo", {
       uri: file.uri,
       name: file.name ?? "companylogo.jpg",
-      type: "image/jpeg",
+      type: file.type || "image/jpeg",
     } as any);
     clearErrors("providerLogo");
   };
@@ -209,6 +209,7 @@ const CompanyBasicInfo = () => {
   };
 
   const handleNext = handleSubmit(async (data) => {
+    console.log("Submitting company basic info:", data);
     try {
       updateProfile({
         activeRoleId: {

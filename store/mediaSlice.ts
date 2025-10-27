@@ -56,10 +56,25 @@ export const mediaSlice: StateCreator<GlobalStore, [], [], MediaState> = (
       });
     }
   },
-  removeFile: (uri: string) => {
+  removeLocalFile: (uri: string) => {
     set((state) => ({
       selectedFiles: state.selectedFiles.filter((file) => file.uri !== uri),
     }));
+  },
+  removeServerFiles: async (fileUrls: string[]) => {
+    try {
+      set({ isLoading: true });
+      const response = await removeFile(fileUrls);
+      set({
+        user: { ...response },
+        isLoading: false,
+      });
+    } catch (error: any) {
+      set({
+        error: error?.message || "Failed to remove files from server",
+        isLoading: false,
+      });
+    }
   },
   clearFiles: () => {
     set({ selectedFiles: [] });

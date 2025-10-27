@@ -55,7 +55,8 @@ export const toggleFollowProvider = async (
   return response.data;
 };
 
-export const removeFile = async (fileIds: string[]): Promise<UserData> => {
-  const response = await axiosInstance.post("users/delete-files/", fileIds);
+export const removeFile = async (fileUrls: string[]): Promise<UserData> => {
+  console.log("Removing files:", fileUrls);
+  const response = await axiosInstance.post("users/delete-files", { fileUrls });
   return response.data;
 };

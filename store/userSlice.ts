@@ -64,6 +64,7 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
       }
       // console.log("Profile update response:", response);
       if (response) {
+        // console.log("Updated user profile:", response);
         set({
           user: { ...response },
           switchRole: !data ? response.activeRole : get().switchRole,

@@ -134,13 +134,13 @@ const ProfilePic = ({
             height: currentSize.container,
           }}
         >
-          {selectedImage ? (
-            <Pressable
-              className="w-full h-full"
-              onPress={isEditable && isLogo ? openOptionsModal : undefined}
-            >
+          <Pressable
+            className="w-full h-full items-center justify-center"
+            onPress={isEditable && isLogo ? openOptionsModal : undefined}
+          >
+            {selectedImage ? (
               <Image
-                source={{ uri: selectedImage as string }}
+                source={{ uri: (selectedImage as string) || "https://" }}
                 alt="Profile Picture"
                 className="w-full h-full"
                 style={{
@@ -149,10 +149,10 @@ const ProfilePic = ({
                   borderRadius: currentSize.container / 2,
                 }}
               />
-            </Pressable>
-          ) : (
-            <Heading className="text-typography-400">LOGO</Heading>
-          )}
+            ) : (
+              <Heading className="text-typography-400">LOGO</Heading>
+            )}
+          </Pressable>
         </Card>
 
         {/* Camera/Edit Button */}

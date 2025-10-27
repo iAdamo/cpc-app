@@ -22,6 +22,7 @@ export const globalSlice: StateCreator<GlobalStore, [], [], GlobalState> = (
   setSwitchRole: async (role) => {
     const formData = new FormData();
     formData.append("activeRole", role);
+    console.log("Setting active role to:", role);
     await updateUserProfile(formData);
     set({ switchRole: role, chats: [] });
   },

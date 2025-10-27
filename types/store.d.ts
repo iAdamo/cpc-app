@@ -167,7 +167,8 @@ export interface MediaState {
     maxSize?: number
   ) => Promise<void>;
   pickDocument: () => void;
-  removeFile: (uri: string) => void;
+  removeLocalFile: (uri: string) => void;
+  removeServerFiles: (fileUrls: string[]) => Promise<void>;
   clearFiles: () => void;
 }
 
