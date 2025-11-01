@@ -1,4 +1,7 @@
 import { ProviderData } from "./provider";
+import { UserData } from "./user";
+import { MediaItem } from "./user";
+import { FileType } from "./media";
 // export interface SubcategoryData {
 //   _id: string;
 //   id: string;
@@ -53,5 +56,25 @@ export interface ServiceData {
   media: string[];
   // tags: string[];
   // clients: [];
+  providerId: ProviderData;
+}
+
+export interface JobData {
+  _id: string;
+  id: string;
+  title: string;
+  description: string;
+  budget: number;
+  deadline: number;
+  urgency: string;
+  categoryId: Category;
+  subcategoryId: SubcategoryData;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  location: string;
+  media: MediaItem[] | FileType[];
+  visibilty: boolean;
+  userId: UserData;
   providerId: ProviderData;
 }

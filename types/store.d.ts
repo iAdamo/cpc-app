@@ -24,6 +24,8 @@ export type PersistedAppState = {
 export type ActiveRole = "Client" | "Provider";
 
 export interface GlobalState {
+  currentView: ProviderView;
+  setCurrentView: (view: ProviderView) => void;
   isLoading: boolean;
   error: string | null;
   success: string | null;
@@ -80,7 +82,7 @@ export interface OnboardingState {
   resetOnboarding: () => void;
 }
 
-export type ProviderView = "Home" | "Updates" | "Chat" | "Profile";
+export type LayoutView = "Home" | "Updates" | "Chat" | "Profile" | "Map" | "Job-Post";
 export type DisplayStyle = "Grid" | "List";
 export type SortBy =
   | "Relevance"
@@ -91,8 +93,6 @@ export type SortBy =
   | "Most Reviewed";
 
 export interface ProviderState {
-  currentView: ProviderView;
-  setCurrentView: (view: ProviderView) => void;
   displayStyle: DisplayStyle;
   setDisplayStyle: (style: DisplayStyle) => void;
   sortBy: sortByType;
@@ -155,7 +155,9 @@ export interface ServiceState {
   OtherProjects: ServiceData[];
   setOtherProjects: (projects: ServiceData[]) => void;
   draftProjects: ServiceData[];
+  draftJobs: JobData[];
   setDraftProjects: (projects: ServiceData[]) => void;
+  setDraftJobs: (projects: JobData[]) => void;
   // deleteService: (id: string) => Promise<void>;
 }
 export interface MediaState {

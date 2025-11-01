@@ -8,24 +8,27 @@ import TaskDisplay from "./clients/home";
 import ProfileView from "./profile";
 import Chat from "./chat";
 import Update from "./providers/update";
+import MapView from "./map";
+import PostJob from "./providers/post";
 
 const Screen = () => {
   const { currentView, switchRole } = useGlobalStore();
 
   return (
     <VStack className="flex-1 bg-white">
-      {currentView === "Home" && <TopNavbar />}
+      {currentView === "Home" ||
+      (switchRole === "Provider" && currentView === "Updates") ? (
+        <TopNavbar />
+      ) : null}
       <VStack className="flex-1">
         {currentView === "Home" &&
-          (switchRole === "Client" ? <HomeView /> : <TaskDisplay />)}
+          (switchRole === "Client" ? <HomeView /> : <Text>Provider Home</Text>)}
         {currentView === "Updates" &&
-          (switchRole === "Client" ? (
-            <Update />
-          ) : (
-            <Text>Provider Updates View</Text>
-          ))}
+          (switchRole === "Client" ? <Update /> : <TaskDisplay />)}
         {currentView === "Chat" && <Chat />}
         {currentView === "Profile" && <ProfileView />}
+        {currentView === "Map" && <MapView />}
+        {currentView === "Job-Post" && <PostJob />}
       </VStack>
     </VStack>
   );

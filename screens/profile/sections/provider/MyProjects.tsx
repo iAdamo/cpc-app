@@ -253,11 +253,13 @@ export const MyServices = ({ providerId }: { providerId?: string }) => {
                 >
                   <ButtonIcon as={TrashIcon} className="text-red-600" />
                 </Button>
-                <Switch
-                  size="md"
-                  value={service.isActive}
-                  onToggle={() => handleToggleActive(service)}
-                />
+                {!service._id.startsWith("draft") && (
+                  <Switch
+                    size="md"
+                    value={service.isActive}
+                    onToggle={() => handleToggleActive(service)}
+                  />
+                )}
               </HStack>
             )}
           </VStack>
@@ -308,7 +310,7 @@ export const MyServices = ({ providerId }: { providerId?: string }) => {
   return (
     <VStack className="flex-1 bg-white">
       {isEditable && (
-        <HStack className="items-center justify-between px-4 pt-4">
+        <HStack className="items-center justify-between px-4 py-4">
           {renderTabButton("published", services.length)}
           {renderTabButton("drafts", draftProjects.length)}
           <Button
@@ -357,6 +359,7 @@ export const MyServices = ({ providerId }: { providerId?: string }) => {
             onClose={handleModalClose}
             isEditable={isEditable && (!showPreview?.isActive || !showPreview)}
             project={showPreview}
+            onPublished={(svc) => setServices((prev) => [...prev, svc])}
           />
         )}
       </VStack>
@@ -370,11 +373,13 @@ export const CreateServiceModal = ({
   onClose,
   isEditable,
   project,
+  onPublished,
 }: {
   isOpen: boolean;
   onClose: () => void;
   isEditable?: boolean;
   project?: ServiceData;
+  onPublished?: (svc: ServiceData) => void;
 }) => {
   const [loading, setLoading] = useState(false);
   const [categoryName, setCategoryName] = useState<string>("");
@@ -482,11 +487,34 @@ export const CreateServiceModal = ({
       const formdata = new FormData();
       appendFormData(formdata, data);
 
-      await createService(formdata);
+      // createService should return the created service; capture it so we can
+      // remove the corresponding draft (if any) from the zustand store.
+
+      const created = await createService(formdata);
+
+      // Only remove the local draft after we have confirmation from the server
+      // that the service was created. This ensures we don't delete drafts on
+      // failed publishes.
+      if (created && created._id) {
+        // Remove the local draft only when the server returned a created item
+        if (project && project._id && project._id.startsWith("draft-")) {
+          useGlobalStore.setState((state) => ({
+            draftProjects: state.draftProjects.filter(
+              (p) => p._id !== project._id
+            ),
+          }));
+        }
+
+        // Notify parent to add the created service to the published list so it
+        // shows immediately in the UI.
+        onPublished?.(created as ServiceData);
+      }
+
       setLoading(false);
       onClose();
       reset();
       setSuccess("Service project created successfully!");
+      return created;
     } catch (error) {
       console.error("Error submitting form:", error);
       setLoading(false);

@@ -1,12 +1,14 @@
 import { Progress } from "@/components/ui/progress";
 import { updateUserProfile } from "@/services/axios/user";
 import { StateCreator } from "zustand";
-import { GlobalStore, GlobalState, ActiveRole } from "@/types";
+import { GlobalStore, GlobalState, ActiveRole, LayoutView } from "@/types";
 
 export const globalSlice: StateCreator<GlobalStore, [], [], GlobalState> = (
   set,
   get
 ) => ({
+  currentView: "Home",
+  setCurrentView: (view: LayoutView) => set({ currentView: view }),
   isLoading: false,
   error: null,
   success: null,
@@ -22,7 +24,6 @@ export const globalSlice: StateCreator<GlobalStore, [], [], GlobalState> = (
   setSwitchRole: async (role) => {
     const formData = new FormData();
     formData.append("activeRole", role);
-    console.log("Setting active role to:", role);
     await updateUserProfile(formData);
     set({ switchRole: role, chats: [] });
   },

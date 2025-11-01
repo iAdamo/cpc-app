@@ -3,7 +3,6 @@ import { StateCreator } from "zustand";
 import {
   GlobalStore,
   ProviderState,
-  ProviderView,
   DisplayStyle,
   SearchResultData,
   SortBy,
@@ -17,14 +16,12 @@ export const providerViewSlice: StateCreator<
   [],
   ProviderState
 > = (set, get) => ({
-  currentView: "Home",
   displayStyle: "Grid",
   sortBy: "Relevance",
   categories: [],
   setCategories: (categories: string[]) => set({ categories }),
   setSortBy: (sortBy: SortBy) => set({ sortBy }),
   setDisplayStyle: (style: DisplayStyle) => set({ displayStyle: style }),
-  setCurrentView: (view: ProviderView) => set({ currentView: view }),
 
   // Search-related state and actions
   searchResults: { providers: [], services: [] },

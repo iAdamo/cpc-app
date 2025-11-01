@@ -15,6 +15,7 @@ import { ProviderData, EditableFields } from "@/types";
 import useGlobalStore from "@/store/globalStore";
 import { Badge, BadgeText, BadgeIcon } from "@/components/ui/badge";
 import { router } from "expo-router";
+import { GooglePlaceService } from "@/services/googlePlaceService";
 
 const ProfileInfo = ({
   provider,
@@ -89,6 +90,7 @@ const ProfileInfo = ({
               {provider.subcategories[0].name || "Tree Felling"}
             </Text>
             <HStack space="xs" className="items-center ">
+              <Button></Button>
               <Icon as={MapPinIcon} size="md" className="text-red-600" />
               <Text className="break-words">
                 {provider.location.primary?.address?.address ||

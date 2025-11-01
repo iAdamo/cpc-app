@@ -1,0 +1,1089 @@
+import { useState, useEffect, use } from "react";
+import { VStack } from "@/components/ui/vstack";
+import { HStack } from "@/components/ui/hstack";
+import { Text } from "@/components/ui/text";
+import { Card } from "@/components/ui/card";
+import { Heading } from "@/components/ui/heading";
+import { Switch } from "@/components/ui/switch";
+import { Spinner } from "@/components/ui/spinner";
+import { Pressable } from "@/components/ui/pressable";
+import { ScrollView, Keyboard } from "react-native";
+import { Input, InputField, InputSlot, InputIcon } from "@/components/ui/input";
+import { Textarea, TextareaInput } from "@/components/ui/textarea";
+import {
+  FormControl,
+  FormControlError,
+  FormControlErrorText,
+  FormControlLabel,
+  FormControlLabelText,
+} from "@/components/ui/form-control";
+import {
+  Select,
+  SelectTrigger,
+  SelectInput,
+  SelectIcon,
+  SelectPortal,
+  SelectBackdrop,
+  SelectContent,
+  SelectDragIndicatorWrapper,
+  SelectDragIndicator,
+  SelectItem,
+} from "@/components/ui/select";
+import {
+  Button,
+  ButtonIcon,
+  ButtonText,
+  ButtonSpinner,
+} from "@/components/ui/button";
+import {
+  Icon,
+  ChevronLeftIcon,
+  ChevronDownIcon,
+  AddIcon,
+  TrashIcon,
+} from "@/components/ui/icon";
+import {
+  JobFormSchema,
+  JobFormSchemaType,
+} from "@/components/schema/JobSchema";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Modal,
+  ModalBackdrop,
+  ModalCloseButton,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from "@/components/ui/modal";
+import useGlobalStore from "@/store/globalStore";
+import {
+  getJobsByUser,
+  createJob,
+  deleteJob,
+  updateJob,
+} from "@/services/axios/service";
+import EmptyState from "@/components/EmptyState";
+import { JobData, FileType, MediaItem } from "@/types";
+import MediaPicker from "@/components/media/MediaPicker";
+import appendFormData from "@/utils/AppendFormData";
+import { Image } from "@/components/ui/image";
+import {
+  Avatar,
+  AvatarFallbackText,
+  AvatarImage,
+} from "@/components/ui/avatar";
+import MediaView from "@/components/media/MediaView";
+import { Badge, BadgeText } from "@/components/ui/badge";
+import { getAllCategoriesWithSubcategories } from "@/services/axios/service";
+import { MapPinCheckIcon } from "lucide-react-native";
+
+export const PostJob = ({ userId }: { userId?: string }) => {
+  const [loading, setLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showPreview, setShowPreview] = useState<JobData | undefined>();
+  const [activeTab, setActiveTab] = useState<"published" | "drafts">(
+    "published"
+  );
+  const { user, setDraftJobs, draftJobs } = useGlobalStore();
+
+  const [jobs, setJobs] = useState<JobData[]>([]);
+
+  useEffect(() => {
+    const fetchjobs = async () => {
+      setLoading(true);
+      const id = userId || user?._id;
+
+      if (id) {
+        try {
+          const response = await getJobsByUser();
+          // Separate published and draft jobs
+          const published = response.filter((job) => job.isActive);
+          const drafts = response.filter((job) => !job.isActive);
+
+          setJobs(published);
+          // append to draft
+          useGlobalStore.setState((state) => ({
+            draftJobs: [...state.draftJobs, ...drafts],
+          }));
+          setLoading(false);
+        } catch (error) {
+          console.error("Error fetching jobs:", error);
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    };
+    fetchjobs();
+  }, [userId, user?.activeRoleId?._id]);
+
+  // Filter jobs based on active tab
+  const filteredjobs =
+    activeTab === "published"
+      ? jobs.filter((job) => job.isActive)
+      : draftJobs.filter((job) => !job.isActive);
+
+  const isEditable = !userId;
+
+  const handleToggleActive = async (job: JobData) => {
+    const formData = new FormData();
+    formData.append("isActive", (!job.isActive).toString());
+    try {
+      const response = await updateJob(job._id, formData);
+
+      // Update both jobs and draftjobs arrays
+      if (job.isActive) {
+        // Moving from published to drafts
+        setJobs((prev) => prev.filter((s) => s._id !== job._id));
+        useGlobalStore.setState((state) => ({
+          draftJobs: [...state.draftJobs, { ...job, isActive: false }],
+        }));
+      } else {
+        // Moving from drafts to published
+        useGlobalStore.setState((state) => ({
+          draftJobs: state.draftJobs.filter((s: JobData) => s._id !== job._id),
+        }));
+        setJobs((prev) => [
+          ...prev,
+          { ...job, isActive: true, media: response.media },
+        ]);
+      }
+    } catch (error) {
+      console.error("Failed to toggle job active status:", error);
+    }
+  };
+
+  const handleAddNewjob = () => {
+    setShowPreview(undefined);
+    setIsModalOpen(true);
+  };
+
+  // When deleting a draft job
+  const handleDeletejob = async (job: JobData) => {
+    if (job._id.startsWith("draft-")) {
+      useGlobalStore.setState((state) => ({
+        draftJobs: state.draftJobs.filter((p: JobData) => p._id !== job._id),
+      }));
+      return;
+    }
+    await deleteJob(job._id);
+    setJobs((prev) => prev.filter((p) => p._id !== job._id));
+    useGlobalStore.setState((state) => ({
+      draftJobs: state.draftJobs.filter((p: JobData) => p._id !== job._id),
+    }));
+  };
+
+  const handleTabPress = (tab: "published" | "drafts") => {
+    setActiveTab(tab);
+  };
+
+  const handlejobPress = (job: JobData) => {
+    setIsModalOpen(true);
+    setShowPreview(job);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setShowPreview(undefined);
+    Keyboard.dismiss();
+  };
+
+  const renderTabButton = (tab: "published" | "drafts", count: number) => {
+    const isActive = activeTab === tab;
+    const label = tab === "published" ? "Published" : "Drafts";
+
+    return (
+      <Button
+        size="sm"
+        variant="outline"
+        className={`border-0 ${
+          isActive ? "bg-brand-primary" : "bg-transparent"
+        }`}
+        onPress={() => handleTabPress(tab)}
+      >
+        <ButtonText className="text-brand-secondary">
+          {label} ({count})
+        </ButtonText>
+      </Button>
+    );
+  };
+
+  const renderjobCard = (job: JobData) => {
+    return (
+      <Card key={job._id} className="relative p-0 mx-4 mb-4">
+        <Image
+          source={{
+            uri:
+              Array.isArray(job.media) && job.media.length > 0
+                ? (() => {
+                    const fallback =
+                      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80";
+                    const found = job.media.find((m) => {
+                      // use runtime checks instead of unsafe casts
+                      if (m && typeof (m as any).thumbnail) return true;
+                      if (
+                        m &&
+                        typeof (m as any).uri &&
+                        (m as any).uri.startsWith("file")
+                      )
+                        return true;
+                      return false;
+                    });
+                    if (!found) return fallback;
+                    if (found && typeof (found as any).thumbnail === "string")
+                      return (found as any).thumbnail;
+                    if (found && typeof (found as any).uri === "string")
+                      return (found as any).uri;
+                    return fallback;
+                  })()
+                : "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+          }}
+          className="w-full h-52 rounded-lg object-cover"
+          alt={job.title}
+        />
+        <VStack className="absolute inset-0 p-4 justify-between">
+          <VStack className="flex-1 justify-start">
+            {!userId && (
+              <HStack className="items-center justify-between">
+                <Button
+                  className="p-2  bg-white/40 h-8 w-8 rounded-full"
+                  onPress={() => handleDeletejob(job)}
+                >
+                  <ButtonIcon as={TrashIcon} className="text-red-600" />
+                </Button>
+                {!job._id.startsWith("draft") && (
+                  <Switch
+                    size="md"
+                    value={job.isActive}
+                    onToggle={() => handleToggleActive(job)}
+                  />
+                )}
+              </HStack>
+            )}
+          </VStack>
+          <Pressable
+            onPress={() => handlejobPress(job)}
+            className="flex-1 justify-end"
+          >
+            <VStack className="justify-end">
+              <HStack className="gap-4 items-center">
+                <VStack className="flex-1">
+                  <Heading size="md" className="text-white line-clamp-1">
+                    {job?.title}
+                  </Heading>
+                  <Text className="text-white line-clamp-1">
+                    {job?.location}
+                  </Text>
+                  <HStack space="sm" className="items-center mt-2">
+                    <Avatar size="xs">
+                      <AvatarFallbackText>
+                        {`${job?.userId?.firstName || user?.firstName} ${
+                          job?.userId?.lastName || user?.lastName
+                        }`}
+                      </AvatarFallbackText>
+                      <AvatarImage
+                        source={
+                          typeof job?.userId?.profilePicture === "string"
+                            ? { uri: job?.userId?.profilePicture }
+                            : undefined
+                        }
+                      />
+                    </Avatar>
+                    <Text className="text-white">
+                      {`${job?.userId?.firstName || user?.firstName} ${
+                        job?.userId?.lastName || user?.lastName
+                      }`}
+                    </Text>
+                    {job?.userId?.isVerified && (
+                      <Badge action="success">
+                        <BadgeText>Verified</BadgeText>
+                      </Badge>
+                    )}
+                  </HStack>
+                </VStack>
+              </HStack>
+            </VStack>
+          </Pressable>
+        </VStack>
+      </Card>
+    );
+  };
+
+  return (
+    <VStack className="flex-1 bg-white pt-14">
+      {isEditable && (
+        <HStack className="items-center justify-between px-4 pt-4">
+          {renderTabButton("published", jobs.length)}
+          {renderTabButton("drafts", draftJobs.length)}
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-0"
+            onPress={handleAddNewjob}
+          >
+            <ButtonIcon as={AddIcon} className="text-brand-secondary" />
+            <ButtonText className="text-brand-secondary">
+              Add New job
+            </ButtonText>
+          </Button>
+        </HStack>
+      )}
+
+      <VStack className="flex-1 mt-4">
+        {loading ? (
+          <Spinner className="mt-8" />
+        ) : filteredjobs.length === 0 ? (
+          <EmptyState
+            header={`No ${
+              activeTab === "published" ? "Published" : "Draft"
+            } jobs`}
+            text={
+              activeTab === "published"
+                ? "You have no published job. Switch to drafts or create a new job."
+                : "You have no draft job. Switch to published or create a new job."
+            }
+          />
+        ) : (
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{ paddingBottom: 20 }}
+          >
+            <VStack className="">{filteredjobs.map(renderjobCard)}</VStack>
+          </ScrollView>
+        )}
+
+        {isModalOpen && (
+          <CreatejobModal
+            isOpen={isModalOpen || !!showPreview}
+            onClose={handleModalClose}
+            isEditable={isEditable && (!showPreview?.isActive || !showPreview)}
+            job={showPreview}
+            onPublished={(j) => setJobs((prev) => [...prev, j])}
+          />
+        )}
+      </VStack>
+    </VStack>
+  );
+};
+export default PostJob;
+
+export const CreatejobModal = ({
+  isOpen,
+  onClose,
+  isEditable,
+  job,
+  onPublished,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  isEditable?: boolean;
+  job?: JobData;
+  onPublished?: (j: JobData) => void;
+}) => {
+  const [loading, setLoading] = useState(false);
+  const [categoryName, setCategoryName] = useState<string>("");
+  const [previewMode, setPreviewMode] = useState(!isEditable);
+  const [categories, setCategories] = useState<any[]>([]);
+  const {
+    isLoading,
+    user,
+    setSuccess,
+    setDraftJobs,
+    selectedFiles,
+    currentLocation,
+    getCurrentLocation,
+  } = useGlobalStore();
+
+  // console.log("job", job);
+
+  const {
+    control,
+    handleSubmit,
+    getValues,
+    setValue,
+    reset,
+    watch,
+    formState: { errors, isValid, isDirty },
+  } = useForm<JobFormSchemaType>({
+    resolver: zodResolver(JobFormSchema),
+    defaultValues: {
+      title: job?.title || "",
+      description: job?.description || "",
+      categoryId: job?.categoryId?._id || "",
+      subcategoryId: job?.subcategoryId?._id || "",
+      location:
+        job?.location ||
+        `${currentLocation?.subregion} ${currentLocation?.region} ${currentLocation?.country}` ||
+        "",
+      budget: job?.budget || 0,
+      deadline: job?.deadline || 0,
+      // media: [],
+      media: Array.isArray(job?.media)
+        ? job?.media.map((img, idx) =>
+            typeof (img as MediaItem).thumbnail === "string"
+              ? {
+                  uri: (img as MediaItem).thumbnail!,
+                  name:
+                    (img as MediaItem).url.split("/").pop() ||
+                    `photo${idx}.jpg`,
+                  type: (img as MediaItem).type as FileType["type"],
+                  url: (img as MediaItem).url,
+                  thumbnail: (img as MediaItem).thumbnail,
+                  index: idx,
+                }
+              : (img as FileType)
+          )
+        : [],
+    },
+  });
+
+  console.log({ errors });
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await getAllCategoriesWithSubcategories();
+        // console.log("fetched categories", data);
+        setCategories(data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  const handleSaveDraft = async () => {
+    if (!isDirty) return; // No changes to save
+    try {
+      const currentValues = getValues();
+
+      // Create draft object
+      const draftData = {
+        ...currentValues,
+        _id: job?._id || `draft-${Date.now()}`,
+        isActive: false, // Drafts are inactive by default
+        createdAt: job?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Save to zustand store
+      setDraftJobs([draftData] as any);
+      setSuccess("job saved to drafts");
+    } catch (error) {
+      console.error("Error saving draft:", error);
+    }
+  };
+
+  const onSubmit = async (data: JobFormSchemaType) => {
+    try {
+      setLoading(true);
+      const formdata = new FormData();
+      appendFormData(formdata, data);
+
+      const created = await createJob(formdata);
+
+      // Only remove the draft after the server confirms creation
+      if (
+        created &&
+        created._id &&
+        job &&
+        job._id &&
+        job._id.startsWith("draft-")
+      ) {
+        useGlobalStore.setState((state) => ({
+          draftJobs: state.draftJobs.filter((p: JobData) => p._id !== job._id),
+        }));
+      }
+
+      // Notify parent to add to published list
+      if (created && created._id) onPublished?.(created as JobData);
+
+      setLoading(false);
+      onClose();
+      reset();
+      setSuccess("job job created successfully!");
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      setLoading(false);
+    }
+  };
+
+  const handleClose = () => {
+    // Check if there are unsaved changes
+    if (isDirty && isEditable) {
+      // You could show a confirmation dialog here
+      console.log("Unsaved changes detected");
+    }
+    handleSaveDraft();
+    useGlobalStore.setState({ selectedFiles: [] });
+    onClose();
+    reset();
+  };
+
+  const inputFieldclass =
+    "text-typography-500 font-semibold border-2 rounded border-brand-primary/30 focus:border-brand-primary focus:bg-blue-50";
+
+  const renderFormField = () => (
+    <VStack className="p-4 gap-4 items-center justify-center">
+      {/* Title */}
+      <FormControl
+        className="w-full bg-white p-2.5 rounded-xl shadow-md"
+        isInvalid={!!errors.title}
+      >
+        <FormControlLabel>
+          <FormControlLabelText className="text-brand-primary/50">
+            Job Title
+          </FormControlLabelText>
+        </FormControlLabel>
+        <Input className="h-14 border-0">
+          <Controller
+            control={control}
+            name="title"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <InputField
+                placeholder="Enter a brief but descriptive title"
+                autoCapitalize="sentences"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                className={inputFieldclass}
+                maxLength={80}
+              />
+            )}
+          />
+        </Input>
+        <FormControlError className="">
+          <FormControlErrorText className="text-sm">
+            {errors.title?.message}
+          </FormControlErrorText>
+        </FormControlError>
+      </FormControl>
+
+      {/* Description */}
+      <FormControl
+        className="w-full bg-white p-2.5 rounded-xl shadow-md"
+        isInvalid={!!errors.description}
+      >
+        <FormControlLabel>
+          <FormControlLabelText className="text-brand-primary/50">
+            Description
+          </FormControlLabelText>
+        </FormControlLabel>
+        <Textarea className="h-36 border-0">
+          <Controller
+            control={control}
+            name="description"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextareaInput
+                placeholder="Briefly describe the job requirements and expectations"
+                autoCapitalize="sentences"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                className={inputFieldclass}
+                maxLength={300}
+                multiline
+                numberOfLines={7}
+              />
+            )}
+          />
+        </Textarea>
+        <FormControlError className="">
+          <FormControlErrorText className="text-sm">
+            {errors.description?.message}
+          </FormControlErrorText>
+        </FormControlError>
+      </FormControl>
+      <HStack className="flex-1 gap-2">
+        {/* Category */}
+        <FormControl
+          className="flex-1 bg-white p-2.5 rounded-xl shadow-md"
+          isInvalid={!!errors.subcategoryId}
+        >
+          <FormControlLabel>
+            <FormControlLabelText className="text-brand-primary/50">
+              Category
+            </FormControlLabelText>
+          </FormControlLabel>
+          <Select
+            onValueChange={(value) => {
+              setValue("categoryId", value, { shouldDirty: true });
+              setCategoryName(value);
+            }}
+            className="flex-1 border-2 rounded border-brand-primary/30 focus:border-brand-primary focus:bg-blue-50"
+          >
+            <SelectTrigger
+              variant="outline"
+              className="h-14 justify-between border-0"
+            >
+              <SelectInput
+                className="font-semibold text-typography-500"
+                placeholder={`${
+                  job?.subcategoryId?.name
+                    ? `${job.subcategoryId.name}`
+                    : "Select a category"
+                }`}
+              />
+              <SelectIcon className="mr-3" as={ChevronDownIcon} />
+            </SelectTrigger>
+            <SelectPortal preventScroll>
+              <SelectBackdrop />
+              <SelectContent>
+                <SelectDragIndicatorWrapper>
+                  <SelectDragIndicator />
+                </SelectDragIndicatorWrapper>
+
+                {categories.map(
+                  (category: { _id: string; name: string }, idx: number) => (
+                    <SelectItem
+                      key={idx}
+                      label={category.name}
+                      value={category._id}
+                      className="font-semibold text-typography-500 text-3xl h-16"
+                    />
+                  )
+                )}
+              </SelectContent>
+            </SelectPortal>
+          </Select>
+          {errors.subcategoryId && (
+            <FormControlError className="">
+              <FormControlErrorText className="text-sm">
+                {errors.subcategoryId.message}
+              </FormControlErrorText>
+            </FormControlError>
+          )}
+        </FormControl>
+        {/* SubCategories */}
+        <FormControl
+          className="flex-1 bg-white p-2.5 rounded-xl shadow-md"
+          isInvalid={!!errors.subcategoryId}
+        >
+          <FormControlLabel>
+            <FormControlLabelText className="text-brand-primary/50">
+              Subcategory
+            </FormControlLabelText>
+          </FormControlLabel>
+          <Select
+            onValueChange={(value) => {
+              setValue("subcategoryId", value, { shouldDirty: true });
+              setCategoryName(value);
+            }}
+            className="flex-1 border-2 rounded border-brand-primary/30 focus:border-brand-primary focus:bg-blue-50"
+          >
+            <SelectTrigger
+              variant="outline"
+              className="h-14 justify-between border-0"
+            >
+              <SelectInput
+                className="font-semibold text-typography-500 flex-1"
+                placeholder={`${
+                  job?.subcategoryId?.name
+                    ? `${job.subcategoryId.name}`
+                    : "Select"
+                }`}
+              />
+              <SelectIcon className="mr-3" as={ChevronDownIcon} />
+            </SelectTrigger>
+            <SelectPortal preventScroll>
+              <SelectBackdrop />
+              <SelectContent>
+                <SelectDragIndicatorWrapper>
+                  <SelectDragIndicator />
+                </SelectDragIndicatorWrapper>
+                {watch("categoryId") ? (
+                  <ScrollView
+                    className="max-h-96 w-full self-start"
+                    showsVerticalScrollIndicator={false}
+                  >
+                    {categories.map((category) => {
+                      if (category._id !== watch("categoryId")) return null;
+                      return category.subcategories.map(
+                        (
+                          subcategoryId: { _id: string; name: string },
+                          idx: number
+                        ) => (
+                          <SelectItem
+                            key={idx}
+                            label={subcategoryId.name}
+                            value={subcategoryId._id}
+                            className="font-semibold text-typography-500"
+                          />
+                        )
+                      );
+                    })}
+                  </ScrollView>
+                ) : (
+                  <Heading size="sm" className="p-4">
+                    Please select a category first
+                  </Heading>
+                )}
+              </SelectContent>
+            </SelectPortal>
+          </Select>
+          {errors.subcategoryId && (
+            <FormControlError className="">
+              <FormControlErrorText className="text-sm">
+                {errors.subcategoryId.message}
+              </FormControlErrorText>
+            </FormControlError>
+          )}
+        </FormControl>
+      </HStack>
+      {/* Bugdet */}
+      <FormControl
+        className="w-full bg-white p-2.5 rounded-xl shadow-md"
+        isInvalid={!!errors.budget}
+      >
+        <FormControlLabel>
+          <FormControlLabelText className="text-brand-primary/50">
+            Budget ($)
+          </FormControlLabelText>
+        </FormControlLabel>
+        <HStack className="gap-8">
+          <Input className="flex-1 h-14 border-0">
+            <Controller
+              control={control}
+              name="budget"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <InputField
+                  placeholder="Enter budget"
+                  keyboardType="numeric"
+                  onBlur={onBlur}
+                  onChangeText={(text) => {
+                    const numericValue = text.replace(/[^0-9.]/g, "");
+                    onChange(Number(numericValue));
+                  }}
+                  value={value ? String(value) : ""}
+                  className={inputFieldclass}
+                  maxLength={7}
+                />
+              )}
+            />
+          </Input>
+          <VStack className="justify-end items-start">
+            <Text className="font-bold text-typography-500">Negotiable</Text>
+            <Controller
+              control={control}
+              name="negotiable"
+              defaultValue={false}
+              render={({ field: { value, onChange } }) => (
+                <Switch
+                  value={Boolean(value)}
+                  onValueChange={(v) => onChange(v)}
+                  size="md"
+                  trackColor={{ false: "#d4d4d4", true: "#DEAE60" }}
+                  thumbColor="#102343"
+                  ios_backgroundColor="#d4d4d4"
+                />
+              )}
+            />
+          </VStack>
+        </HStack>
+        <FormControlError className="">
+          <FormControlErrorText className="text-sm">
+            {errors.negotiable?.message}
+          </FormControlErrorText>
+        </FormControlError>
+      </FormControl>
+      {/* Duration */}
+      <FormControl
+        className="w-full bg-white p-2.5 rounded-xl shadow-md"
+        isInvalid={!!errors.deadline}
+      >
+        <FormControlLabel>
+          <FormControlLabelText className="text-brand-primary/50">
+            When do you need it done? (in days)
+          </FormControlLabelText>
+        </FormControlLabel>
+        <Input className="h-14 border-0">
+          <Controller
+            control={control}
+            name="deadline"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <InputField
+                placeholder="Enter deadline"
+                keyboardType="numeric"
+                onBlur={onBlur}
+                onChangeText={(text) => {
+                  const numericValue = text.replace(/[^0-9]/g, "");
+                  onChange(Number(numericValue));
+                }}
+                value={value ? String(value) : ""}
+                className={inputFieldclass}
+                maxLength={3}
+              />
+            )}
+          />
+        </Input>
+        <FormControlError className="">
+          <FormControlErrorText className="text-sm">
+            {errors.deadline?.message}
+          </FormControlErrorText>
+        </FormControlError>
+      </FormControl>
+      {/* Location */}
+      <Card className="w-full p-2.5 shadow-md rounded-xl">
+        <Text className="font-semibold text-typography-400">Location</Text>
+        <HStack className="w-full items-center gap-8">
+          <Input className="flex-1 h-14 mt-2 border-0" isDisabled>
+            <Controller
+              control={control}
+              name="location"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <InputField
+                  placeholder={getValues("location")}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={getValues("location")}
+                  className="flex-1 h-14 font-semibold text-typography-900 border-0 w-72"
+                />
+              )}
+            />
+          </Input>
+
+          <Button
+            variant="outline"
+            className="border-0 rounded-full w-14 h-14 bg-red-500 data-[active=true]:bg-red-500"
+            isDisabled={isLoading}
+            onPress={() => {
+              getCurrentLocation(),
+                setValue(
+                  "location",
+                  `${currentLocation?.subregion} ${currentLocation?.region} ${currentLocation?.country}`,
+                  { shouldDirty: true }
+                );
+            }}
+          >
+            {isLoading ? (
+              <ButtonSpinner />
+            ) : (
+              <ButtonIcon as={MapPinCheckIcon} className="text-white" />
+            )}
+          </Button>
+        </HStack>
+      </Card>
+
+      {/* Media Picker */}
+      <FormControl
+        className="w-full bg-white rounded-xl shadow-md"
+        isInvalid={!!errors.media}
+      >
+        <MediaPicker
+          maxFiles={6}
+          maxSize={100}
+          allowedTypes={["image"]}
+          initialFiles={(watch("media") || []).map((file) => ({
+            ...file,
+            type:
+              file.type === "image"
+                ? file.type
+                : file.type?.includes("image")
+                ? "image"
+                : undefined,
+          }))}
+          onFilesChange={(files) => {
+            console.log("files", files);
+            if (files.length === 0) {
+              setValue("media", [], { shouldDirty: true });
+              return;
+            }
+            setValue("media", files, { shouldDirty: true });
+          }}
+          classname="h-80"
+        />
+        <FormControlError className="">
+          <FormControlErrorText className="text-sm">
+            {errors.media?.message}
+          </FormControlErrorText>
+        </FormControlError>
+      </FormControl>
+      {/** For next app update */}
+      {/** Visibity */}
+      <Card className="w-full p-2.5 shadow-md rounded-xl flex-row justify-between items-center">
+        <Text className="text-typography-500 font-bold" size="lg">
+          Visibility
+        </Text>
+        <Controller
+          control={control}
+          name="visibility"
+          defaultValue="public"
+          render={({ field: { value, onChange } }) => (
+            <Switch
+              value={value === "public"}
+              onValueChange={(v) => onChange(v ? "public" : "verified_only")}
+              size="md"
+              trackColor={{ false: "#d4d4d4", true: "#DEAE60" }}
+              thumbColor="#102343"
+              ios_backgroundColor="#d4d4d4"
+            />
+          )}
+        />
+      </Card>
+    </VStack>
+  );
+
+  const renderPreview = () => {
+    const [viewMedia, setViewMedia] = useState<string | null>(null);
+
+    return (
+      <VStack className="mt-4 gap-4">
+        {/* <Text className="text-typography-700 mx-4 font-medium">
+        {categoryName ||
+          `${job?.subcategoryId.categoryId.name} | ${job?.subcategoryId.name}`}
+      </Text> */}
+
+        <Card variant="filled" className="mx-4">
+          <Heading size="md" className="text-typography-600 mb-2">
+            job Description
+          </Heading>
+          <Text className="text-typography-600">
+            {getValues("description") || job?.description}
+          </Text>
+        </Card>
+
+        <Card variant="filled" className="mx-4">
+          <Heading size="md" className="text-typography-600 mb-2">
+            Location
+          </Heading>
+          <Text className="text-typography-700">
+            {getValues("location") || job?.location}
+          </Text>
+        </Card>
+
+        <Card variant="filled" className="mx-4">
+          <Heading size="md" className="text-typography-600 mb-2">
+            Price Range
+          </Heading>
+          <Text className="text-typography-700">
+            {getValues("budget") || job?.budget}
+          </Text>
+        </Card>
+
+        <Card variant="filled" className="mx-4">
+          <Heading size="md" className="text-typography-600 mb-2">
+            Estimated Duration
+          </Heading>
+          <Text className="text-typography-700">
+            {getValues("deadline") || job?.deadline} days
+          </Text>
+        </Card>
+
+        {job?.media &&
+          job.media.length > 0 &&
+          job.media.map((item, index) => (
+            <Pressable
+              key={index}
+              onPress={() => setViewMedia((item as MediaItem).url)}
+            >
+              <Image
+                source={{
+                  uri: (item as any).thumbnail,
+                }}
+                className="w-full h-80 object-cover"
+                alt={`job media ${index + 1}`}
+              />
+            </Pressable>
+          ))}
+      </VStack>
+    );
+  };
+
+  const renderFormFooter = () => {
+    if (!isEditable) return null;
+
+    if (!previewMode) {
+      return (
+        <ModalFooter className="mt-0 flex-col px-4">
+          <HStack className="w-full gap-3">
+            {isValid && (
+              <Button
+                size="xl"
+                variant="outline"
+                className="flex-1"
+                onPress={handleSubmit(() => setPreviewMode(true))}
+                isDisabled={!isValid}
+              >
+                <ButtonText className="text-brand-primary">Preview</ButtonText>
+              </Button>
+            )}
+          </HStack>
+          <Button
+            size="xl"
+            isDisabled={isLoading || loading}
+            className="w-full bg-brand-primary"
+            onPress={handleSubmit(onSubmit)}
+          >
+            <ButtonText className="text-brand-secondary">
+              {isLoading || loading ? <Spinner /> : "Publish"}
+            </ButtonText>
+          </Button>
+        </ModalFooter>
+      );
+    }
+
+    return (
+      <ModalFooter className="mt-0 flex-col px-4">
+        <Button
+          size="xl"
+          variant="outline"
+          onPress={() => setPreviewMode(false)}
+          className="w-full"
+        >
+          <ButtonText className="text-gray-500">Back to Edit</ButtonText>
+        </Button>
+        {isDirty && (
+          <Button
+            size="xl"
+            isDisabled={!isValid || isLoading || loading}
+            className="w-full bg-brand-primary"
+            onPress={handleSubmit(onSubmit)}
+          >
+            <ButtonText>
+              {isLoading || loading ? <Spinner /> : "Save & Publish Job"}
+            </ButtonText>
+          </Button>
+        )}
+      </ModalFooter>
+    );
+  };
+
+  return (
+    <Modal
+      isOpen={!!isOpen}
+      onClose={handleClose}
+      closeOnOverlayClick={false}
+      className="bg-white"
+    >
+      <ModalBackdrop />
+      <ModalContent className="flex-1 pt-16 w-full px-0">
+        <ModalHeader className="items-center justify-start gap-2">
+          <ModalCloseButton
+            className={`flex flex-row items-center gap-2 ${
+              !isEditable && "px-4"
+            }`}
+          >
+            <Icon size="xl" as={ChevronLeftIcon} />
+            <Heading size="lg" className="text-brand-primary">
+              {!previewMode ? "Job Post" : "Request Preview"}
+            </Heading>
+          </ModalCloseButton>
+        </ModalHeader>
+        <ModalBody className="mt-8" showsVerticalScrollIndicator={false}>
+          <Heading size="xl" className="text-brand-primary mx-4">
+            {!previewMode
+              ? "Create a Request"
+              : getValues("title") || job?.title}
+          </Heading>
+
+          {!previewMode ? renderFormField() : renderPreview()}
+        </ModalBody>
+
+        {renderFormFooter()}
+      </ModalContent>
+    </Modal>
+  );
+};

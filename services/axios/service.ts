@@ -1,5 +1,6 @@
+import { create } from "zustand";
 import { ApiClientSingleton } from "./conf";
-import { ServiceData, Category } from "@/types";
+import { ServiceData, Category, JobData } from "@/types";
 
 const { axiosInstance } = ApiClientSingleton.getInstance();
 
@@ -59,5 +60,38 @@ export const getServices = async (
   const response = await axiosInstance.get(
     `services?page=${page}&limit=${limit}`
   );
+  return response.data;
+};
+
+export const createJob = async (data: FormData): Promise<JobData> => {
+  console.log(data);
+  const response = await axiosInstance.post("services/jobs", data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return { ...response.data, status: response.status };
+};
+
+export const getJobsByUser = async (): Promise<JobData[]> => {
+  const response = await axiosInstance.get("services/jobs");
+  return response.data;
+};
+
+export const updateJob = async (
+  jobId: string,
+  data: FormData
+): Promise<JobData> => {
+  const response = await axiosInstance.patch(`services/jobs/${jobId}`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return response.data;
+};
+
+export const deleteJob = async (jobId: string): Promise<JobData[]> => {
+  const response = await axiosInstance.delete(`services/jobs/${jobId}`);
   return response.data;
 };

@@ -4,7 +4,7 @@ import { HStack } from "../ui/hstack";
 import { Pressable } from "../ui/pressable";
 import { Text } from "../ui/text";
 import { Heading } from "../ui/heading";
-import { Icon, ChevronDownIcon } from "../ui/icon";
+import { Icon, ChevronDownIcon, AddIcon } from "../ui/icon";
 import {
   Avatar,
   AvatarFallbackText,
@@ -17,62 +17,82 @@ import {
   CircleDotDashedIcon,
   MessagesSquareIcon,
   CircleUserRoundIcon,
+  MapPinHouseIcon,
+  CirclePlusIcon,
 } from "lucide-react-native";
 import useGlobalStore from "@/store/globalStore";
 import { LinearGradient } from "expo-linear-gradient";
-import SearchBar from "../SearchEngine";
-import ProfilePic from "../profile/ProfilePic";
 
 export const BottomNavbar = () => {
   const { currentView, setCurrentView, switchRole } = useGlobalStore();
   const isProvider = switchRole === "Provider";
   const buttons = [
-    { icon: HouseIcon, label: "Home" },
-    { icon: CircleDotDashedIcon, label: "Updates" },
-    { icon: MessagesSquareIcon, label: "Chat" },
-    { icon: CircleUserRoundIcon, label: "Profile" },
+    { icon: HouseIcon, label: "Home", showFor: "Both" },
+    { icon: CircleDotDashedIcon, label: "Updates", showFor: "Both" },
+    { icon: AddIcon, label: "Job-Post", showFor: "Client" },
+    // { icon: MapPinHouseIcon, label: "Nearby", showFor: "Client" },
+    { icon: MessagesSquareIcon, label: "Chat", showFor: "Both" },
+    { icon: CircleUserRoundIcon, label: "Profile", showFor: "Both" },
   ];
+
   return (
-    <HStack className="p-2 justify-between bg-white items-center border border-t border-gray-300 fixed bottom-0">
-      {buttons.map((button, index) => (
-        <Pressable
-          key={index}
-          onPress={() => setCurrentView(button.label as any)}
-          className="flex-1 items-center"
-        >
-          <VStack className="items-center">
-            <Icon
-              as={button.icon}
-              size="lg"
-              className={`w-7 h-7 ${
-                currentView === button.label
-                  ? isProvider
-                    ? "text-brand-secondary"
-                    : "text-brand-primary"
-                  : "text-gray-500"
-              }`}
-            />
-            <Text
-              className={`${
-                currentView === button.label
-                  ? isProvider
-                    ? "text-brand-secondary font-bold"
-                    : "text-brand-primary font-bold"
-                  : "text-gray-500"
-              } mt-1`}
-            >
-              {button.label}
-            </Text>
-          </VStack>
-        </Pressable>
-      ))}
+    <HStack className="p-2 px-6 justify-between bg-white items-center border border-t border-gray-300 fixed bottom-0">
+      {buttons
+        .filter(
+          (button) => button.showFor === "Both" || button.showFor === switchRole
+        )
+        .map((button, index) => (
+          <Pressable
+            key={index}
+            onPress={() => setCurrentView(button.label as any)}
+            className={`items-center justify-center ${
+              button.icon == AddIcon &&
+              "bg-brand-primary rounded-full shadow-lg"
+            }`}
+          >
+            <VStack className="items-center justify-center">
+              <Icon
+                as={button.icon}
+                size="lg"
+                className={`w-7 h-7 ${
+                  button.label === "Job-Post"
+                    ? "text-white m-4"
+                    : currentView === button.label
+                    ? isProvider
+                      ? "text-brand-secondary"
+                      : "text-brand-primary"
+                    : "text-gray-500"
+                }`}
+              />
+              {button.label !== "Job-Post" && (
+                <Text
+                  className={`${
+                    currentView === button.label
+                      ? isProvider
+                        ? "text-brand-secondary font-bold"
+                        : "text-brand-primary font-bold"
+                      : "text-gray-500"
+                  } mt-1`}
+                >
+                  {button.label}
+                </Text>
+              )}
+            </VStack>
+          </Pressable>
+        ))}
     </HStack>
   );
 };
 
 export const TopNavbar = () => {
-  const { user, currentLocation, getCurrentLocation, isLoading, switchRole } =
-    useGlobalStore();
+  const {
+    user,
+    currentLocation,
+    getCurrentLocation,
+    isLoading,
+    switchRole,
+    setCurrentView,
+  } = useGlobalStore();
   const isProvider = switchRole === "Provider";
 
   return (
@@ -143,7 +163,8 @@ export const TopNavbar = () => {
               </Button>
             )}
             <Button
-              className={`rounded-full h-0 w-0 p-5 ${
+              variant="outline"
+              className={`border-0 rounded-full h-0 w-0 p-5 ${
                 isProvider ? "bg-brand-secondary/30" : "bg-brand-primary/30"
               }`}
             >

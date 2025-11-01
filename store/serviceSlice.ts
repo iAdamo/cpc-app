@@ -7,8 +7,14 @@ import {
   updateService,
   deleteService,
 } from "@/services/axios/service";
-import { Category, Subcategory, ServiceData } from "@/types";
-import { GlobalStore, ServiceState } from "@/types";
+import {
+  Category,
+  Subcategory,
+  ServiceData,
+  GlobalStore,
+  ServiceState,
+  JobData,
+} from "@/types";
 
 export const serviceSlice: StateCreator<GlobalStore, [], [], ServiceState> = (
   set,
@@ -19,6 +25,7 @@ export const serviceSlice: StateCreator<GlobalStore, [], [], ServiceState> = (
   MyProjects: [],
   OtherProjects: [],
   draftProjects: [],
+  draftJobs: [],
 
   setAvailableCategories: (categories: Category[]) =>
     set({ availableCategories: categories }),
@@ -43,6 +50,23 @@ export const serviceSlice: StateCreator<GlobalStore, [], [], ServiceState> = (
       });
       return { draftProjects: updatedDrafts };
     }),
+  setDraftJobs: (jobs: JobData[]) =>
+    set((state) => {
+      // Create a map of the new projects for quick lookup
+      const newProjectsMap = new Map(jobs.map((p) => [p._id, p]));
+      // Replace or keep old projects
+      const updatedDrafts = state.draftJobs.map((proj) =>
+        newProjectsMap.has(proj._id) ? newProjectsMap.get(proj._id)! : proj
+      );
+      // Add any truly new projects
+      jobs.forEach((proj) => {
+        if (!state.draftJobs.some((p) => p._id === proj._id)) {
+          updatedDrafts.push(proj);
+        }
+      });
+      return { draftJobs: updatedDrafts };
+    }),
+    
   createService: async (data: FormData) => {
     set({ isLoading: true });
     try {

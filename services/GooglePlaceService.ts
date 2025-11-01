@@ -4,7 +4,10 @@ import { Place, PlaceDetails } from "@/types";
 import type { LocationObject } from "expo-location";
 import { LocationSubscription } from "expo-location";
 
-const GOOGLE_MAPS_API_KEY = Constants.expoConfig?.extra?.googleMapsApiKey;
+// const GOOGLE_MAPS_API_KEY = Constants.expoConfig?.extra?.googleMapsApiKey;
+const GOOGLE_MAPS_API_KEY =
+  Constants.expoConfig?.android?.config?.googleMaps?.apiKey;
+
 const AUTOCOMPLETE_URL =
   "https://maps.googleapis.com/maps/api/place/autocomplete/json";
 const PLACE_DETAILS_URL =

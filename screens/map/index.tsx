@@ -20,13 +20,23 @@ import { useState } from "react";
 import { Alert, ScrollView } from "react-native";
 import { ShareService } from "@/services/shareService";
 import { GooglePlaceService } from "@/services/googlePlaceService";
+import { AppleMaps, GoogleMaps } from "expo-maps";
+import { Platform } from "react-native";
 
-const InviteFriends = () => {
-  return (
-    <HStack className="p-4">
-      <Text>Maps are not available on this platform.</Text>
-    </HStack>
-  );
+const MapView = () => {
+  if (Platform.OS === "ios") {
+    return <AppleMaps.View style={{ flex: 1 }} />;
+  } else if (Platform.OS === "android") {
+    return <GoogleMaps.View style={{ flex: 1 }} />;
+  } else {
+    return (
+      <VStack className="flex-1 bg-white">
+        <HStack className="p-4">
+          <Text>Maps are not available on this platform.</Text>
+        </HStack>
+      </VStack>
+    );
+  }
 };
 
-export default InviteFriends;
+export default MapView;

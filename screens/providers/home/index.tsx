@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import Categories from "./Categories";
 import { ScrollView } from "react-native";
 import { VStack } from "@/components/ui/vstack";
+import { Fab, FabIcon, FabLabel } from "@/components/ui/fab";
+import { MapPinHouseIcon } from "lucide-react-native";
 import ContentDisplay from "./ContentDisplay";
 import SortBar from "./SortBar";
 import useGlobalStore from "@/store/globalStore";
@@ -55,6 +57,14 @@ const HomeView = () => {
       {!isSearchFocus && <Categories />}
       <SortBar />
       <ContentDisplay providers={providers} displayStyle={displayStyle} />
+      <Fab
+        size="xl"
+        className="bg-red-500 shadow-xl data-[active=true]:bg-red-400"
+        onPress={() => {}}
+      >
+        <FabIcon as={MapPinHouseIcon} />
+        {/* <FabLabel className="font-semibold">Nearby</FabLabel> */}
+      </Fab>
     </VStack>
   );
 };

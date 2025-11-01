@@ -161,7 +161,7 @@ const ProfileView = () => {
             </Button>
           </HStack>
         </VStack>
-        <Card className="flex-row rounded-xl justify-between items-center p-0 px-4 mx-4 bottom-6 shadow-lg bg-white">
+        <Card className="flex-row rounded-xl justify-between items-center p-3 px-4 mx-4 bottom-6 shadow-lg bg-white">
           <Text size="lg" className="font-medium">
             Switch to {switchRole === "Client" ? "Company" : "Client"}
           </Text>
