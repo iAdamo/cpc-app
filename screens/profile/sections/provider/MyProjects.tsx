@@ -223,20 +223,25 @@ export const MyServices = ({ providerId }: { providerId?: string }) => {
             uri:
               Array.isArray(service.media) && service.media.length > 0
                 ? (() => {
-                    const found = service.media.find(
-                      (mediaItem: string | FileType) =>
-                        typeof mediaItem === "string"
-                          ? !(
-                              mediaItem.endsWith(".mp4") ||
-                              mediaItem.endsWith(".mov")
-                            )
-                          : mediaItem.type !== "video"
-                    );
-                    if (!found)
-                      return "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80";
-                    if (typeof found === "string") return found;
-                    // found is FileType
-                    return (found as FileType).uri;
+                    const fallback =
+                      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80";
+                    const found = service.media.find((m) => {
+                      // use runtime checks instead of unsafe casts
+                      if (m && typeof (m as any).thumbnail) return true;
+                      if (
+                        m &&
+                        typeof (m as any).uri &&
+                        (m as any).uri.startsWith("file")
+                      )
+                        return true;
+                      return false;
+                    });
+                    if (!found) return fallback;
+                    if (found && typeof (found as any).thumbnail === "string")
+                      return (found as any).thumbnail;
+                    if (found && typeof (found as any).uri === "string")
+                      return (found as any).uri;
+                    return fallback;
                   })()
                 : "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
           }}

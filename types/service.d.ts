@@ -66,13 +66,18 @@ export interface JobData {
   description: string;
   budget: number;
   deadline: number;
-  urgency: string;
+  negotiable: boolean;
+  urgency: "Normal" | "Urgent" | "Immediate" | "";
   categoryId: Category;
   subcategoryId: SubcategoryData;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
   location: string;
+  coordinates?: {
+    lat: number;
+    long: number;
+  };
   media: MediaItem[] | FileType[];
   visibilty: boolean;
   userId: UserData;

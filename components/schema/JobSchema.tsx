@@ -34,6 +34,12 @@ export const JobFormSchema = z.object({
     .min(1, "Deadline must be at least 1 day")
     .max(365, "Deadline must be at most 365 days"),
   location: z.string().min(1, "Location is required"),
+  coordinates: z
+    .object({
+      lat: z.number().min(-90).max(90),
+      long: z.number().min(-180).max(180),
+    })
+    .optional(),
   // urgency: z.string().min(1, "Urgency level is required"),
   negotiable: z.boolean().optional(),
   visibility: z.string().optional(),

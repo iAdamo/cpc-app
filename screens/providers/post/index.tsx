@@ -78,6 +78,9 @@ import MediaView from "@/components/media/MediaView";
 import { Badge, BadgeText } from "@/components/ui/badge";
 import { getAllCategoriesWithSubcategories } from "@/services/axios/service";
 import { MapPinCheckIcon } from "lucide-react-native";
+import { getDistanceWithUnit } from "@/utils/GetDistance";
+import { MapPinIcon } from "lucide-react-native";
+import DateFormatter from "@/utils/DateFormat";
 
 export const PostJob = ({ userId }: { userId?: string }) => {
   const [loading, setLoading] = useState(false);
@@ -161,7 +164,7 @@ export const PostJob = ({ userId }: { userId?: string }) => {
   };
 
   // When deleting a draft job
-  const handleDeletejob = async (job: JobData) => {
+  const handleDeleteJob = async (job: JobData) => {
     if (job._id.startsWith("draft-")) {
       useGlobalStore.setState((state) => ({
         draftJobs: state.draftJobs.filter((p: JobData) => p._id !== job._id),
@@ -179,7 +182,7 @@ export const PostJob = ({ userId }: { userId?: string }) => {
     setActiveTab(tab);
   };
 
-  const handlejobPress = (job: JobData) => {
+  const handleJobPress = (job: JobData) => {
     setIsModalOpen(true);
     setShowPreview(job);
   };
@@ -212,44 +215,14 @@ export const PostJob = ({ userId }: { userId?: string }) => {
 
   const renderjobCard = (job: JobData) => {
     return (
-      <Card key={job._id} className="relative p-0 mx-4 mb-4">
-        <Image
-          source={{
-            uri:
-              Array.isArray(job.media) && job.media.length > 0
-                ? (() => {
-                    const fallback =
-                      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80";
-                    const found = job.media.find((m) => {
-                      // use runtime checks instead of unsafe casts
-                      if (m && typeof (m as any).thumbnail) return true;
-                      if (
-                        m &&
-                        typeof (m as any).uri &&
-                        (m as any).uri.startsWith("file")
-                      )
-                        return true;
-                      return false;
-                    });
-                    if (!found) return fallback;
-                    if (found && typeof (found as any).thumbnail === "string")
-                      return (found as any).thumbnail;
-                    if (found && typeof (found as any).uri === "string")
-                      return (found as any).uri;
-                    return fallback;
-                  })()
-                : "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-          }}
-          className="w-full h-52 rounded-lg object-cover"
-          alt={job.title}
-        />
-        <VStack className="absolute inset-0 p-4 justify-between">
+      <Card key={job._id} className="mx-4 mb-4 gap-4 shadow-xl">
+        <HStack>
           <VStack className="flex-1 justify-start">
             {!userId && (
               <HStack className="items-center justify-between">
                 <Button
                   className="p-2  bg-white/40 h-8 w-8 rounded-full"
-                  onPress={() => handleDeletejob(job)}
+                  onPress={() => handleDeleteJob(job)}
                 >
                   <ButtonIcon as={TrashIcon} className="text-red-600" />
                 </Button>
@@ -263,50 +236,58 @@ export const PostJob = ({ userId }: { userId?: string }) => {
               </HStack>
             )}
           </VStack>
-          <Pressable
-            onPress={() => handlejobPress(job)}
-            className="flex-1 justify-end"
-          >
-            <VStack className="justify-end">
-              <HStack className="gap-4 items-center">
-                <VStack className="flex-1">
-                  <Heading size="md" className="text-white line-clamp-1">
-                    {job?.title}
-                  </Heading>
-                  <Text className="text-white line-clamp-1">
-                    {job?.location}
-                  </Text>
-                  <HStack space="sm" className="items-center mt-2">
-                    <Avatar size="xs">
-                      <AvatarFallbackText>
-                        {`${job?.userId?.firstName || user?.firstName} ${
-                          job?.userId?.lastName || user?.lastName
-                        }`}
-                      </AvatarFallbackText>
-                      <AvatarImage
-                        source={
-                          typeof job?.userId?.profilePicture === "string"
-                            ? { uri: job?.userId?.profilePicture }
-                            : undefined
-                        }
-                      />
-                    </Avatar>
-                    <Text className="text-white">
-                      {`${job?.userId?.firstName || user?.firstName} ${
-                        job?.userId?.lastName || user?.lastName
-                      }`}
-                    </Text>
-                    {job?.userId?.isVerified && (
-                      <Badge action="success">
-                        <BadgeText>Verified</BadgeText>
-                      </Badge>
-                    )}
-                  </HStack>
-                </VStack>
-              </HStack>
-            </VStack>
-          </Pressable>
+        </HStack>
+        <VStack space="md" className="">
+          <Heading className="">{job.title}</Heading>
+          <Text className="line-clamp-2 text-typography-700">
+            {job?.description}
+          </Text>
         </VStack>
+        <HStack space="lg" className="items-center">
+          <Heading size="md">{`$${job?.budget || 0}`}</Heading>
+          <Text>{!job.negotiable ? "Negotiable" : ""}</Text>
+          <Text
+            className={`py-0.5 text-white px-2 rounded-full ${
+              job.urgency === "Normal"
+                ? "bg-green-500"
+                : job.urgency === "Urgent"
+                ? "bg-yellow-500"
+                : job.urgency === "Immediate"
+                ? "bg-red-500"
+                : "bg-gray-500"
+            }`}
+          >
+            {job?.urgency || ""}
+          </Text>
+        </HStack>
+        <HStack className="justify-between items-center w-full">
+          <HStack space="sm" className="items-center flex-1">
+            <Icon
+              size="xl"
+              as={MapPinIcon}
+              className="fill-gray-500 stroke-white text-typography-600"
+            />
+            <Text className="text-typography-600 ">
+              {job.location} (
+              {
+                getDistanceWithUnit(
+                  job?.coordinates?.lat ?? 0,
+                  job?.coordinates?.long ?? 0
+                )?.text
+              }{" "}
+              away)
+            </Text>
+          </HStack>
+          <Button
+            size="md"
+            onPress={() => {
+              handleJobPress(job);
+            }}
+            className="rounded-xl h-8 bg-brand-primary"
+          >
+            <ButtonText>View</ButtonText>
+          </Button>
+        </HStack>
       </Card>
     );
   };
@@ -478,21 +459,22 @@ export const CreatejobModal = ({
   };
 
   const onSubmit = async (data: JobFormSchemaType) => {
+    console.log({ data });
     try {
       setLoading(true);
-      const formdata = new FormData();
-      appendFormData(formdata, data);
-
-      const created = await createJob(formdata);
-
+      const formData = new FormData();
+      appendFormData(formData, data);
+      console.log("Submitting formData:", Array.from(formData.entries()));
+      let created: JobData | undefined;
+      if (job && job._id && !job._id.startsWith("draft-")) {
+        formData.append("isActive", "true");
+        console.log(job._id);
+        created = await updateJob(job._id, formData);
+      } else {
+        created = await createJob(formData);
+      }
       // Only remove the draft after the server confirms creation
-      if (
-        created &&
-        created._id &&
-        job &&
-        job._id &&
-        job._id.startsWith("draft-")
-      ) {
+      if (created && created._id && job && job._id) {
         useGlobalStore.setState((state) => ({
           draftJobs: state.draftJobs.filter((p: JobData) => p._id !== job._id),
         }));
@@ -930,22 +912,30 @@ export const CreatejobModal = ({
     const [viewMedia, setViewMedia] = useState<string | null>(null);
 
     return (
-      <VStack className="mt-4 gap-4">
+      <VStack className="mt-4 gap-2 bg-[#F9F9F9] pb-8 pt-4">
         {/* <Text className="text-typography-700 mx-4 font-medium">
         {categoryName ||
           `${job?.subcategoryId.categoryId.name} | ${job?.subcategoryId.name}`}
       </Text> */}
 
-        <Card variant="filled" className="mx-4">
+        <Card className="mx-4">
           <Heading size="md" className="text-typography-600 mb-2">
-            job Description
+            Job Description
           </Heading>
           <Text className="text-typography-600">
             {getValues("description") || job?.description}
           </Text>
         </Card>
-
-        <Card variant="filled" className="mx-4">
+        <Card className="mx-4">
+          <Heading size="md" className="text-typography-600 mb-2">
+            Budget
+          </Heading>
+          <Text className="text-typography-700">
+            {getValues("budget") || job?.budget} -{" "}
+            {getValues("negotiable") ? "Negotiable" : "Fixed Price"}
+          </Text>
+        </Card>
+        <Card className="mx-4">
           <Heading size="md" className="text-typography-600 mb-2">
             Location
           </Heading>
@@ -954,21 +944,30 @@ export const CreatejobModal = ({
           </Text>
         </Card>
 
-        <Card variant="filled" className="mx-4">
-          <Heading size="md" className="text-typography-600 mb-2">
-            Price Range
-          </Heading>
-          <Text className="text-typography-700">
-            {getValues("budget") || job?.budget}
-          </Text>
-        </Card>
-
-        <Card variant="filled" className="mx-4">
+        <Card className="mx-4">
           <Heading size="md" className="text-typography-600 mb-2">
             Estimated Duration
           </Heading>
           <Text className="text-typography-700">
-            {getValues("deadline") || job?.deadline} days
+            {"On or Before "}
+            {DateFormatter.toRelative(
+              getValues("deadline") ?? job?.deadline ?? 0
+            )}{" "}
+            {"| Urgency"}
+            {job?.urgency ? ` - ${String(job.urgency)}` : ""}
+          </Text>
+        </Card>
+        <Card className="mx-4">
+          <Heading size="md" className="text-typography-600 mb-2">
+            Estimated Duration
+          </Heading>
+          <Text className="text-typography-700">
+            {"On or Before "}
+            {DateFormatter.toRelative(
+              getValues("deadline") ?? job?.deadline ?? 0
+            )}{" "}
+            {"| Urgency"}
+            {job?.urgency ? ` - ${String(job.urgency)}` : ""}
           </Text>
         </Card>
 
