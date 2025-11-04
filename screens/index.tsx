@@ -4,7 +4,7 @@ import { Text } from "@/components/ui/text";
 import { TopNavbar } from "@/components/layout/Navbar";
 import useGlobalStore from "@/store/globalStore";
 import HomeView from "./providers/home";
-import TaskDisplay from "./clients/home";
+import ClientsUpdates from "./clients/update";
 import ProfileView from "./profile";
 import Chat from "./chat";
 import Update from "./providers/update";
@@ -24,7 +24,7 @@ const Screen = () => {
         {currentView === "Home" &&
           (switchRole === "Client" ? <HomeView /> : <Text>Provider Home</Text>)}
         {currentView === "Updates" &&
-          (switchRole === "Client" ? <Update /> : <TaskDisplay />)}
+          (switchRole === "Client" ? <Update /> : <ClientsUpdates />)}
         {currentView === "Chat" && <Chat />}
         {currentView === "Profile" && <ProfileView />}
         {currentView === "Map" && <MapView />}

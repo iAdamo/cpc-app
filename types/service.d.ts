@@ -83,4 +83,5 @@ export interface JobData {
   // tags: string[];
   userId: UserData;
   providerId: ProviderData;
+  createdAt: Date;
 }

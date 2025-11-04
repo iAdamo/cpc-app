@@ -6,6 +6,7 @@ import {
   DisplayStyle,
   SearchResultData,
   SortBy,
+  JobData,
 } from "@/types";
 import { globalSearch } from "@/services/axios/search";
 import { setUserFavourites } from "@/services/axios/user";
@@ -22,9 +23,10 @@ export const providerViewSlice: StateCreator<
   setCategories: (categories: string[]) => set({ categories }),
   setSortBy: (sortBy: SortBy) => set({ sortBy }),
   setDisplayStyle: (style: DisplayStyle) => set({ displayStyle: style }),
+  savedJobs: [],
 
   // Search-related state and actions
-  searchResults: { providers: [], services: [] },
+  searchResults: { providers: [], services: [], jobs: [] },
   setSearchResults: (results: SearchResultData) =>
     set({ searchResults: results }),
 
@@ -57,7 +59,21 @@ export const providerViewSlice: StateCreator<
     }
   },
 
+  setSavedJobs: (job: JobData) => {
+    const existing = get().savedJobs.find((j) => j._id === job._id);
+    if (existing) {
+      // remove
+      set({ savedJobs: get().savedJobs.filter((j) => j._id !== job._id) });
+      set({ success: "Removed from Saved Jobs" });
+    } else {
+      // add
+      set({ savedJobs: [...get().savedJobs, job] });
+      set({ success: "Added to Saved Jobs" });
+    }
+  },
+
   executeSearch: async (params: {
+    model: "providers" | "services" | "jobs";
     page: number;
     limit: number;
     engine: boolean;
@@ -71,6 +87,7 @@ export const providerViewSlice: StateCreator<
     set({ error: null, success: null });
     try {
       const {
+        model,
         page,
         limit,
         engine,
@@ -82,6 +99,7 @@ export const providerViewSlice: StateCreator<
         categories,
       } = params;
       const response = await globalSearch(
+        model,
         page,
         limit,
         engine,
@@ -92,12 +110,23 @@ export const providerViewSlice: StateCreator<
         sortBy,
         categories
       );
-      set({
-        searchResults: {
-          providers: response.providers,
-          services: response.services || [],
-        },
-      });
+      if (model === "providers") {
+        set({
+          searchResults: {
+            providers: response.providers || [],
+            services: response.services || [],
+            jobs: [],
+          },
+        });
+      } else if (model === "jobs") {
+        set({
+          searchResults: {
+            providers: [],
+            services: [],
+            jobs: response.jobs || [],
+          },
+        });
+      }
     } catch (error: any) {
       console.error("Search error:", error);
       set({
@@ -107,5 +136,5 @@ export const providerViewSlice: StateCreator<
     }
   },
   clearSearchResults: () =>
-    set({ searchResults: { providers: [], services: [] } }),
+    set({ searchResults: { providers: [], services: [], jobs: [] } }),
 });

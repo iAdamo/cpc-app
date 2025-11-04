@@ -32,6 +32,7 @@ const HomeView = () => {
       //   categories,
       // });
       await executeSearch({
+        model: "providers",
         page: 1,
         limit: 30,
         engine: false,

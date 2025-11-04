@@ -81,7 +81,6 @@ import { MapPinCheckIcon } from "lucide-react-native";
 import { getDistanceWithUnit } from "@/utils/GetDistance";
 import { MapPinIcon } from "lucide-react-native";
 import DateFormatter from "@/utils/DateFormat";
-import { get } from "lodash";
 
 export const PostJob = ({ userId }: { userId?: string }) => {
   const [loading, setLoading] = useState(false);
@@ -140,8 +139,6 @@ export const PostJob = ({ userId }: { userId?: string }) => {
     formData.append("isActive", (!job.isActive).toString());
     try {
       const response = await updateJob(job._id, formData);
-      console.log({ response });
-
       // Update both jobs and draftjobs arrays
       if (job.isActive) {
         // Moving from published to drafts
@@ -248,7 +245,7 @@ export const PostJob = ({ userId }: { userId?: string }) => {
         </VStack>
         <HStack space="lg" className="items-center">
           <Heading size="md">{`$${job?.budget || 0}`}</Heading>
-          <Text>{!job.negotiable ? "Negotiable" : ""}</Text>
+          <Text>{job.negotiable ? "Negotiable" : "Fixed"}</Text>
           <Text
             className={`py-0.5 text-white px-2 rounded-full ${
               job.urgency === "Normal"
@@ -381,8 +378,6 @@ export const CreatejobModal = ({
     getCurrentLocation,
   } = useGlobalStore();
 
-  console.log("job", job);
-
   const {
     control,
     handleSubmit,
@@ -437,10 +432,9 @@ export const CreatejobModal = ({
     },
   });
 
-  console.log(getValues("categoryId"), job);
   console.log({ errors });
   // print all values on change
-  console.log("Form Values:", watch());
+  // console.log("Form Values:", watch());
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -477,16 +471,15 @@ export const CreatejobModal = ({
   };
 
   const onSubmit = async (data: JobFormSchemaType) => {
-    console.log({ data });
+    // console.log({ data });
     try {
       setLoading(true);
       const formData = new FormData();
       appendFormData(formData, data);
-      console.log("Submitting formData:", Array.from(formData.entries()));
+      // console.log("Submitting formData:", Array.from(formData.entries()));
       let created: JobData | undefined;
       if (job && job._id && !job._id.startsWith("draft-")) {
         formData.append("isActive", "true");
-        console.log(job._id);
         created = await updateJob(job._id, formData);
       } else {
         created = await createJob(formData);
@@ -515,7 +508,6 @@ export const CreatejobModal = ({
     // Check if there are unsaved changes
     if (isDirty && isEditable) {
       // You could show a confirmation dialog here
-      console.log("Unsaved changes detected");
     }
     handleSaveDraft();
     useGlobalStore.setState({ selectedFiles: [] });
@@ -895,7 +887,6 @@ export const CreatejobModal = ({
                 : undefined,
           }))}
           onFilesChange={(files) => {
-            console.log("files", files);
             if (files.length === 0) {
               setValue("media", [], { shouldDirty: true });
               return;

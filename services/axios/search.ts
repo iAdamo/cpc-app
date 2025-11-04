@@ -1,9 +1,10 @@
 import { ApiClientSingleton } from "./conf";
-import { ProviderData, ServiceData } from "@/types";
+import { ProviderData, ServiceData, JobData } from "@/types";
 
 const { axiosInstance } = ApiClientSingleton.getInstance();
 
 export const globalSearch = async (
+  model: "providers" | "services" | "jobs",
   page: number,
   limit: number,
   engine: boolean,
@@ -16,6 +17,7 @@ export const globalSearch = async (
 ): Promise<{
   providers: ProviderData[];
   services?: ServiceData[];
+  jobs?: JobData[];
   totalPages: number;
 }> => {
   const params: Record<string, any> = {};
@@ -29,6 +31,6 @@ export const globalSearch = async (
   if (sortBy) params.sortBy = sortBy;
   if (categories) params.categories = categories;
 
-  const response = await axiosInstance.get("search/providers", { params });
+  const response = await axiosInstance.get(`search/${model}`, { params });
   return response.data;
 };

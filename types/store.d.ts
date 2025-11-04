@@ -10,7 +10,7 @@ import {
   LocationGeocodedAddress,
 } from "expo-location";
 import { ProviderData } from "./provider";
-import { ServiceCategory, Subcategory, ServiceData } from "./service";
+import { ServiceCategory, Subcategory, ServiceData, JobData } from "./service";
 import { FileType, MediaSource, MediaPickerOptions } from "./media";
 import { Chat, Message, LastMessage } from "./chat";
 
@@ -109,9 +109,12 @@ export interface ProviderState {
   filteredProviders: ProviderData[];
   setFilteredProviders: (providers: ProviderData[]) => void;
   savedProviders: ProviderData[];
+  savedJobs: JobData[];
+  setSavedJobs: (job: JobData) => void;
   setSavedProviders: (providerId: string) => Promise<ProviderData[] | void>;
   setSearchResults: (results: SearchResultData) => void;
   executeSearch: (params: {
+    model: "providers" | "services" | "jobs";
     page: number;
     limit: number;
     engine: boolean;

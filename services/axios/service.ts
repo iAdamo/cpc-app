@@ -95,3 +95,8 @@ export const deleteJob = async (jobId: string): Promise<JobData[]> => {
   const response = await axiosInstance.delete(`services/jobs/${jobId}`);
   return response.data;
 };
+
+export const getJobById = async (jobId: string): Promise<JobData> => {
+  const response = await axiosInstance.get(`services/jobs/${jobId}`);
+  return response.data;
+};

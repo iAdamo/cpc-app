@@ -22,6 +22,8 @@ import {
 } from "lucide-react-native";
 import useGlobalStore from "@/store/globalStore";
 import { LinearGradient } from "expo-linear-gradient";
+import { MediaItem } from "@/types";
+import { router, usePathname } from "expo-router";
 
 export const BottomNavbar = () => {
   const { currentView, setCurrentView, switchRole } = useGlobalStore();
@@ -35,6 +37,10 @@ export const BottomNavbar = () => {
     { icon: CircleUserRoundIcon, label: "Profile", showFor: "Both" },
   ];
 
+  const pathname = usePathname();
+
+  console.log(pathname, "Current Pathname");
+
   return (
     <HStack className="p-2 px-6 justify-between bg-white items-center border border-t border-gray-300 fixed bottom-0">
       {buttons
@@ -44,7 +50,12 @@ export const BottomNavbar = () => {
         .map((button, index) => (
           <Pressable
             key={index}
-            onPress={() => setCurrentView(button.label as any)}
+            onPress={() => {
+              setCurrentView(button.label as any);
+              if (pathname !== "/clients" && pathname !== "/providers") {
+                router.back();
+              }
+            }}
             className={`items-center justify-center ${
               button.icon == AddIcon &&
               "bg-brand-primary rounded-full shadow-lg"
@@ -124,44 +135,38 @@ export const TopNavbar = () => {
             <AvatarImage
               source={{
                 uri: isProvider
-                  ? typeof user?.activeRoleId?.providerLogo === "string"
-                    ? user?.activeRoleId?.providerLogo
-                    : undefined
-                  : typeof user?.profilePicture?.thumbnail === "string"
-                  ? user?.profilePicture.thumbnail
-                  : undefined,
+                  ? (user?.activeRoleId?.providerLogo as MediaItem).thumbnail
+                  : user?.profilePicture?.thumbnail,
               }}
             />
           </Avatar>
           {isProvider && (
-            <Heading className="ml-4 text-typography-700">Tasks</Heading>
+            <Heading className="ml-4 text-typography-700">Jobs</Heading>
           )}
           <HStack className="items-center gap-2 ml-auto">
-            {!isProvider && (
-              <Button
-                size="sm"
-                className={`h-10 ${
-                  isProvider
-                    ? "bg-brand-secondary data-[active=true]:bg-brand-secondary"
-                    : "bg-brand-primary data-[active=true]:bg-brand-secondary"
-                } rounded-full`}
-                onPress={getCurrentLocation}
-              >
-                <ButtonIcon as={NavigationIcon} />
-                {isLoading ? (
-                  <ButtonSpinner />
-                ) : (
-                  <ButtonText className="line-clamp-1 max-w-32">
-                    {`${
-                      currentLocation
-                        ? `${currentLocation.city}, ${currentLocation.region}, ${currentLocation.isoCountryCode}`
-                        : "Get Location"
-                    }`}
-                  </ButtonText>
-                )}
-                <ButtonIcon as={ChevronDownIcon} />
-              </Button>
-            )}
+            <Button
+              size="sm"
+              className={`h-10 ${
+                isProvider
+                  ? "bg-brand-secondary data-[active=true]:bg-brand-secondary"
+                  : "bg-brand-primary data-[active=true]:bg-brand-secondary"
+              } rounded-full`}
+              onPress={getCurrentLocation}
+            >
+              <ButtonIcon as={NavigationIcon} />
+              {isLoading ? (
+                <ButtonSpinner />
+              ) : (
+                <ButtonText className="line-clamp-1 max-w-32">
+                  {`${
+                    currentLocation
+                      ? `${currentLocation.city}, ${currentLocation.region}, ${currentLocation.isoCountryCode}`
+                      : "Get Location"
+                  }`}
+                </ButtonText>
+              )}
+            </Button>
+
             <Button
               variant="outline"
               className={`border-0 rounded-full h-0 w-0 p-5 ${
