@@ -81,6 +81,7 @@ import { MapPinCheckIcon } from "lucide-react-native";
 import { getDistanceWithUnit } from "@/utils/GetDistance";
 import { MapPinIcon } from "lucide-react-native";
 import DateFormatter from "@/utils/DateFormat";
+import { get } from "lodash";
 
 export const PostJob = ({ userId }: { userId?: string }) => {
   const [loading, setLoading] = useState(false);
@@ -89,7 +90,7 @@ export const PostJob = ({ userId }: { userId?: string }) => {
   const [activeTab, setActiveTab] = useState<"published" | "drafts">(
     "published"
   );
-  const { user, setDraftJobs, draftJobs } = useGlobalStore();
+  const { user, setDraftJobs, draftJobs, removeDraftJob } = useGlobalStore();
 
   const [jobs, setJobs] = useState<JobData[]>([]);
 
@@ -106,10 +107,14 @@ export const PostJob = ({ userId }: { userId?: string }) => {
           const drafts = response.filter((job) => !job.isActive);
 
           setJobs(published);
-          // append to draft
-          useGlobalStore.setState((state) => ({
-            draftJobs: [...state.draftJobs, ...drafts],
-          }));
+          // append to draft using setDraftJobs (deduplicates)
+
+          // // append to draft
+          // useGlobalStore.setState((state) => ({
+          //   draftJobs: [...state.draftJobs, ...drafts],
+          // }));
+
+          setDraftJobs([...drafts]);
           setLoading(false);
         } catch (error) {
           console.error("Error fetching jobs:", error);
@@ -120,7 +125,7 @@ export const PostJob = ({ userId }: { userId?: string }) => {
       }
     };
     fetchjobs();
-  }, [userId, user?.activeRoleId?._id]);
+  }, [userId, user?._id]);
 
   // Filter jobs based on active tab
   const filteredjobs =
@@ -135,19 +140,20 @@ export const PostJob = ({ userId }: { userId?: string }) => {
     formData.append("isActive", (!job.isActive).toString());
     try {
       const response = await updateJob(job._id, formData);
+      console.log({ response });
 
       // Update both jobs and draftjobs arrays
       if (job.isActive) {
         // Moving from published to drafts
         setJobs((prev) => prev.filter((s) => s._id !== job._id));
-        useGlobalStore.setState((state) => ({
-          draftJobs: [...state.draftJobs, { ...job, isActive: false }],
-        }));
+        // use setDraftJobs to merge and deduplicate. Use the server response
+        // so we include any fields the server returns (category/subcategory)
+        // and ensure the draft entry has the latest data.
+        setDraftJobs([{ ...(response as JobData), isActive: false }]);
       } else {
         // Moving from drafts to published
-        useGlobalStore.setState((state) => ({
-          draftJobs: state.draftJobs.filter((s: JobData) => s._id !== job._id),
-        }));
+        // Remove from drafts using the dedicated remover so we don't rely on merge behavior
+        removeDraftJob(job._id);
         setJobs((prev) => [
           ...prev,
           { ...job, isActive: true, media: response.media },
@@ -166,16 +172,13 @@ export const PostJob = ({ userId }: { userId?: string }) => {
   // When deleting a draft job
   const handleDeleteJob = async (job: JobData) => {
     if (job._id.startsWith("draft-")) {
-      useGlobalStore.setState((state) => ({
-        draftJobs: state.draftJobs.filter((p: JobData) => p._id !== job._id),
-      }));
+      removeDraftJob(job._id);
       return;
     }
     await deleteJob(job._id);
     setJobs((prev) => prev.filter((p) => p._id !== job._id));
-    useGlobalStore.setState((state) => ({
-      draftJobs: state.draftJobs.filter((p: JobData) => p._id !== job._id),
-    }));
+    // remove from drafts via dedicated remover so dedupe/merge logic is used
+    removeDraftJob(job._id);
   };
 
   const handleTabPress = (tab: "published" | "drafts") => {
@@ -306,7 +309,7 @@ export const PostJob = ({ userId }: { userId?: string }) => {
           >
             <ButtonIcon as={AddIcon} className="text-brand-secondary" />
             <ButtonText className="text-brand-secondary">
-              Add New job
+              Add New Job
             </ButtonText>
           </Button>
         </HStack>
@@ -367,7 +370,7 @@ export const CreatejobModal = ({
   const [loading, setLoading] = useState(false);
   const [categoryName, setCategoryName] = useState<string>("");
   const [previewMode, setPreviewMode] = useState(!isEditable);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [services, setServices] = useState<any[]>([]);
   const {
     isLoading,
     user,
@@ -378,7 +381,7 @@ export const CreatejobModal = ({
     getCurrentLocation,
   } = useGlobalStore();
 
-  // console.log("job", job);
+  console.log("job", job);
 
   const {
     control,
@@ -393,14 +396,27 @@ export const CreatejobModal = ({
     defaultValues: {
       title: job?.title || "",
       description: job?.description || "",
-      categoryId: job?.categoryId?._id || "",
+      categoryId: job?.subcategoryId?.categoryId?._id || "",
       subcategoryId: job?.subcategoryId?._id || "",
       location:
         job?.location ||
-        `${currentLocation?.subregion} ${currentLocation?.region} ${currentLocation?.country}` ||
+        [
+          currentLocation?.subregion,
+          currentLocation?.region,
+          currentLocation?.country,
+        ]
+          .filter(Boolean)
+          .join(" ") ||
         "",
+      coordinates: {
+        lat: job?.coordinates?.lat || currentLocation?.coords.latitude || 0,
+        long: job?.coordinates?.long || currentLocation?.coords.longitude || 0,
+      },
       budget: job?.budget || 0,
-      deadline: job?.deadline || 0,
+      deadline: DateFormatter.remainingDays(job?.deadline as Date) || 0,
+      negotiable: job?.negotiable || false,
+      urgency: job?.urgency || "Normal",
+      visibility: job?.visibility || "Public",
       // media: [],
       media: Array.isArray(job?.media)
         ? job?.media.map((img, idx) =>
@@ -421,16 +437,18 @@ export const CreatejobModal = ({
     },
   });
 
+  console.log(getValues("categoryId"), job);
   console.log({ errors });
-
+  // print all values on change
+  console.log("Form Values:", watch());
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const data = await getAllCategoriesWithSubcategories();
-        // console.log("fetched categories", data);
-        setCategories(data);
+        // console.log("fetched services", data);
+        setServices(data);
       } catch (error) {
-        console.error("Error fetching categories:", error);
+        console.error("Error fetching services:", error);
       }
     };
     fetchCategories();
@@ -475,9 +493,9 @@ export const CreatejobModal = ({
       }
       // Only remove the draft after the server confirms creation
       if (created && created._id && job && job._id) {
-        useGlobalStore.setState((state) => ({
-          draftJobs: state.draftJobs.filter((p: JobData) => p._id !== job._id),
-        }));
+        // Use the current store value to avoid referencing outer-scope draftJobs
+        const currentDrafts = useGlobalStore.getState().draftJobs;
+        setDraftJobs(currentDrafts.filter((p: JobData) => p._id !== job._id));
       }
 
       // Notify parent to add to published list
@@ -583,7 +601,7 @@ export const CreatejobModal = ({
         {/* Category */}
         <FormControl
           className="flex-1 bg-white p-2.5 rounded-xl shadow-md"
-          isInvalid={!!errors.subcategoryId}
+          isInvalid={!!errors.categoryId}
         >
           <FormControlLabel>
             <FormControlLabelText className="text-brand-primary/50">
@@ -592,7 +610,9 @@ export const CreatejobModal = ({
           </FormControlLabel>
           <Select
             onValueChange={(value) => {
-              setValue("categoryId", value, { shouldDirty: true });
+              setValue("categoryId", getValues("categoryId") || value, {
+                shouldDirty: true,
+              });
               setCategoryName(value);
             }}
             className="flex-1 border-2 rounded border-brand-primary/30 focus:border-brand-primary focus:bg-blue-50"
@@ -604,8 +624,8 @@ export const CreatejobModal = ({
               <SelectInput
                 className="font-semibold text-typography-500"
                 placeholder={`${
-                  job?.subcategoryId?.name
-                    ? `${job.subcategoryId.name}`
+                  job?.subcategoryId?.categoryId?.name
+                    ? `${job.subcategoryId?.categoryId?.name}`
                     : "Select a category"
                 }`}
               />
@@ -618,7 +638,7 @@ export const CreatejobModal = ({
                   <SelectDragIndicator />
                 </SelectDragIndicatorWrapper>
 
-                {categories.map(
+                {services.map(
                   (category: { _id: string; name: string }, idx: number) => (
                     <SelectItem
                       key={idx}
@@ -631,10 +651,10 @@ export const CreatejobModal = ({
               </SelectContent>
             </SelectPortal>
           </Select>
-          {errors.subcategoryId && (
+          {errors.categoryId && (
             <FormControlError className="">
               <FormControlErrorText className="text-sm">
-                {errors.subcategoryId.message}
+                {errors.categoryId.message}
               </FormControlErrorText>
             </FormControlError>
           )}
@@ -651,7 +671,9 @@ export const CreatejobModal = ({
           </FormControlLabel>
           <Select
             onValueChange={(value) => {
-              setValue("subcategoryId", value, { shouldDirty: true });
+              setValue("subcategoryId", value, {
+                shouldDirty: true,
+              });
               setCategoryName(value);
             }}
             className="flex-1 border-2 rounded border-brand-primary/30 focus:border-brand-primary focus:bg-blue-50"
@@ -664,7 +686,7 @@ export const CreatejobModal = ({
                 className="font-semibold text-typography-500 flex-1"
                 placeholder={`${
                   job?.subcategoryId?.name
-                    ? `${job.subcategoryId.name}`
+                    ? `${job.subcategoryId?.name}`
                     : "Select"
                 }`}
               />
@@ -681,7 +703,7 @@ export const CreatejobModal = ({
                     className="max-h-96 w-full self-start"
                     showsVerticalScrollIndicator={false}
                   >
-                    {categories.map((category) => {
+                    {services.map((category) => {
                       if (category._id !== watch("categoryId")) return null;
                       return category.subcategories.map(
                         (
@@ -817,10 +839,10 @@ export const CreatejobModal = ({
               name="location"
               render={({ field: { onChange, onBlur, value } }) => (
                 <InputField
-                  placeholder={getValues("location")}
+                  placeholder={value || "Enter job location"}
                   onBlur={onBlur}
                   onChangeText={onChange}
-                  value={getValues("location")}
+                  value={value || ""}
                   className="flex-1 h-14 font-semibold text-typography-900 border-0 w-72"
                 />
               )}
@@ -838,6 +860,11 @@ export const CreatejobModal = ({
                   `${currentLocation?.subregion} ${currentLocation?.region} ${currentLocation?.country}`,
                   { shouldDirty: true }
                 );
+              setValue("coordinates", {
+                lat: currentLocation?.coords.latitude || 0,
+                long: currentLocation?.coords.longitude || 0,
+              }),
+                { shouldDirty: true };
             }}
           >
             {isLoading ? (
@@ -886,17 +913,17 @@ export const CreatejobModal = ({
       {/** For next app update */}
       {/** Visibity */}
       <Card className="w-full p-2.5 shadow-md rounded-xl flex-row justify-between items-center">
-        <Text className="text-typography-500 font-bold" size="lg">
-          Visibility
+        <Text className="text-typography-400 font-bold" size="lg">
+          Visibility - {getValues("visibility")}
         </Text>
         <Controller
           control={control}
           name="visibility"
-          defaultValue="public"
+          defaultValue="Public"
           render={({ field: { value, onChange } }) => (
             <Switch
-              value={value === "public"}
-              onValueChange={(v) => onChange(v ? "public" : "verified_only")}
+              value={value === "Public"}
+              onValueChange={(v) => onChange(v ? "Public" : "Verified")}
               size="md"
               trackColor={{ false: "#d4d4d4", true: "#DEAE60" }}
               thumbColor="#102343"
@@ -910,20 +937,23 @@ export const CreatejobModal = ({
 
   const renderPreview = () => {
     const [viewMedia, setViewMedia] = useState<string | null>(null);
-
     return (
       <VStack className="mt-4 gap-2 bg-[#F9F9F9] pb-8 pt-4">
-        {/* <Text className="text-typography-700 mx-4 font-medium">
-        {categoryName ||
-          `${job?.subcategoryId.categoryId.name} | ${job?.subcategoryId.name}`}
-      </Text> */}
-
         <Card className="mx-4">
           <Heading size="md" className="text-typography-600 mb-2">
             Job Description
           </Heading>
           <Text className="text-typography-600">
             {getValues("description") || job?.description}
+          </Text>
+        </Card>
+        <Card className="mx-4">
+          <Heading size="md" className="text-typography-600 mb-2">
+            Job Service
+          </Heading>
+          <Text className="text-typography-600 font-medium">
+            {categoryName ||
+              `${job?.subcategoryId.categoryId.name} | ${job?.subcategoryId.name}`}
           </Text>
         </Card>
         <Card className="mx-4">
@@ -959,15 +989,14 @@ export const CreatejobModal = ({
         </Card>
         <Card className="mx-4">
           <Heading size="md" className="text-typography-600 mb-2">
-            Estimated Duration
+            Visibility{" "}
           </Heading>
           <Text className="text-typography-700">
-            {"On or Before "}
-            {DateFormatter.toRelative(
-              getValues("deadline") ?? job?.deadline ?? 0
-            )}{" "}
-            {"| Urgency"}
-            {job?.urgency ? ` - ${String(job.urgency)}` : ""}
+            {job?.visibility === "Public"
+              ? "Everyone"
+              : job?.visibility === "Verified"
+              ? "Verified Users Only"
+              : "Only Me"}
           </Text>
         </Card>
 
@@ -987,6 +1016,15 @@ export const CreatejobModal = ({
               />
             </Pressable>
           ))}
+
+        {/* Media viewer modal */}
+        {viewMedia && (
+          <MediaView
+            isOpen={!!viewMedia}
+            onClose={() => setViewMedia(null)}
+            url={viewMedia ?? ""}
+          />
+        )}
       </VStack>
     );
   };

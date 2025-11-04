@@ -82,7 +82,13 @@ export interface OnboardingState {
   resetOnboarding: () => void;
 }
 
-export type LayoutView = "Home" | "Updates" | "Chat" | "Profile" | "Map" | "Job-Post";
+export type LayoutView =
+  | "Home"
+  | "Updates"
+  | "Chat"
+  | "Profile"
+  | "Map"
+  | "Job-Post";
 export type DisplayStyle = "Grid" | "List";
 export type SortBy =
   | "Relevance"
@@ -158,6 +164,7 @@ export interface ServiceState {
   draftJobs: JobData[];
   setDraftProjects: (projects: ServiceData[]) => void;
   setDraftJobs: (projects: JobData[]) => void;
+  removeDraftJob: (id: string) => void;
   // deleteService: (id: string) => Promise<void>;
 }
 export interface MediaState {

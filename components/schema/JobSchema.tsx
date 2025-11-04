@@ -17,11 +17,11 @@ const mediaFileSchema = z.object({
 export const JobFormSchema = z.object({
   title: z
     .string()
-    .min(30, "Title must be at least 30 characters long")
+    .min(10, "Title must be at least 10 characters long")
     .max(80, "Title must be at most 80 characters long"),
   description: z
     .string()
-    .min(100, "Description must be at least 250 characters long")
+    .min(20, "Description must be at least 20 characters long")
     .max(300, "Description must be at most 300 characters long"),
   categoryId: z.string().min(1, "Category is required"),
   subcategoryId: z.string().min(1, "Subcategory is required"),
@@ -40,7 +40,7 @@ export const JobFormSchema = z.object({
       long: z.number().min(-180).max(180),
     })
     .optional(),
-  // urgency: z.string().min(1, "Urgency level is required"),
+  urgency: z.string().optional(),
   negotiable: z.boolean().optional(),
   visibility: z.string().optional(),
   // contactPreference: z.string().min(1, "Contact preference is required"),

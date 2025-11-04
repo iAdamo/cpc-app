@@ -66,7 +66,12 @@ export const serviceSlice: StateCreator<GlobalStore, [], [], ServiceState> = (
       });
       return { draftJobs: updatedDrafts };
     }),
-    
+  // Remove a single draft job by id
+  removeDraftJob: (id: string) =>
+    set((state) => ({
+      draftJobs: state.draftJobs.filter((p) => p._id !== id),
+    })),
+
   createService: async (data: FormData) => {
     set({ isLoading: true });
     try {

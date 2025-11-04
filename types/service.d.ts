@@ -65,10 +65,9 @@ export interface JobData {
   title: string;
   description: string;
   budget: number;
-  deadline: number;
+  deadline: string | Date;
   negotiable: boolean;
   urgency: "Normal" | "Urgent" | "Immediate" | "";
-  categoryId: Category;
   subcategoryId: SubcategoryData;
   isActive: boolean;
   createdAt: string;
@@ -79,7 +78,9 @@ export interface JobData {
     long: number;
   };
   media: MediaItem[] | FileType[];
-  visibilty: boolean;
+  visibility: "Public" | "Verified" | "Private";
+  proposalsCount: number;
+  // tags: string[];
   userId: UserData;
   providerId: ProviderData;
 }

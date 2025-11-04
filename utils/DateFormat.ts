@@ -84,4 +84,20 @@ export default class DateFormatter {
     if (diff < 604800) return `${Math.floor(diff / 86400)} day(s) ago`;
     return DateFormatter.toShortDate(dateInput);
   }
+
+  /**
+   * Returns the number of whole days remaining from now until the provided
+   * date input. Rounds up partial days to the next integer.
+   * - Returns -1 if the input is not a valid date.
+   * - Returns 0 if the date is in the past or is today.
+   */
+  static remainingDays(dateInput: string | number | Date): number | null {
+    if (!DateFormatter.isValid(dateInput)) return null;
+    const target = new Date(dateInput).getTime();
+    const now = Date.now();
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const diff = target - now;
+    if (diff <= 0) return 0;
+    return Math.ceil(diff / msPerDay);
+  }
 }
