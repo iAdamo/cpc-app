@@ -15,6 +15,7 @@ import {
   ServiceState,
   JobData,
 } from "@/types";
+import { ca } from "zod/v4/locales";
 
 export const serviceSlice: StateCreator<GlobalStore, [], [], ServiceState> = (
   set,
@@ -26,7 +27,11 @@ export const serviceSlice: StateCreator<GlobalStore, [], [], ServiceState> = (
   OtherProjects: [],
   draftProjects: [],
   draftJobs: [],
-
+  // simple page cache for jobs: { pageNumber: JobData[] }
+  cachedJobs: [],
+  setCachedJobs: (jobs: JobData[]) => {
+    set({ cachedJobs: jobs });
+  },
   setAvailableCategories: (categories: Category[]) =>
     set({ availableCategories: categories }),
   setSelectedServices: (services: Subcategory[]) =>

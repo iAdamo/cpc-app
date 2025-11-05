@@ -81,6 +81,7 @@ export interface JobData {
   visibility: "Public" | "Verified" | "Private";
   proposalsCount: number;
   // tags: string[];
+  anonymous: boolean;
   userId: UserData;
   providerId: ProviderData;
   createdAt: Date;

@@ -168,6 +168,8 @@ export interface ServiceState {
   setDraftProjects: (projects: ServiceData[]) => void;
   setDraftJobs: (projects: JobData[]) => void;
   removeDraftJob: (id: string) => void;
+  cachedJobs: JobData[];
+  setCachedJobs: (jobs: JobData[]) => void;
   // deleteService: (id: string) => Promise<void>;
 }
 export interface MediaState {

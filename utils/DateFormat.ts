@@ -79,9 +79,18 @@ export default class DateFormatter {
     const now = new Date();
     const diff = (now.getTime() - date.getTime()) / 1000;
     if (diff < 60) return "just now";
-    if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
-    if (diff < 604800) return `${Math.floor(diff / 86400)} day(s) ago`;
+    if (diff < 3600) {
+      const mins = Math.floor(diff / 60);
+      return `${mins} ${mins === 1 ? "min" : "mins"} ago`;
+    }
+    if (diff < 86400) {
+      const hrs = Math.floor(diff / 3600);
+      return `${hrs} ${hrs === 1 ? "hr" : "hrs"} ago`;
+    }
+    if (diff < 604800) {
+      const days = Math.floor(diff / 86400);
+      return `${days} ${days === 1 ? "day" : "days"} ago`;
+    }
     return DateFormatter.toShortDate(dateInput);
   }
 

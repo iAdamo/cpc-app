@@ -6,4 +6,7 @@ export interface SearchResultData {
   providers: ProviderData[];
   services: ServiceData[];
   jobs: JobData[];
-};
+  // pagination metadata returned by the backend
+  page?: number;
+  totalPages?: number;
+}

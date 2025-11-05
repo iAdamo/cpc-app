@@ -22,6 +22,8 @@ export interface UserData {
   phoneNumber: string;
   followingCount: number;
   followedProviders: ProviderData[];
+  reviewCount: number;
+  averageRating: number;
   phoneEditCount: number;
   profilePicture?: MediaItem;
   purchasedServices: any[];

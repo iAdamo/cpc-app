@@ -20,13 +20,9 @@ const ClientsUpdates = () => {
   const fetchingRef = useRef<boolean>(false);
   const LIMIT = 30;
 
-  const {
-    executeSearch,
-    searchResults,
-    currentLocation,
-    sortBy,
-    categories,
-  } = useGlobalStore();
+  const { executeSearch, searchResults, currentLocation, sortBy, categories } =
+    useGlobalStore();
+  const { setCachedJobs } = useGlobalStore();
 
   useEffect(() => {
     // when sort/location/categories change, reset pagination
@@ -53,11 +49,20 @@ const ClientsUpdates = () => {
   useEffect(() => {
     if (!searchResults) return;
     const received = searchResults.jobs || [];
+    // save the latest response jobs to the simple cache in the store
+    setCachedJobs && setCachedJobs(received);
     if (page === 1) setJobs(received);
     else setJobs((prev = []) => [...prev, ...received]);
 
-    // determine if there's more to load based on page size
-    setHasMore((received.length ?? 0) >= LIMIT);
+    // determine if there's more to load based on server metadata when available
+    const srPage = (searchResults as any).page as number | undefined;
+    const srTotal = (searchResults as any).totalPages as number | undefined;
+    if (typeof srPage === "number" && typeof srTotal === "number") {
+      setHasMore(srPage < srTotal);
+    } else {
+      // fallback to length heuristic
+      setHasMore((received.length ?? 0) >= LIMIT);
+    }
     // reset fetching guard
     fetchingRef.current = false;
     setLoadingMore(false);

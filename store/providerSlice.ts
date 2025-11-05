@@ -116,6 +116,8 @@ export const providerViewSlice: StateCreator<
             providers: response.providers || [],
             services: response.services || [],
             jobs: [],
+            page: page,
+            totalPages: response.totalPages,
           },
         });
       } else if (model === "jobs") {
@@ -124,6 +126,8 @@ export const providerViewSlice: StateCreator<
             providers: [],
             services: [],
             jobs: response.jobs || [],
+            page: page,
+            totalPages: response.totalPages,
           },
         });
       }

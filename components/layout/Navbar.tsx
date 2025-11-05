@@ -39,7 +39,7 @@ export const BottomNavbar = () => {
 
   const pathname = usePathname();
 
-  console.log(pathname, "Current Pathname");
+  // console.log(pathname, "Current Pathname");
 
   return (
     <HStack className="p-2 px-6 justify-between bg-white items-center border border-t border-gray-300 fixed bottom-0">
