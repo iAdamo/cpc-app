@@ -8,6 +8,7 @@ import { JobData } from "@/types";
 import { FlatList } from "react-native";
 import JobCard from "@/screens/clients/update/JobCard";
 import { ListRenderItemInfo } from "react-native";
+import { Spinner } from "@/components/ui/spinner";
 
 const ClientsUpdates = () => {
   const { width } = Dimensions.get("window");
@@ -20,8 +21,14 @@ const ClientsUpdates = () => {
   const fetchingRef = useRef<boolean>(false);
   const LIMIT = 30;
 
-  const { executeSearch, searchResults, currentLocation, sortBy, categories } =
-    useGlobalStore();
+  const {
+    executeSearch,
+    searchResults,
+    currentLocation,
+    sortBy,
+    categories,
+    isLoading,
+  } = useGlobalStore();
   const { setCachedJobs } = useGlobalStore();
 
   useEffect(() => {
@@ -129,6 +136,14 @@ const ClientsUpdates = () => {
       </Text>
     </>
   );
+
+  if (isLoading) {
+    return (
+      <VStack className="flex-1 justify-center items-center">
+        <Spinner size="large" className="text-brand-secondary w-12 h-12" />
+      </VStack>
+    );
+  }
 
   return (
     <VStack>

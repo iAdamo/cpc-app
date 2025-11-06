@@ -80,6 +80,7 @@ export interface JobData {
   media: MediaItem[] | FileType[];
   visibility: "Public" | "Verified" | "Private";
   proposalsCount: number;
+  applicants: string[];
   // tags: string[];
   anonymous: boolean;
   userId: UserData;

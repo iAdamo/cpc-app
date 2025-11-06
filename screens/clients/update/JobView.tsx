@@ -31,11 +31,15 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar";
 import RatingSection from "@/components/RatingFunction";
+import CreateProposal from "./proposals/createProposalModal";
 
 const JobView = () => {
   const [job, setJob] = useState<JobData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [viewingPhoto, setViewingPhoto] = useState<string | null>(null);
+  const [proposalModalOpen, setProposalModalOpen] = useState<JobData | null>(
+    null
+  );
 
   const { savedJobs, setSavedJobs, cachedJobs } = useGlobalStore();
   const params = useLocalSearchParams<{ id: string }>();
@@ -130,7 +134,7 @@ const JobView = () => {
             <Heading size="xl" className="font-medium text-brand-primary">
               {`$${job?.budget || 0} -`}
             </Heading>
-            <Heading className="font-medium text-typography-600">
+            <Heading size="md" className="font-medium text-typography-600">
               {job.negotiable ? "Negotiable" : "Fixed"}
             </Heading>
             <Heading
@@ -255,6 +259,7 @@ const JobView = () => {
           </HStack>
           <Button
             size="xl"
+            onPress={() => setProposalModalOpen(job)}
             className="bg-brand-primary mx-4 data-[active=true]:bg-brand-primary/60 rounded-xl"
           >
             <ButtonText>Send Proposal</ButtonText>
@@ -267,6 +272,9 @@ const JobView = () => {
           onClose={() => setViewingPhoto("")}
           url={viewingPhoto}
         />
+      )}
+      {proposalModalOpen && (
+        <CreateProposal job={job} onClose={() => setProposalModalOpen(null)} />
       )}
     </VStack>
   );

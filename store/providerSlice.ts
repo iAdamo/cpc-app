@@ -84,7 +84,7 @@ export const providerViewSlice: StateCreator<
     sortBy?: string;
     categories?: string[];
   }) => {
-    set({ error: null, success: null });
+    set({ error: null, success: null, isLoading: true });
     try {
       const {
         model,
@@ -137,6 +137,8 @@ export const providerViewSlice: StateCreator<
         error:
           error?.response?.data?.message || "An error occurred during search.",
       });
+    } finally {
+      set({ isLoading: false });
     }
   },
   clearSearchResults: () =>
