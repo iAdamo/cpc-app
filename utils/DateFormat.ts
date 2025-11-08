@@ -78,14 +78,18 @@ export default class DateFormatter {
     if (!DateFormatter.isValid(date)) return "";
     const now = new Date();
     const diff = (now.getTime() - date.getTime()) / 1000;
-    if (diff < 60) return "just now";
+    if (diff < 1) return "just now";
+    if (diff < 60) {
+      const secs = Math.floor(diff);
+      return `${secs} ${secs === 1 ? "second" : "seconds"} ago`;
+    }
     if (diff < 3600) {
       const mins = Math.floor(diff / 60);
       return `${mins} ${mins === 1 ? "min" : "mins"} ago`;
     }
     if (diff < 86400) {
       const hrs = Math.floor(diff / 3600);
-      return `${hrs} ${hrs === 1 ? "hr" : "hrs"} ago`;
+      return `${hrs} ${hrs === 1 ? "hour" : "hours"} ago`;
     }
     if (diff < 604800) {
       const days = Math.floor(diff / 86400);
@@ -108,5 +112,39 @@ export default class DateFormatter {
     const diff = target - now;
     if (diff <= 0) return 0;
     return Math.ceil(diff / msPerDay);
+  }
+
+  /**
+   * Returns a human-readable remaining time until the provided date.
+   * Examples: "2 days", "3 hours", "5 mins", "10 seconds"
+   * Returns null for invalid dates and "0 days" for past/now.
+   */
+  static remainingTime(dateInput: string | number | Date): string | null {
+    if (!DateFormatter.isValid(dateInput)) return null;
+    const target = new Date(dateInput).getTime();
+    const now = Date.now();
+    let diffSec = Math.ceil((target - now) / 1000);
+    if (diffSec <= 0) return "0 days";
+
+    const secPerDay = 24 * 60 * 60;
+    const secPerHour = 60 * 60;
+    const secPerMin = 60;
+
+    if (diffSec >= secPerDay) {
+      const days = Math.ceil(diffSec / secPerDay);
+      return `${days} ${days === 1 ? "day" : "days"}`;
+    }
+
+    if (diffSec >= secPerHour) {
+      const hours = Math.ceil(diffSec / secPerHour);
+      return `${hours} ${hours === 1 ? "hour" : "hours"}`;
+    }
+
+    if (diffSec >= secPerMin) {
+      const mins = Math.ceil(diffSec / secPerMin);
+      return `${mins} ${mins === 1 ? "min" : "mins"}`;
+    }
+
+    return `${diffSec} ${diffSec === 1 ? "second" : "seconds"}`;
   }
 }

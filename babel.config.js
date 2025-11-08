@@ -27,4 +27,4 @@ export default function (api) {
       "react-native-reanimated/plugin",
     ],
   };
-};
+}

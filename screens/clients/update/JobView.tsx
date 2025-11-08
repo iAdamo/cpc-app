@@ -41,9 +41,11 @@ const JobView = () => {
     null
   );
 
-  const { savedJobs, setSavedJobs, cachedJobs } = useGlobalStore();
+  const { savedJobs, setSavedJobs, cachedJobs, user } = useGlobalStore();
   const params = useLocalSearchParams<{ id: string }>();
   const savedJobIds = savedJobs.map((p) => p._id);
+
+  const hasApplied = job?.applicants?.includes(user?.activeRoleId?._id || "");
 
   const handleSaveToggle = () => {
     job && setSavedJobs(job);
@@ -127,18 +129,29 @@ const JobView = () => {
         className="flex-1 pt-6 gap-4"
       >
         <Card className="gap-4">
-          <Heading size="2xl" className="font-medium">
-            {job.title}
-          </Heading>
+          <HStack className="gap-4 justify-between items-center">
+            <Heading size="xl" className="font-medium flex-1">
+              {job.title}
+            </Heading>
+            {hasApplied && (
+              <Heading
+                size="xs"
+                className="py-0.5 px-2 bg-green-500 h-5 rounded-lg text-white text-center"
+              >
+                Applied
+              </Heading>
+            )}
+          </HStack>
+
           <HStack space="xs" className="items-center">
-            <Heading size="xl" className="font-medium text-brand-primary">
+            <Heading size="lg" className="font-medium text-brand-primary">
               {`$${job?.budget || 0} -`}
             </Heading>
-            <Heading size="md" className="font-medium text-typography-600">
+            <Heading size="sm" className="font-medium text-typography-600">
               {job.negotiable ? "Negotiable" : "Fixed"}
             </Heading>
             <Heading
-              size="sm"
+              size="xs"
               className={`text-white px-3 py-0.5 rounded-lg self-center ml-12 ${
                 job.urgency === "Normal"
                   ? "bg-green-500"
@@ -164,7 +177,7 @@ const JobView = () => {
           <HStack space="md" className="items-center">
             <Icon as={ClockIcon} className="text-brand-primary" />
             <Text className="text-typography-600 font-medium">
-              Due in {DateFormatter.remainingDays(job.deadline)} hours
+              Due in {DateFormatter.remainingTime(job.deadline)}
             </Text>
           </HStack>
           <HStack space="md" className="items-center">
@@ -199,7 +212,7 @@ const JobView = () => {
               Attachments
             </Heading>
             {job.media && job.media.length > 0 ? (
-              <HStack space="4">
+              <HStack space="sm" className="flex-wrap ">
                 {job.media.map((mediaItem) => (
                   <Pressable
                     key={(mediaItem as MediaItem).index}
@@ -257,12 +270,14 @@ const JobView = () => {
               Member since {DateFormatter.toShortDate(job.userId.createdAt)}
             </Text>
           </HStack>
+
           <Button
             size="xl"
+            isDisabled={hasApplied}
             onPress={() => setProposalModalOpen(job)}
             className="bg-brand-primary mx-4 data-[active=true]:bg-brand-primary/60 rounded-xl"
           >
-            <ButtonText>Send Proposal</ButtonText>
+            <ButtonText>{hasApplied ? "Applied" : "Send Proposal"}</ButtonText>
           </Button>
         </Card>
       </ScrollView>

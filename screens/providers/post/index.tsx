@@ -1096,7 +1096,7 @@ export const CreatejobModal = ({
           >
             <Icon size="xl" as={ChevronLeftIcon} />
             <Heading size="lg" className="text-brand-primary">
-              {!previewMode ? "Job Post" : "Request Preview"}
+              {!previewMode ? "Job Post" : "Job Request Preview"}
             </Heading>
           </ModalCloseButton>
         </ModalHeader>

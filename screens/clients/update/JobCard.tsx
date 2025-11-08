@@ -98,7 +98,7 @@ const JobCard = ({ item: job }: { item: JobData }) => {
               </HStack>
             </VStack>
           </VStack>
-          <VStack space="xs" className="items-end z-50 bg-red-600">
+          <VStack space="xs" className="items-end h-full z-50">
             {hasApplied && (
               <Box className="items-end">
                 <Icon
