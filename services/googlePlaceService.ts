@@ -4,17 +4,15 @@ import { Place, PlaceDetails } from "@/types";
 import type { LocationObject } from "expo-location";
 import { LocationSubscription } from "expo-location";
 
-// const GOOGLE_MAPS_API_KEY = Constants.expoConfig?.extra?.googleMapsApiKey;
-const GOOGLE_MAPS_API_KEY =
-  Constants.expoConfig?.android?.config?.googleMaps?.apiKey;
+const GOOGLE_MAPS_API_KEY = Constants.expoConfig?.extra?.googleMapsApiKey;
 
 const AUTOCOMPLETE_URL =
   "https://maps.googleapis.com/maps/api/place/autocomplete/json";
 const PLACE_DETAILS_URL =
   "https://maps.googleapis.com/maps/api/place/details/json";
 if (!GOOGLE_MAPS_API_KEY) {
-  throw new Error(
-    "Google Places API key is not defined in environment variables."
+  console.warn(
+    "Google Places API key missing at runtime. Check app.config.js/EAS secrets and rebuild the native app."
   );
 }
 

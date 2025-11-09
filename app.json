@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Rendi",
+    "name": "CompaniesCenter",
     "slug": "companiescenterllc",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -26,9 +26,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sanuxtech.companiescenterllc",
-      "associatedDomains": [
-        "applinks:companiescenterllc.com"
-      ]
+      "associatedDomains": ["applinks:companiescenterllc.com"]
     },
     "android": {
       "adaptiveIcon": {
@@ -61,10 +59,7 @@
               "pathPrefix": "/"
             }
           ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
+          "category": ["BROWSABLE", "DEFAULT"]
         }
       ]
     },
@@ -78,7 +73,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/locationperm.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#102343"

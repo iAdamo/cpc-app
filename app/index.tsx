@@ -16,10 +16,10 @@ export default function App() {
     <VStack className="flex-1 bg-brand-primary">
       <VStack className="items-center mt-80 flex-1 gap-2">
         <Text className="text-white text-center font-bold" size="5xl">
-          Rendi
+          Companies Center
         </Text>
         <Text className="text-white" size="xl">
-          A Center for All Your Service Needs
+          The Center For All Your Service Needs
         </Text>
       </VStack>
       <Center className="mb-4">

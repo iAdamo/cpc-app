@@ -40,7 +40,7 @@ export default function RootLayout() {
   };
 
   useEffect(() => {
-    if (error) throw error;
+    if (error) console.error(error);
   }, [error]);
 
   useEffect(() => {
