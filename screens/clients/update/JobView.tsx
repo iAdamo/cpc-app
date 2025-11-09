@@ -6,7 +6,23 @@ import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Card } from "@/components/ui/card";
 import { ScrollView } from "@/components/ui/scroll-view";
-import { Icon, ArrowLeftIcon, FavouriteIcon } from "@/components/ui/icon";
+import {
+  Icon,
+  ArrowLeftIcon,
+  FavouriteIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+} from "@/components/ui/icon";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionHeader,
+  AccordionTitleText,
+  AccordionContentText,
+  AccordionIcon,
+} from "@/components/ui/accordion";
 import {
   TagIcon,
   ClockIcon,
@@ -45,7 +61,13 @@ const JobView = () => {
   const params = useLocalSearchParams<{ id: string }>();
   const savedJobIds = savedJobs.map((p) => p._id);
 
-  const hasApplied = job?.applicants?.includes(user?.activeRoleId?._id || "");
+  const hasApplied = job?.proposals?.some(
+    (proposal) => proposal?.providerId?._id === user?.activeRoleId?._id
+  );
+
+  const myProposal = job?.proposals?.find(
+    (proposal) => proposal?.providerId?._id === user?.activeRoleId?._id
+  );
 
   const handleSaveToggle = () => {
     job && setSavedJobs(job);
@@ -126,7 +148,8 @@ const JobView = () => {
       </VStack>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        className="flex-1 pt-6 gap-4"
+        className="flex-1 bg-white"
+        contentContainerClassName="gap-3 pb-16 bg-white"
       >
         <Card className="gap-4">
           <HStack className="gap-4 justify-between items-center">
@@ -235,7 +258,7 @@ const JobView = () => {
             )}
           </VStack>
         </Card>
-        <Card className="gap-8 mb-8">
+        <Card className="gap-8">
           <HStack className="gap-4 items-center">
             <Avatar size="md">
               <AvatarFallbackText>
@@ -280,6 +303,39 @@ const JobView = () => {
             <ButtonText>{hasApplied ? "Applied" : "Send Proposal"}</ButtonText>
           </Button>
         </Card>
+        {myProposal && (
+          <Accordion variant="unfilled">
+            <AccordionItem value="a">
+              <AccordionHeader>
+                <AccordionTrigger>
+                  {({ isExpanded }: { isExpanded: any }) => {
+                    return (
+                      <>
+                        <AccordionTitleText className="text-typography-600">
+                          My Proposal
+                        </AccordionTitleText>
+                        {isExpanded ? (
+                          <AccordionIcon
+                            as={ChevronUpIcon}
+                            className="ml-3 text-typography-600"
+                          />
+                        ) : (
+                          <AccordionIcon
+                            as={ChevronDownIcon}
+                            className="ml-3 text-typography-600"
+                          />
+                        )}
+                      </>
+                    );
+                  }}
+                </AccordionTrigger>
+              </AccordionHeader>
+              <AccordionContent>
+                <Text>{myProposal?.message}</Text>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        )}
       </ScrollView>
       {viewingPhoto && (
         <MediaView

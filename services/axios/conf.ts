@@ -1,13 +1,11 @@
 import axios, { InternalAxiosRequestConfig } from "axios";
 import * as SecureStore from "expo-secure-store";
 import useGlobalStore from "@/store/globalStore";
+import Constants from "expo-constants";
 
 const createClient = () => {
   const apiClient = axios.create({
-    baseURL:
-      process.env.NODE_ENV === "production"
-        ? process.env.EXPO_PUBLIC_API_URL
-        : "https://companiescenterllc.com/sanuxapi", // dev tunnel URL for local testing
+    baseURL: Constants.expoConfig?.extra?.apiUrl || "http://localhost:3333/api",
     headers: {
       "Content-Type": "application/json",
     },
@@ -34,13 +32,13 @@ const createClient = () => {
     (response) => response,
     async (error) => {
       console.warn(error);
+      const { logout, setError } = useGlobalStore.getState();
       if (error.response?.status === 403 || error.response?.status === 401) {
         // token expired or forbidden
         console.warn("Forbidden - maybe token expired, redirect to login");
-        const { logout } = useGlobalStore.getState();
         await logout();
       } else if (error.message === "Network Error") {
-        throw "Please check your internet connection.";
+        setError("Please check your internet connection.");
       } else if (!error.response) {
         console.error("Server is unavailable. Please try again later.");
       }

@@ -4,7 +4,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { Slot } from "expo-router";
-import { StatusBar, Platform } from "react-native"; // Added Platform
+import { StatusBar, Platform } from "react-native";
 import Toast from "react-native-toast-message";
 import useGlobalStore from "@/store/globalStore";
 import { router } from "expo-router";
@@ -75,7 +75,7 @@ function RootLayoutNav() {
         type: "error",
         text1: error,
         visibilityTime: 3000,
-        onHide: clearError, // Clear error after toast hides
+        onHide: clearError,
       });
     }
   }, [error, clearError]);
@@ -86,7 +86,7 @@ function RootLayoutNav() {
         type: "success",
         text1: success,
         visibilityTime: 3000,
-        onHide: clearSuccess, // Clear success after toast hides
+        onHide: clearSuccess,
       });
     }
   }, [success, clearSuccess]);
@@ -97,7 +97,7 @@ function RootLayoutNav() {
         type: "info",
         text1: info,
         visibilityTime: 3000,
-        onHide: clearInfo, // Clear info after toast hides
+        onHide: clearInfo,
       });
     }
   }, [info, clearInfo]);

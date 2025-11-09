@@ -23,7 +23,7 @@ import { Button, ButtonText } from "@/components/ui/button";
 import ForgotPasswordModal from "@/screens/auth/ForgotPassword";
 import { Spinner } from "@/components/ui/spinner";
 import useGlobalStore from "@/store/globalStore";
-import { fr } from "zod/v4/locales";
+import { ScrollView } from "@/components/ui/scroll-view";
 
 type ControllerRenderType = {
   field: {
@@ -105,7 +105,7 @@ const SignInScreen = () => {
     handleSubmit(onSubmit)();
   };
   return (
-    <VStack className="bg-white w-full p-4 ">
+    <ScrollView className="bg-white w-full p-4" contentContainerClassName="justify-center mt-40 flex-1">
       <VStack className="h-3/5 justify-end">
         <Card className="shadow-xl gap-8">
           <Heading size="xl" className="text-brand-primary">
@@ -240,7 +240,7 @@ const SignInScreen = () => {
           onClose={() => setShowForgotPasswordModal(false)}
         />
       )}
-    </VStack>
+    </ScrollView>
   );
 };
 

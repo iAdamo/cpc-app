@@ -1,5 +1,6 @@
 import { Progress } from "@/components/ui/progress";
 import { updateUserProfile } from "@/services/axios/user";
+import { ApiClientSingleton } from "@/services/axios/conf";
 import { StateCreator } from "zustand";
 import { GlobalStore, GlobalState, ActiveRole, LayoutView } from "@/types";
 

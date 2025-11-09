@@ -99,6 +99,7 @@ export type SortBy =
   | "Most Reviewed";
 
 export interface ProviderState {
+  isSearching: boolean;
   displayStyle: DisplayStyle;
   setDisplayStyle: (style: DisplayStyle) => void;
   sortBy: sortByType;

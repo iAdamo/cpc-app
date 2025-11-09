@@ -1,12 +1,8 @@
 import io, { Socket } from "socket.io-client";
 import * as SecureStore from "expo-secure-store";
+import Constants from "expo-constants";
 
-// const SOCKET_URL =
-//   process.env.NODE_ENV === "production"
-//     ? process.env.EXPO_PUBLIC_SOCKET_URL
-//     : "https://companiescenterllc.com";
-
-const SOCKET_URL = "https://companiescenterllc.com";
+const SOCKET_URL = Constants.expoConfig?.extra?.socketUrl || "";
 
 class SocketService {
   private socket: typeof Socket | null = null;
@@ -29,8 +25,8 @@ class SocketService {
 
     const token = await SecureStore.getItemAsync("accessToken");
 
-    this.socket = io(`${SOCKET_URL}/chat`, {
-      path: "/sanuxsocket/socket.io",
+    this.socket = io(SOCKET_URL, {
+      path: Constants.expoConfig?.extra?.socketPath || "",
       auth: {
         token: token ? token : undefined,
       },

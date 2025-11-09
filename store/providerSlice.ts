@@ -17,6 +17,7 @@ export const providerViewSlice: StateCreator<
   [],
   ProviderState
 > = (set, get) => ({
+  isSearching: false,
   displayStyle: "Grid",
   sortBy: "Relevance",
   categories: [],
@@ -84,7 +85,7 @@ export const providerViewSlice: StateCreator<
     sortBy?: string;
     categories?: string[];
   }) => {
-    set({ error: null, success: null, isLoading: true });
+    set({ error: null, success: null, isSearching: true });
     try {
       const {
         model,
@@ -133,12 +134,12 @@ export const providerViewSlice: StateCreator<
       }
     } catch (error: any) {
       console.error("Search error:", error);
-      set({
-        error:
-          error?.response?.data?.message || "An error occurred during search.",
-      });
+      // set({
+      //   error:
+      //     error?.response?.data?.message || "An error occurred during search.",
+      // });
     } finally {
-      set({ isLoading: false });
+      set({ isSearching: false });
     }
   },
   clearSearchResults: () =>

@@ -57,6 +57,13 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@/components/ui/modal";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionHeader,
+} from "@/components/ui/accordion";
 import useGlobalStore from "@/store/globalStore";
 import {
   getJobsByUser,
@@ -65,7 +72,7 @@ import {
   updateJob,
 } from "@/services/axios/service";
 import EmptyState from "@/components/EmptyState";
-import { JobData, FileType, MediaItem } from "@/types";
+import { JobData, FileType, MediaItem, ProposalData } from "@/types";
 import MediaPicker from "@/components/media/MediaPicker";
 import appendFormData from "@/utils/AppendFormData";
 import { Image } from "@/components/ui/image";
@@ -76,11 +83,15 @@ import {
 } from "@/components/ui/avatar";
 import MediaView from "@/components/media/MediaView";
 import { Badge, BadgeText } from "@/components/ui/badge";
-import { getAllCategoriesWithSubcategories } from "@/services/axios/service";
+import {
+  getAllCategoriesWithSubcategories,
+  getProposalsByJob,
+} from "@/services/axios/service";
 import { MapPinCheckIcon } from "lucide-react-native";
 import { getDistanceWithUnit } from "@/utils/GetDistance";
 import { MapPinIcon } from "lucide-react-native";
 import DateFormatter from "@/utils/DateFormat";
+import RatingSection from "@/components/RatingFunction";
 
 export const PostJob = ({ userId }: { userId?: string }) => {
   const [loading, setLoading] = useState(false);
@@ -1020,6 +1031,77 @@ export const CreatejobModal = ({
     );
   };
 
+  const renderProposals = () => {
+    return (
+      <VStack>
+        <Accordion>
+          <AccordionItem value="a">
+            <AccordionHeader>
+              <AccordionTrigger>
+                {({ isExpanded }: { isExpanded: any }) => {
+                  return (
+                    <>
+                      <Heading size="xl" className="text-brand-primary">
+                        {getValues("title") || job?.title}
+                      </Heading>
+                      {isExpanded ? (
+                        <Text className="font-medium">Close</Text>
+                      ) : (
+                        <Text className="font-medium">Open</Text>
+                      )}
+                    </>
+                  );
+                }}
+              </AccordionTrigger>
+            </AccordionHeader>
+            <AccordionContent className="p-0">
+              {renderPreview()}
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+        {job?.proposals &&
+          job.proposals.length > 0 &&
+          job.proposals.map((proposal: ProposalData) => (
+            <Card key={proposal._id} className="">
+              <HStack className="gap-4 items-start">
+                <Avatar size="md">
+                  <AvatarFallbackText>
+                    {proposal.providerId.providerName}
+                  </AvatarFallbackText>
+                  <AvatarImage
+                    source={{
+                      uri: (proposal.providerId?.providerLogo as MediaItem)
+                        ?.thumbnail,
+                    }}
+                  />
+                </Avatar>
+
+                <VStack>
+                  <Heading className="text-brand-primary">
+                    {proposal.providerId.providerName}
+                  </Heading>
+                  <RatingSection
+                    rating={proposal.providerId.averageRating}
+                    reviewCount={proposal.providerId.reviewCount}
+                  />
+                </VStack>
+                {/* <Text
+                    size="sm"
+                    className="self-end text-typography-600 font-medium flex-1"
+                  >
+                    Member since{" "}
+                    {DateFormatter.toShortDate(job.userId.createdAt)}
+                  </Text> */}
+              </HStack>
+              <Card>
+                <Text>{proposal.message}</Text>
+              </Card>
+            </Card>
+          ))}
+      </VStack>
+    );
+  };
+
   const renderFormFooter = () => {
     if (!isEditable) return null;
 
@@ -1101,13 +1183,24 @@ export const CreatejobModal = ({
           </ModalCloseButton>
         </ModalHeader>
         <ModalBody className="mt-8" showsVerticalScrollIndicator={false}>
-          <Heading size="xl" className="text-brand-primary mx-4">
-            {!previewMode
-              ? "Create a Request"
-              : getValues("title") || job?.title}
-          </Heading>
+          {!previewMode ? (
+            <Heading size="xl" className="text-brand-primary mx-4">
+              Create a Request
+            </Heading>
+          ) : (
+            !job?.proposals &&
+            job?._id && (
+              <Heading size="xl" className="text-brand-primary mx-4">
+                {job?.title || "Job Request Preview"}
+              </Heading>
+            )
+          )}
 
-          {!previewMode ? renderFormField() : renderPreview()}
+          {!previewMode
+            ? renderFormField()
+            : job?.proposals && job.proposals.length > 0
+            ? renderProposals()
+            : renderPreview()}
         </ModalBody>
 
         {renderFormFooter()}

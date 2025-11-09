@@ -21,7 +21,9 @@ const JobCard = ({ item: job }: { item: JobData }) => {
     setSavedJobs(job);
   };
 
-  const hasApplied = job?.applicants?.includes(user?.activeRoleId?._id || "");
+  const hasApplied = job?.proposals?.some(
+    (proposal) => proposal?.providerId?._id === user?.activeRoleId?._id
+  );
 
   return (
     <Pressable

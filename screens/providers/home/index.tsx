@@ -10,6 +10,7 @@ import useGlobalStore from "@/store/globalStore";
 import { TopNavbar } from "@/components/layout/Navbar";
 import SearchBar from "@/components/SearchEngine";
 import { ProviderData } from "@/types";
+import MapView from "@/screens/map";
 
 const HomeView = () => {
   const {
@@ -19,6 +20,7 @@ const HomeView = () => {
     currentLocation,
     displayStyle,
     categories,
+    setCurrentView,
   } = useGlobalStore();
   const [providers, setProviders] = useState<ProviderData[]>([]);
   const [isSearchFocus, setIsSearchFocus] = useState(false);
@@ -61,7 +63,9 @@ const HomeView = () => {
       <Fab
         size="xl"
         className="bg-red-500 shadow-xl data-[active=true]:bg-red-400"
-        onPress={() => {}}
+        onPress={() => {
+          setCurrentView("Map");
+        }}
       >
         <FabIcon as={MapPinHouseIcon} />
         {/* <FabLabel className="font-semibold">Nearby</FabLabel> */}

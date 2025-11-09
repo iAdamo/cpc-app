@@ -81,9 +81,22 @@ export interface JobData {
   visibility: "Public" | "Verified" | "Private";
   proposalsCount: number;
   applicants: string[];
+  proposals: ProposalData[];
   // tags: string[];
   anonymous: boolean;
   userId: UserData;
   providerId: ProviderData;
   createdAt: Date;
+}
+
+export interface ProposalData {
+  _id: string;
+  id: string;
+  message: string;
+  proposedPrice: number;
+  estimatedDuration: string | Date;
+  createdAt: string;
+  updatedAt: string;
+  jobId: JobData;
+  providerId: ProviderData;
 }
