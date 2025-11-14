@@ -1,14 +1,13 @@
-import io, { Socket } from "socket.io-client";
+import io from "socket.io-client";
 import * as SecureStore from "expo-secure-store";
 import Constants from "expo-constants";
 
 const SOCKET_URL = Constants.expoConfig?.extra?.socketUrl || "";
 
 class SocketService {
-  private socket: typeof Socket | null = null;
+  private socket: ReturnType<typeof io> | null = null;
   private isConnected: boolean = false;
-  private reconnectAttempts: number = 0;
-  private maxReconnectAttempts: number = 5;
+  private emitQueue: Array<{ event: string; data: any }> = [];
   private static instance: SocketService;
   private constructor() {}
 
@@ -19,11 +18,24 @@ class SocketService {
     return SocketService.instance;
   }
   async connect(): Promise<void> {
-    console.log("Attempting to connect to socket...");
-    if (this.socket?.connected || this.isConnected) return;
-    console.log("Creating new socket connection...");
+    // console.log("Attempting to connect to socket...");
+    if (this.socket?.connected || this.isConnected) {
+      // console.log("Already connected to socket...");
+      return;
+    }
 
     const token = await SecureStore.getItemAsync("accessToken");
+
+    // If we already have a socket instance, update auth and attempt to connect
+    if (this.socket) {
+      // update auth for reconnection
+      // @ts-ignore -- socket.io-client types don't always expose auth
+      this.socket.auth = { token: token ? token : undefined };
+      this.socket.connect();
+      return;
+    }
+
+    // console.log("Creating new socket connection...");
 
     this.socket = io(SOCKET_URL, {
       path: Constants.expoConfig?.extra?.socketPath || "",
@@ -31,9 +43,13 @@ class SocketService {
         token: token ? token : undefined,
       },
       transports: ["websocket"],
-      forceNew: true,
+      // Let socket.io manage reconnection
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
     });
-    // console.log("Socket instance created:", this.socket);
+
     this.setupEventListeners();
   }
 
@@ -41,19 +57,24 @@ class SocketService {
     if (!this.socket) return;
 
     this.socket.on("connect", () => {
-      console.log("Socket connected");
+      // console.log("Socket connected");
       this.isConnected = true;
-      this.reconnectAttempts = 0;
+      // flush queued emits
+      while (this.emitQueue.length && this.socket) {
+        const { event, data } = this.emitQueue.shift()!;
+        this.socket.emit(event, data);
+      }
     });
 
-    this.socket.on("disconnect", (reason: typeof Socket.disconnected) => {
+    // reason is a string like "io client disconnect"
+    this.socket.on("disconnect", (reason: string) => {
       console.log("Socket disconnected:", reason);
       this.isConnected = false;
     });
 
     this.socket.on("connect_error", (error: any) => {
       console.error("Socket connection error:", error);
-      this.handleReconnection();
+      // rely on socket.io's built-in reconnection
     });
 
     this.socket.on("error", (error: any) => {
@@ -61,21 +82,15 @@ class SocketService {
     });
   }
 
-  private handleReconnection(): void {
-    if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      this.reconnectAttempts++;
-      setTimeout(() => {
-        this.connect();
-      }, 1000 * this.reconnectAttempts); // Exponential backoff
-    }
-  }
+  // manual reconnection removed in favor of socket.io reconnection
 
   joinChat(chatId: string): void {
-    this.socket?.emit("join_chats", [chatId]);
+    console.log("Joining chat:", chatId);
+    this.emitEvent("join_chats", [chatId]);
   }
 
   leaveChat(chatId: string): void {
-    this.socket?.emit("leave_chats", [chatId]);
+    this.emitEvent("leave_chats", [chatId]);
   }
 
   onEvent<T>(event: string, callback: (data: T) => void): void {
@@ -87,10 +102,15 @@ class SocketService {
   }
 
   emitEvent(event: string, data: any): void {
-    if (this.isConnected) {
-      this.socket?.emit(event, data);
+    if (this.isConnected && this.socket?.connected) {
+      this.socket.emit(event, data);
     } else {
-      console.warn("Socket not connected, cannot emit event:", event);
+      console.warn("Socket not connected, queuing event:", event);
+      this.emitQueue.push({ event, data });
+      // try to connect if not already
+      this.connect().catch(() => {
+        /* connect errors are logged by socket handlers */
+      });
     }
   }
   disconnect(): void {
@@ -98,8 +118,7 @@ class SocketService {
       this.socket.disconnect();
       this.socket = null;
       this.isConnected = false;
-      this.reconnectAttempts = 0;
-      console.log("Socket disconnected manually");
+      // console.log("Socket disconnected manually");
     }
   }
 

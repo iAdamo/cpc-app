@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import { useState, useEffect, use } from "react";
 import { Keyboard } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,6 +15,7 @@ import {
 import Link, { useRouter } from "expo-router";
 // import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
+import { ScrollView } from "@/components/ui/scroll-view";
 import { Text } from "@/components/ui/text";
 import { Heading } from "@/components/ui/heading";
 import { EyeIcon, EyeOffIcon } from "@/components/ui/icon";
@@ -42,10 +43,24 @@ const SignUpScreen = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const { signUp, isLoading, setError, setCurrentStep, currentStep } =
-    useGlobalStore();
+  const {
+    signUp,
+    isLoading,
+    setError,
+    setCurrentStep,
+    currentStep,
+    isAuthenticated,
+    isOnboardingComplete,
+    switchRole,
+  } = useGlobalStore();
 
   const router = useRouter();
+
+  if (isAuthenticated && isOnboardingComplete) {
+    const target = switchRole === "Client" ? "/providers" : "/clients";
+    router.replace(target);
+    return;
+  }
 
   const switchToSignIn = () => {
     useGlobalStore.setState({
@@ -119,7 +134,7 @@ const SignUpScreen = () => {
   };
 
   return (
-    <VStack className="bg-white p-4 mt-28">
+    <ScrollView className="bg-white px-4 pt-28 flex-1">
       <VStack className="justify-end">
         <Card className="shadow-xl gap-8">
           <Heading size="xl" className="text-brand-primary">
@@ -296,7 +311,7 @@ const SignUpScreen = () => {
           <ButtonText className="">Sign In Here</ButtonText>
         </Button>
       </VStack>
-    </VStack>
+    </ScrollView>
   );
 };
 

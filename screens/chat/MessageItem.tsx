@@ -13,12 +13,28 @@ import MediaView from "@/components/media/MediaView";
 import { FilePlayIcon, FileTextIcon } from "lucide-react-native";
 import openFile from "@/components/media/OpenFile";
 
+const resolveMediaUrl = (mediaUrl: any): string => {
+  if (!mediaUrl) return "";
+  if (Array.isArray(mediaUrl)) return resolveMediaUrl(mediaUrl[0]);
+  if (typeof mediaUrl === "string") return mediaUrl;
+  if (typeof mediaUrl === "object") return mediaUrl.url || mediaUrl.uri || "";
+  return "";
+};
+
 const MessageItem = memo(
   ({ message, user }: { message: Message; user: UserData }) => {
-    // console.log("Rendering MessageItem:", message);
     const [viewMedia, setViewMedia] = useState<string | undefined>("");
-    const isOwnMessage =
-      message.senderId._id === user?._id && user.activeRole === "Client";
+    const isOwnMessage = message.senderId._id === user?._id;
+
+    const handlePress = () => {
+      if (message.type === "image" || message.type === "video") {
+        const url = resolveMediaUrl(message.content?.mediaUrl);
+        setViewMedia(url);
+      } else if (message.type === "file") {
+        const fileUrl = resolveMediaUrl(message.content?.mediaUrl);
+        if (fileUrl) openFile(fileUrl);
+      }
+    };
 
     return (
       <VStack className="">
@@ -26,20 +42,15 @@ const MessageItem = memo(
           <MediaView
             isOpen={!!viewMedia}
             onClose={() => setViewMedia("")}
-            url={viewMedia ? viewMedia : ""}
+            url={viewMedia}
           />
         )}
+
         <Pressable
           className={`p-2  ${
             message.type !== "text" && message.type !== "image" && "w-[80%]"
           }  ${isOwnMessage ? "self-end" : "self-start"}`}
-          onPress={() => {
-            if (message.type === "image" || message.type === "video") {
-              setViewMedia(message.content?.mediaUrl);
-            } else if (message.type === "file") {
-              openFile(message.content?.mediaUrl || "");
-            }
-          }}
+          onPress={handlePress}
         >
           <HStack
             space="sm"
@@ -74,7 +85,7 @@ const MessageItem = memo(
               </Text>
             ) : message.type === "image" ? (
               <Image
-                source={{ uri: message.content?.mediaUrl }}
+                source={{ uri: resolveMediaUrl(message.content?.mediaUrl) }}
                 className="w-full h-64 rounded-lg"
                 alt="Message-Media"
                 resizeMode="cover"
@@ -82,19 +93,26 @@ const MessageItem = memo(
             ) : message.type === "video" ? (
               <HStack space="sm" className="justify-center items-center">
                 <Text className="text-white">
-                  {message.content?.mediaUrl?.split("/").pop()}
+                  {resolveMediaUrl(message.content?.mediaUrl)
+                    .toString()
+                    .split("/")
+                    .pop()}
                 </Text>
                 <Icon size="xl" as={FilePlayIcon} className="text-white" />
               </HStack>
             ) : (
               <HStack space="sm" className="justify-center items-center">
                 <Text className="text-white">
-                  {message.content?.mediaUrl?.split("/").pop()}
+                  {resolveMediaUrl(message.content?.mediaUrl)
+                    .toString()
+                    .split("/")
+                    .pop()}
                 </Text>
                 <Icon size="xl" as={FileTextIcon} className="text-white" />
               </HStack>
             )}
           </HStack>
+
           <Text
             size="xs"
             className={`mt-1 ${

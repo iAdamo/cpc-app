@@ -10,6 +10,7 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
   get
 ) => ({
   chats: [],
+  filteredChats: [],
   selectedChat: null,
   currentPage: 1,
   messages: [],
@@ -18,6 +19,7 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
   chatError: null,
   typingUsers: [],
   hasMoreMessages: true,
+  setFilteredChats: (chats: Chat[]) => set({ filteredChats: chats }),
 
   createChat: async (
     participantIds: string,

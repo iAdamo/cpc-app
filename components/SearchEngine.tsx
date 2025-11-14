@@ -8,20 +8,25 @@ import {
 } from "@/components/ui/button";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { FormControl } from "@/components/ui/form-control";
-import { MapPinIcon, SlidersHorizontalIcon } from "lucide-react-native";
+import { MapPinIcon, SlidersHorizontalIcon, X } from "lucide-react-native";
 import useGlobalStore from "@/store/globalStore";
 import { GooglePlaceService } from "@/services/googlePlaceService";
 import { Menu, MenuItem, MenuItemLabel } from "@/components/ui/menu";
-import { Place, ProviderData } from "@/types";
+import { Chat, Place, PlaceDetails, ProviderData } from "@/types";
 import { debounce } from "lodash";
 import { usePathname } from "expo-router";
 import { useLocalSearchParams } from "expo-router";
 
+// Small helper to match names
+const participantName = (u: any) => `${u.firstName || ""} ${u.lastName || ""}`;
+
 const SearchBar = ({
   providers,
   isSearchFocus,
+  chats,
 }: {
   providers?: ProviderData[];
+  chats?: Chat[];
   isSearchFocus?: (focus: boolean) => void;
 }) => {
   const [locationInput, setLocationInput] = useState<boolean>(false);
@@ -29,12 +34,15 @@ const SearchBar = ({
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [predictions, setPredictions] = useState<Place[]>([]);
   const [filterQuery, setFilterQuery] = useState<string>("");
+  const [locationAddress, setLocationAddress] = useState<string>("");
+  const [isLocationSelected, setIsLocationSelected] = useState<boolean>(false);
 
   const pathname = usePathname();
   const params = useLocalSearchParams();
 
   const {
     setFilteredProviders,
+    setFilteredChats,
     selectedPlace,
     setSelectedPlace,
     currentLocation,
@@ -46,71 +54,169 @@ const SearchBar = ({
 
   const isSavedCompaniesView =
     pathname === "/profile" && params.section === "saved-companies";
-
   const isUpdateView = currentView === "Updates";
-
   const isHomeView = currentView === "Home";
   const isChatView = currentView === "Chat";
 
-  const debouncedFetchPredictions = useRef(
-    debounce(async (query: string) => {
-      if (query.length > 2) {
-        try {
-          const results = await GooglePlaceService.autocomplete(query);
-          setPredictions(results);
-        } catch (err: any) {
-          setError(`Autocomplete error ${err.message}`);
-        }
-      } else {
-        setPredictions([]);
+  // Stable debounced refs
+  const debouncedFetchRef = useRef(
+    debounce(async (query: string, cb: (results: Place[]) => void) => {
+      if (!query || query.length === 0) return cb([]);
+      try {
+        const results = await GooglePlaceService.autocomplete(query);
+        cb(results);
+      } catch (err: any) {
+        setError(`Autocomplete error ${err.message}`);
+        cb([]);
       }
     }, 300)
-  ).current;
+  );
 
-  // Filter providers locally if providers prop is passed
+  const debouncedSearchAddressRef = useRef(
+    debounce(async (query: string) => {
+      if (!query || query.length === 0 || providers) return;
+      try {
+        await executeSearch({
+          model: "providers",
+          page: 1,
+          limit: 10,
+          engine: true,
+          searchInput: searchQuery,
+          lat: 0,
+          long: 0,
+          address: query,
+        });
+      } catch (err: any) {
+        setError(`Address search error: ${err.message}`);
+      }
+    }, 500)
+  );
+
+  // Filter providers and chats independently
   useEffect(() => {
-    if (providers && filterQuery.length > 0) {
-      const q = filterQuery.toLowerCase();
-      setFilteredProviders(
-        providers.filter(
-          (p) => p.providerName && p.providerName.toLowerCase().includes(q)
-          // (p.subcategories && p.subcategories.toLowerCase().includes(q)) ||
-          // (typeof p.ratings === "number" &&
-          //   p.ratings.toString().includes(q)) ||
-          // (p.location &&
-          //   p.location.primary.address.address.toLowerCase().includes(q)) ||
-          // (p.providerDescription &&
-          //   p.providerDescription.toLowerCase().includes(q))
-        )
-      );
-    } else {
-      setFilteredProviders([]);
+    const q = filterQuery.trim().toLowerCase();
+
+    if (providers) {
+      console.log("Filtering providers with query:", q, providers[0].providerName);
+      if (q.length > 0) {
+        setFilteredProviders(
+          providers.filter((p) => p.providerName?.toLowerCase().includes(q))
+        );
+      } else {
+        setFilteredProviders([]);
+      }
     }
-  }, [providers, filterQuery]);
 
+    if (chats) {
+      if (q.length > 0) {
+        const filtered = chats.filter((c) => {
+          const participantMatch = c.participants?.some((u) =>
+            participantName(u).toLowerCase().includes(q)
+          );
+          const lastMessageText = c.lastMessage?.text?.toLowerCase() || "";
+          return participantMatch || lastMessageText.includes(q);
+        });
+        setFilteredChats(filtered);
+      } else {
+        setFilteredChats([]);
+      }
+    }
+  }, [providers, chats, filterQuery, setFilteredProviders, setFilteredChats]);
+
+  // Initialize address
   useEffect(() => {
-    if (locationQuery) {
-      debouncedFetchPredictions(locationQuery);
+    const defaultAddress = selectedPlace
+      ? selectedPlace.formatted_address
+      : currentLocation
+      ? currentLocation.formattedAddress
+      : "Enter location...";
+
+    setLocationAddress(defaultAddress || "Enter location...");
+  }, [selectedPlace, currentLocation]);
+
+  // Location query autocomplete and backend address-search
+  useEffect(() => {
+    if (locationQuery && !isLocationSelected) {
+      debouncedFetchRef.current(locationQuery, setPredictions);
+      debouncedSearchAddressRef.current(locationQuery);
     } else {
       setPredictions([]);
     }
-  }, [locationQuery, debouncedFetchPredictions]);
+  }, [locationQuery, isLocationSelected]);
 
-  const handleSearchExecute = useCallback(async () => {
-    if (searchQuery.length > 0 && !providers) {
-      await executeSearch({
+  // cancel debounces
+  useEffect(() => {
+    return () => {
+      (debouncedFetchRef.current as any)?.cancel?.();
+      (debouncedSearchAddressRef.current as any)?.cancel?.();
+    };
+  }, []);
+
+  const resetLocationInput = useCallback(() => {
+    const defaultAddress = selectedPlace?.place_id
+      ? selectedPlace.formatted_address
+      : currentLocation
+      ? currentLocation.formattedAddress
+      : "Enter location...";
+
+    setLocationAddress(defaultAddress || "Enter location...");
+    setLocationQuery("");
+    setIsLocationSelected(false);
+    setPredictions([]);
+
+    if (selectedPlace && !locationQuery) {
+      void executeSearch({
+        model: "providers",
         page: 1,
         limit: 10,
         engine: true,
         searchInput: searchQuery,
-        lat: selectedPlace?.geometry.location.lat,
-        long: selectedPlace?.geometry.location.lng,
-        address: !selectedPlace?.geometry.location
-          ? selectedPlace?.formatted_address ?? undefined
-          : currentLocation?.formattedAddress ?? undefined,
+        lat: selectedPlace.geometry.location.lat,
+        long: selectedPlace.geometry.location.lng,
+        address: selectedPlace.formatted_address,
       });
     }
-  }, [executeSearch, searchQuery, selectedPlace, currentLocation, providers]);
+  }, [
+    selectedPlace,
+    currentLocation,
+    searchQuery,
+    executeSearch,
+    locationQuery,
+  ]);
+
+  const handleSearchExecute = useCallback(async () => {
+    if ((searchQuery.length > 0 || locationQuery.length > 0) && !providers) {
+      const searchAddress = selectedPlace
+        ? selectedPlace.formatted_address
+        : locationQuery || currentLocation?.formattedAddress || "";
+
+      const searchLat = selectedPlace
+        ? selectedPlace.geometry.location.lat
+        : currentLocation?.coords.latitude || 0;
+
+      const searchLong = selectedPlace
+        ? selectedPlace.geometry.location.lng
+        : currentLocation?.coords.longitude || 0;
+
+      await executeSearch({
+        model: "providers",
+        page: 1,
+        limit: 10,
+        engine: true,
+        searchInput: searchQuery,
+        lat: searchLat,
+        long: searchLong,
+        address: searchAddress,
+      });
+    }
+  }, [
+    executeSearch,
+    searchQuery,
+    selectedPlace,
+    currentLocation,
+    providers,
+    locationQuery,
+  ]);
 
   const handleLocationSelect = useCallback(
     async (prediction: Place) => {
@@ -119,30 +225,53 @@ const SearchBar = ({
           prediction.place_id
         );
         setSelectedPlace(details);
-        setLocationQuery(details.formatted_address);
+        setLocationAddress(details.formatted_address);
+        setLocationQuery("");
+        setIsLocationSelected(true);
         setPredictions([]);
 
-        // Trigger search if there's already a search query
-        if (searchQuery.length > 0 && !providers) {
-          await handleSearchExecute();
-        }
+        void executeSearch({
+          model: "providers",
+          page: 1,
+          limit: 10,
+          engine: true,
+          searchInput: searchQuery,
+          lat: details.geometry.location.lat,
+          long: details.geometry.location.lng,
+          address: details.formatted_address,
+        });
       } catch (err: any) {
-        setError(`Place details error: ${err.message}`);
+        setError(`Location selection error: ${err.message}`);
       }
     },
-    [setSelectedPlace, searchQuery, handleSearchExecute, providers]
+    [setSelectedPlace, executeSearch, searchQuery, setError]
   );
 
-  const currentLocationText = selectedPlace
-    ? selectedPlace.formatted_address
-    : currentLocation
-    ? currentLocation.formattedAddress
-    : "Get Location";
-
   const handleFocus = useCallback(() => {
-    isHomeView && setLocationInput(true);
-    isSearchFocus && isSearchFocus(true);
+    if (isHomeView) setLocationInput(true);
+    if (isSearchFocus) isSearchFocus(true);
+
+    setLocationQuery("");
+    setIsLocationSelected(false);
+  }, [isHomeView, isSearchFocus]);
+
+  const handleBlur = useCallback(() => {
+    if (isSearchFocus) isSearchFocus(false);
+
+    setTimeout(() => {
+      if (!isLocationSelected) {
+        setLocationInput(false);
+        resetLocationInput();
+      }
+    }, 200);
+  }, [isSearchFocus, isLocationSelected, resetLocationInput]);
+
+  const handleLocationInputChange = useCallback((text: string) => {
+    setLocationQuery(text);
+    setIsLocationSelected(false);
   }, []);
+
+  const clearSearch = useCallback(() => setSearchQuery(""), []);
 
   return (
     <FormControl className="gap-4">
@@ -161,10 +290,12 @@ const SearchBar = ({
                 </InputSlot>
                 <InputField
                   {...triggerProps}
-                  placeholder={currentLocationText}
+                  placeholder={locationAddress}
                   value={locationQuery}
                   className="placeholder:text-lg placeholder:text-gray-400 placeholder:line-clamp-1"
-                  onChangeText={(text) => setLocationQuery(text)}
+                  onChangeText={handleLocationInputChange}
+                  onFocus={handleFocus}
+                  onBlur={handleBlur}
                 />
               </Input>
             );
@@ -182,6 +313,7 @@ const SearchBar = ({
             ))}
         </Menu>
       )}
+
       {isHomeView && (
         <Input className="mx-4 rounded-2xl border-gray-300 h-14 data-[focus=true]:border-2 data-[focus=true]:border-brand-primary/60">
           <InputSlot>
@@ -194,10 +326,10 @@ const SearchBar = ({
             value={searchQuery}
             onFocus={handleFocus}
             onBlur={() => {
-              isSearchFocus && isSearchFocus(false),
-                // setLocationInput(false),
-                handleSearchExecute;
+              if (isSearchFocus) isSearchFocus(false);
+              handleSearchExecute();
             }}
+            onSubmitEditing={handleSearchExecute}
           />
           {isLoading && (
             <InputSlot className="pr-3">
@@ -206,7 +338,8 @@ const SearchBar = ({
           )}
         </Input>
       )}
-      {isSavedCompaniesView || isUpdateView && (
+
+      {(isSavedCompaniesView || isUpdateView) && (
         <Input className="m-4 rounded-2xl border-gray-300 h-14 data-[focus=true]:border-2 data-[focus=true]:border-brand-primary/60">
           <InputSlot className="pl-4">
             <InputIcon
@@ -216,12 +349,15 @@ const SearchBar = ({
             />
           </InputSlot>
           <InputField
-            placeholder={isSavedCompaniesView ? "Filter..." : "Search for companies..."}
+            placeholder={
+              isSavedCompaniesView ? "Filter..." : "Search for companies..."
+            }
             className="placeholder:text-lg placeholder:text-gray-400"
             onChangeText={(text) => setFilterQuery(text)}
           />
         </Input>
       )}
+
       {isChatView && (
         <Input className="m-4 rounded-2xl border-gray-300 h-14 data-[focus=true]:border-2 data-[focus=true]:border-brand-primary/60">
           <InputSlot className="pl-4">
@@ -230,7 +366,7 @@ const SearchBar = ({
           <InputField
             placeholder="Search Chats..."
             className="placeholder:text-lg placeholder:text-gray-400"
-            // onChangeText={(text) => setFilterQuery(text)}
+            onChangeText={(text) => setFilterQuery(text)}
           />
         </Input>
       )}

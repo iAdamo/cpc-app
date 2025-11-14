@@ -1,4 +1,4 @@
-import { FlatList } from "react-native";
+import { FlatList, ListRenderItemInfo } from "react-native";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Heading } from "@/components/ui/heading";
@@ -27,7 +27,8 @@ import DateFormatter from "@/utils/DateFormat";
 import SearchBar from "@/components/SearchEngine";
 
 export const ChatList: React.FC = () => {
-  const { fetchChats, chats, chatLoading, switchRole, user } = useGlobalStore();
+  const { fetchChats, chats, chatLoading, switchRole, user, filteredChats } =
+    useGlobalStore();
 
   useEffect(() => {
     let mounted = true;
@@ -44,17 +45,16 @@ export const ChatList: React.FC = () => {
     return () => {
       mounted = false;
       chatService.leaveCurrentChat();
-      chatService.disconnect();
+      // chatService.disconnect();
     };
   }, [fetchChats]);
 
   // console.log("Chats in ChatList:", chats);
 
   const renderChatItem = useCallback(
-    ({ item: chat }: { item: Chat }) => {
+    ({ item: chat }: ListRenderItemInfo<Chat>) => {
       return (
         <VStack className="flex-1">
-          <SearchBar />
           <ChatItem chat={chat} switchRole={switchRole} />
         </VStack>
       );
@@ -62,14 +62,16 @@ export const ChatList: React.FC = () => {
     [switchRole]
   );
 
+  console.log("Filtered Chats:", filteredChats);
   return (
     <VStack className="flex-1">
+      <ChatNavbar chats={chats} />
       <FlatList
-        data={chats}
+        data={filteredChats.length > 0 ? filteredChats : chats}
         renderItem={renderChatItem}
         keyExtractor={(item) => item._id}
         // onRefresh={fetchChats}
-        refreshing={chatLoading}
+        // refreshing={chatLoading}
         ListEmptyComponent={() =>
           chatLoading ? (
             <Spinner
@@ -80,12 +82,11 @@ export const ChatList: React.FC = () => {
             <NoActiveChat />
           )
         }
-        ListHeaderComponent={() => <ChatNavbar />}
         stickyHeaderIndices={[0]}
         initialNumToRender={8}
         maxToRenderPerBatch={8}
         windowSize={10}
-        removeClippedSubviews
+        // removeClippedSubviews
       />
     </VStack>
   );

@@ -1,4 +1,4 @@
-import React from "react";
+import {memo} from "react";
 import { Pressable } from "@/components/ui/pressable";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
@@ -82,4 +82,4 @@ function ChatItem({ chat, switchRole }: { chat: Chat; switchRole: string }) {
     </Pressable>
   );
 }
-export default React.memo(ChatItem);
+export default memo(ChatItem);

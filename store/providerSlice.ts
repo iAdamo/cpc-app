@@ -99,6 +99,7 @@ export const providerViewSlice: StateCreator<
         sortBy,
         categories,
       } = params;
+      console.log("Executing search with params:", params);
       const response = await globalSearch(
         model,
         page,

@@ -52,7 +52,7 @@ export function OnboardingFlow() {
   const noBackButtonSteps = new Set([0, 1, 2, 5]);
   const showBackButton =
     !noBackButtonSteps.has(currentStep) && currentStep < 12;
-  console.log(paramsFrom, currentStep);
+  // console.log(paramsFrom, currentStep);
   const handleBack = () => {
     setBackPressed(true);
     if (paramsFrom === "/providers") {

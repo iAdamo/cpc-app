@@ -1,7 +1,7 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { Slot } from "expo-router";
 import { StatusBar, Platform } from "react-native";
@@ -110,7 +110,7 @@ function RootLayoutNav() {
         backgroundColor={"transparent"}
       />
       <Slot />
-      <Toast />
+      <Toast position="bottom" />
     </GluestackUIProvider>
   );
 }

@@ -32,7 +32,7 @@ const AttactmentOptions = ({
     selectedFiles,
     pickMedia,
     pickDocument,
-    removeFile,
+    removeLocalFile,
     setProgress,
     // sendMediaMessage, // No longer used here
   } = useGlobalStore();
@@ -42,10 +42,10 @@ const AttactmentOptions = ({
     if (selectedFiles.length > 0 && onSendMedia) {
       onSendMedia(selectedFiles);
       // Optionally clear selected files after sending
-      selectedFiles.forEach((file) => removeFile(file.uri));
+      selectedFiles.forEach((file) => removeLocalFile(file.uri));
       setProgress(0);
     }
-  }, [selectedFiles, onSendMedia, removeFile]);
+  }, [selectedFiles, onSendMedia, removeLocalFile]);
 
   const options = [
     {

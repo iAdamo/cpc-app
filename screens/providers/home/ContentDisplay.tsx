@@ -5,12 +5,16 @@ import EmptyState from "@/components/EmptyState";
 
 interface ContentDisplayProps {
   providers: ProviderData[];
+  handleProvidersSearch: () => void;
+  isSearching?: boolean;
   displayStyle?: "Grid" | "List";
 }
 
 const ContentDisplay = ({
   providers,
   displayStyle = "Grid",
+  handleProvidersSearch,
+  isSearching,
 }: ContentDisplayProps) => {
   if (!providers || providers.length === 0)
     return <EmptyState header="" text="" />;
@@ -28,6 +32,8 @@ const ContentDisplay = ({
           <ProviderCard provider={item} />
         </View>
       )}
+      onRefresh={handleProvidersSearch}
+      refreshing={isSearching}
       contentContainerStyle={{ paddingHorizontal: 8, paddingVertical: 8 }}
       showsVerticalScrollIndicator={false}
       ListEmptyComponent={<EmptyState header="" text="" />}

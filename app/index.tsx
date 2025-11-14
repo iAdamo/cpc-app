@@ -3,11 +3,22 @@ import { Text } from "@/components/ui/text";
 import { Center } from "@/components/ui/center";
 import { VStack } from "@/components/ui/vstack";
 import { router } from "expo-router";
+import useGlobalStore from "@/store/globalStore";
 
 export default function App() {
+  const { isAuthenticated, isOnboardingComplete, switchRole } =
+    useGlobalStore();
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.replace("/auth/signin");
+      if (isAuthenticated) {
+        if (!isOnboardingComplete) {
+          router.replace("/onboarding");
+        } else {
+          router.replace(switchRole === "Client" ? "/providers" : "/clients");
+        }
+      } else {
+        router.replace("/auth/signin");
+      }
     }, 2000); // 2 seconds delay
 
     return () => clearTimeout(timer); // Cleanup the timer on unmount

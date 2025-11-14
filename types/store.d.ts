@@ -189,6 +189,7 @@ export interface MediaState {
 
 export interface ChatState {
   chats: Chat[];
+  filteredChats: Chat[];
   selectedChat: Chat | null;
   messages: Message[];
   groupedMessages: MessageSection[];
@@ -218,6 +219,7 @@ export interface ChatState {
   stopTyping: () => void;
   typingUsers: string[];
   hasMoreMessages: boolean;
+  setFilteredChats: (chats: Chat[]) => void;
 }
 
 export type GlobalStore = AuthState &

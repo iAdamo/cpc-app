@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, use } from "react";
 import { Keyboard } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
@@ -47,7 +47,20 @@ const SignInScreen = () => {
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
 
   const router = useRouter();
-  const { login, isLoading, isAuthenticated } = useGlobalStore();
+  const {
+    login,
+    isLoading,
+    isAuthenticated,
+    isOnboardingComplete,
+    switchRole,
+  } = useGlobalStore();
+
+  if (
+    useGlobalStore.getState().isAuthenticated &&
+    useGlobalStore.getState().isOnboardingComplete
+  ) {
+    router.replace(switchRole === "Client" ? "/providers" : "/clients");
+  }
 
   const switchToSignUp = () => {
     useGlobalStore.setState({
@@ -105,8 +118,8 @@ const SignInScreen = () => {
     handleSubmit(onSubmit)();
   };
   return (
-    <ScrollView className="bg-white w-full p-4" contentContainerClassName="justify-center mt-40 flex-1">
-      <VStack className="h-3/5 justify-end">
+    <VStack className="bg-white flex-1 w-full p-4 pt-28">
+      <VStack className="h-3/5">
         <Card className="shadow-xl gap-8">
           <Heading size="xl" className="text-brand-primary">
             Welcome Back!
@@ -219,18 +232,18 @@ const SignInScreen = () => {
             </VStack>
           </VStack>
         </Card>
-      </VStack>
-      <VStack className="h-2/5 justify-center items-center">
-        <VStack className="items-center gap-2">
-          <Text size="md" className="text-text-secondary text-center">
-            Don&apos;t have an account yet?
-          </Text>
-          <Button
-            onPress={switchToSignUp}
-            className="bg-brand-secondary hover:bg-btn-secondary active:bg-brand-secondary"
-          >
-            <ButtonText className="">Sign Up Here</ButtonText>
-          </Button>
+        <VStack className="h-2/5 justify-center items-center gap-6 mt-4 bg-white">
+          <VStack className="items-center gap-2">
+            <Text size="md" className="text-text-secondary text-center">
+              Don&apos;t have an account yet?
+            </Text>
+            <Button
+              onPress={switchToSignUp}
+              className="bg-brand-secondary hover:bg-btn-secondary active:bg-brand-secondary"
+            >
+              <ButtonText className="">Sign Up Here</ButtonText>
+            </Button>
+          </VStack>
         </VStack>
       </VStack>
       {/** Forgot password modal */}
@@ -240,7 +253,7 @@ const SignInScreen = () => {
           onClose={() => setShowForgotPasswordModal(false)}
         />
       )}
-    </ScrollView>
+    </VStack>
   );
 };
 

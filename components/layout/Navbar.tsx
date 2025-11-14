@@ -4,7 +4,7 @@ import { HStack } from "../ui/hstack";
 import { Pressable } from "../ui/pressable";
 import { Text } from "../ui/text";
 import { Heading } from "../ui/heading";
-import { Icon, ChevronDownIcon, AddIcon } from "../ui/icon";
+import { Icon, ChevronDownIcon, AddIcon, SearchIcon } from "../ui/icon";
 import {
   Avatar,
   AvatarFallbackText,
@@ -180,6 +180,7 @@ export const TopNavbar = () => {
                 }
               />
             </Button>
+            
           </HStack>
         </HStack>
         {/** Search bar */}

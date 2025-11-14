@@ -167,7 +167,7 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       currentView: "Home",
       displayStyle: "Grid",
       selectedFiles: [],
-      draftJobs: [], // test purpose
+      // draftJobs: [], // test purpose
       // savedProviders: [],
       currentLocation: null,
       paramsFrom: null,
@@ -175,7 +175,7 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       messages: [],
       groupedMessages: [],
       hasMoreMessages: true,
-      // chats: [],
+      chats: [],
     });
     socketService.disconnect();
     await SecureStore.deleteItemAsync("accessToken");

@@ -1,20 +1,15 @@
-import VideoPlayer from "@/components/media/VideoPlayer";
-import { Image } from "../ui/image";
-import { Text } from "../ui/text";
-import { useVideoPlayer, VideoView } from "expo-video";
+import React from "react";
 import {
   Modal,
-  ModalBackdrop,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
-} from "@/components/ui/modal";
-import { Icon, CloseIcon, ArrowLeftIcon } from "../ui/icon";
-import { VStack } from "../ui/vstack";
-import { HStack } from "../ui/hstack";
-import { Button } from "../ui/button";
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+} from "react-native";
+import VideoPlayer from "@/components/media/VideoPlayer";
+import { Image } from "../ui/image";
+import { useVideoPlayer } from "expo-video";
+import { Icon, ArrowLeftIcon } from "../ui/icon";
 
 const getMediaType = (url: string): "image" | "video" | "doc" => {
   const imageExt = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg"];
@@ -54,35 +49,37 @@ const MediaView = ({
     player.loop = false;
     player.play();
   });
+  const close = () => {
+    try {
+      player.release();
+    } catch (e) {
+      // ignore
+    }
+    onClose();
+  };
+
   return (
     <Modal
-      isOpen={isOpen}
-      onClose={() => {
-        player.release();
-        onClose();
-      }}
-      closeOnOverlayClick={true}
-      className="bg-black flex-1"
+      visible={isOpen}
+      animationType="fade"
+      onRequestClose={close}
+      style={{ flex: 1, backgroundColor: "black" }}
     >
-      <ModalBackdrop />
-      <ModalContent className="flex-1 w-full p-0  pt-16 bg-black">
-        <ModalHeader className="">
-          <ModalCloseButton>
-            <Icon
-              size="xl"
-              as={ArrowLeftIcon}
-              className="ml-4 w-8 h-8 text-white"
-            />
-          </ModalCloseButton>
-        </ModalHeader>
-        <ModalBody
-          className="m-0 bg-black flex-1"
-          contentContainerClassName="flex-1 justify-center items-center bg-black "
-        >
+      <TouchableOpacity
+        style={styles.backdrop}
+        activeOpacity={1}
+        onPress={close}
+      />
+      <View style={styles.container}>
+        <TouchableOpacity style={styles.closeButton} onPress={close}>
+          <Icon as={ArrowLeftIcon} className="text-white w-8 h-8" size="xl" />
+        </TouchableOpacity>
+
+        <View style={styles.mediaWrapper}>
           {isImage && (
             <Image
               source={url}
-              className="flex-1 w-full h-full object-contain bg-black"
+              className="w-full h-full object-cover bg-black"
               resizeMode="contain"
             />
           )}
@@ -94,11 +91,41 @@ const MediaView = ({
               player={player}
             />
           )}
-        </ModalBody>
-        <ModalFooter className="bg-black"></ModalFooter>
-      </ModalContent>
+        </View>
+      </View>
     </Modal>
   );
 };
 
 export default MediaView;
+
+const { height } = Dimensions.get("window");
+
+const styles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: "black",
+  },
+  container: {
+    position: "absolute",
+    top: 10,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "flex-start",
+    alignItems: "center",
+  },
+  closeButton: {
+    alignSelf: "flex-start",
+    marginLeft: 12,
+    marginBottom: 8,
+    padding: 8,
+  },
+  mediaWrapper: {
+    width: "100%",
+    height: Math.max(300, height - 120),
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#000",
+  },
+});

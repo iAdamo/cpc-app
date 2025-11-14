@@ -1,4 +1,4 @@
-import { UserData } from "./user";
+import { MediaItem, UserData } from "./user";
 
 export interface Chat {
   _id: string;
@@ -40,7 +40,7 @@ export interface Message {
 
 export interface MessageContent {
   text?: string;
-  mediaUrl?: string;
+  mediaUrl?: MediaItem;
   mediaType?: string;
   size?: number;
   duration?: number;

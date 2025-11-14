@@ -5,8 +5,11 @@ import { PhoneCallIcon } from "lucide-react-native";
 import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
 import useGlobalStore from "@/store/globalStore";
 import { LinearGradient } from "expo-linear-gradient";
+import { SearchIcon } from "@/components/ui/icon";
+import SearchBar from "@/components/SearchEngine";
+import { Chat } from "@/types";
 
-const ChatNavbar = () => {
+const ChatNavbar = ({ chats }: { chats: Chat[] }) => {
   const { switchRole } = useGlobalStore();
   const isProvider = switchRole === "Provider";
 
@@ -28,18 +31,25 @@ const ChatNavbar = () => {
           end={{ x: 1, y: 0 }}
         />
       </HStack>
-      <VStack className="pt-10 gap-4">
+      <VStack className="pt-10">
         <HStack className="p-4 justify-between">
           <Heading size="2xl" className="font-medium text-brand-primary">
             Chats
           </Heading>
-          <Button
-            variant="outline"
-            className="bg-brand-primary/40 rounded-3xl px-4"
-          >
-            <ButtonIcon as={PhoneCallIcon} className="text-brand-primary" />
-            <ButtonText className="text-brand-primary">Call</ButtonText>
-          </Button>
+          <HStack space="sm">
+            {/* <Button
+              variant="outline"
+              className="bg-brand-primary/40 rounded-3xl px-4"
+            >
+              <ButtonIcon as={PhoneCallIcon} className="text-brand-primary" />
+            </Button> */}
+            <Button
+              variant="outline"
+              className="bg-brand-primary/40 rounded-3xl px-4"
+            >
+              <ButtonIcon as={SearchIcon} className="text-brand-primary" />
+            </Button>
+          </HStack>
         </HStack>
         {/* <HStack className="w-full p-4 items-center">
             <Avatar size="md">
@@ -57,7 +67,7 @@ const ChatNavbar = () => {
 
           </HStack> */}
         {/** Search bar */}
-        {/* <SearchBar /> */}
+        <SearchBar chats={chats} />
       </VStack>
     </VStack>
   );

@@ -81,6 +81,7 @@ import {
   AvatarFallbackText,
   AvatarImage,
 } from "@/components/ui/avatar";
+import ProfileVatar from "@/components/ProfileAvatar";
 import MediaView from "@/components/media/MediaView";
 import { Badge, BadgeText } from "@/components/ui/badge";
 import {
@@ -242,6 +243,9 @@ export const PostJob = ({ userId }: { userId?: string }) => {
                     size="md"
                     value={job.isActive}
                     onToggle={() => handleToggleActive(job)}
+                    trackColor={{ false: "#d4d4d4", true: "#16a34a" }}
+                    thumbColor="#fafafa"
+                    ios_backgroundColor="#d4d4d4"
                   />
                 )}
               </HStack>
@@ -443,7 +447,7 @@ export const CreatejobModal = ({
     },
   });
 
-  console.log({ errors });
+  // console.log({ errors });
   // print all values on change
   // console.log("Form Values:", watch());
   useEffect(() => {
@@ -1059,45 +1063,51 @@ export const CreatejobModal = ({
             </AccordionContent>
           </AccordionItem>
         </Accordion>
-        {job?.proposals &&
-          job.proposals.length > 0 &&
-          job.proposals.map((proposal: ProposalData) => (
-            <Card key={proposal._id} className="">
-              <HStack className="gap-4 items-start">
-                <Avatar size="md">
-                  <AvatarFallbackText>
-                    {proposal.providerId.providerName}
-                  </AvatarFallbackText>
-                  <AvatarImage
-                    source={{
-                      uri: (proposal.providerId?.providerLogo as MediaItem)
-                        ?.thumbnail,
-                    }}
-                  />
-                </Avatar>
+        {job?.proposals && job.proposals.length > 0 && (
+          <VStack className="mt-8 gap-4">
+            <HStack className="items-start justify-between mx-4">
+              <Heading size="xl" className="text-brand-primary">
+                Proposals
+              </Heading>
+              <Text className="px-3 py-0.5 bg-brand-primary/10 font-bold text-brand-primary/80 rounded-full">
+                {job.proposals.length} Applications
+              </Text>
+            </HStack>
+            {job.proposals.map((proposal: ProposalData) => (
+              <Card key={proposal._id} className="gap-2">
+                <ProfileVatar provider={proposal.providerId} />
 
-                <VStack>
-                  <Heading className="text-brand-primary">
-                    {proposal.providerId.providerName}
-                  </Heading>
-                  <RatingSection
-                    rating={proposal.providerId.averageRating}
-                    reviewCount={proposal.providerId.reviewCount}
-                  />
-                </VStack>
-                {/* <Text
-                    size="sm"
-                    className="self-end text-typography-600 font-medium flex-1"
-                  >
-                    Member since{" "}
-                    {DateFormatter.toShortDate(job.userId.createdAt)}
-                  </Text> */}
-              </HStack>
-              <Card>
-                <Text>{proposal.message}</Text>
+                <Text size="lg" className="font-medium text-typography-600">
+                  {proposal.message}
+                </Text>
+
+                <HStack className="mt-1 justify-between w-3/5">
+                  <VStack>
+                    <Heading className="text-typography-700">
+                      ${proposal.proposedPrice}
+                    </Heading>
+                    <Text size="lg" className="text-typography-600">
+                      Propossed Price
+                    </Text>
+                  </VStack>
+                  <VStack>
+                    <Heading size="md" className="text-typography-600">
+                      {proposal.estimatedDuration} days
+                    </Heading>
+                    <Text size="lg" className=" text-typography-600">
+                      Duration
+                    </Text>
+                  </VStack>
+                </HStack>
+                <Button className="self-end mt-2 bg-brand-primary data-[active=true]:bg-brand-primary/80 w-2/5 rounded-lg">
+                  <ButtonText>Accept</ButtonText>
+                </Button>
+
+
               </Card>
-            </Card>
-          ))}
+            ))}
+          </VStack>
+        )}
       </VStack>
     );
   };

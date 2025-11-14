@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Redirect, Stack } from "expo-router";
 import { StatusBar } from "react-native";
 import useGlobalStore from "@/store/globalStore";
@@ -6,41 +6,49 @@ import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { current } from "immer";
 
+// ...existing code...
 export default function AppLayout() {
   const { user, isAuthenticated, isOnboardingComplete } = useGlobalStore();
+  const lastRedirectRef = useRef<string | null>(null);
+
   useEffect(() => {
-    if (isAuthenticated && !isOnboardingComplete) {
-      router.replace("/onboarding");
-    } else if (
-      isAuthenticated &&
-      isOnboardingComplete &&
-      !user?.isEmailVerified
-    ) {
-      useGlobalStore.setState({ currentStep: 3 });
-      router.replace("/onboarding");
-    } else if (isAuthenticated && isOnboardingComplete) {
-      if (user?.activeRole === "Client") {
-        // remove the comment if clients route is done
-        // setSwitchRole("Client");
-        router.replace("/providers");
+    // avoid running while auth state is unknown (optional)
+    if (typeof isAuthenticated === "undefined") return;
+
+    let target:
+      | "/auth/signin"
+      | "/onboarding"
+      | "/providers"
+      | "/clients"
+      | null = null;
+
+    if (!isAuthenticated) {
+      target = !isOnboardingComplete ? "/onboarding" : null;
+    } else {
+      if (!isOnboardingComplete) target = "/onboarding";
+      else if (!user?.isEmailVerified) {
+        useGlobalStore.setState({ currentStep: 3 });
+        target = "/onboarding";
       } else {
-        // setSwitchRole("Provider");
-        router.replace("/clients");
+        target = user?.activeRole === "Client" ? "/providers" : "/clients";
       }
-    } else if (!isAuthenticated && !isOnboardingComplete) {
-      router.replace("/onboarding");
-    } else if (!isAuthenticated && isOnboardingComplete) {
-      router.replace("/auth/signin");
     }
-  }, [isAuthenticated, isOnboardingComplete]);
+
+    if (target && lastRedirectRef.current !== target) {
+      console.log(`Redirecting to: ${target}`);
+      lastRedirectRef.current = target;
+      router.replace(target);
+    }
+  }, []);
+
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <>
       <StatusBar
         barStyle="dark-content"
-        translucent={true}
-        backgroundColor={"#FFFFFF"}
+        translucent
+        backgroundColor="#FFFFFF"
       />
       <Stack screenOptions={{ headerShown: false }} />
-    </SafeAreaView>
+    </>
   );
 }

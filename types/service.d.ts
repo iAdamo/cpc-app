@@ -94,7 +94,7 @@ export interface ProposalData {
   id: string;
   message: string;
   proposedPrice: number;
-  estimatedDuration: string | Date;
+  estimatedDuration: string;
   createdAt: string;
   updatedAt: string;
   jobId: JobData;
