@@ -20,7 +20,7 @@ class SocketService {
   async connect(): Promise<void> {
     // console.log("Attempting to connect to socket...");
     if (this.socket?.connected || this.isConnected) {
-      // console.log("Already connected to socket...");
+      console.log("Already connected to socket...");
       return;
     }
 
@@ -57,7 +57,7 @@ class SocketService {
     if (!this.socket) return;
 
     this.socket.on("connect", () => {
-      // console.log("Socket connected");
+      console.log("Socket connected");
       this.isConnected = true;
       // flush queued emits
       while (this.emitQueue.length && this.socket) {

@@ -73,10 +73,7 @@ export interface JobData {
   createdAt: string;
   updatedAt: string;
   location: string;
-  coordinates?: {
-    lat: number;
-    long: number;
-  };
+  coordinates?: number[];
   media: MediaItem[] | FileType[];
   visibility: "Public" | "Verified" | "Private";
   proposalsCount: number;
@@ -86,6 +83,7 @@ export interface JobData {
   anonymous: boolean;
   userId: UserData;
   providerId: ProviderData;
+  status: "active" | "in_progress" | "completed" | "cancelled" | "expired";
   createdAt: Date;
 }
 
@@ -99,4 +97,6 @@ export interface ProposalData {
   updatedAt: string;
   jobId: JobData;
   providerId: ProviderData;
+  viewedByClient: boolean;
+  attachments: MediaItem[];
 }

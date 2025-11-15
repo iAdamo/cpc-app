@@ -2,6 +2,7 @@ import React from "react";
 import { HStack } from "./ui/hstack";
 import { VStack } from "./ui/vstack";
 import { Heading } from "./ui/heading";
+import { Pressable } from "./ui/pressable";
 import {
   Avatar,
   AvatarBadge,
@@ -10,6 +11,7 @@ import {
 } from "./ui/avatar";
 import { MediaItem, ProviderData, UserData } from "@/types";
 import RatingSection from "./RatingFunction";
+import { router } from "expo-router";
 
 const getAvatarUri = (maybe: any) => {
   if (!maybe) return undefined;
@@ -38,7 +40,17 @@ const ProfileAvatar = ({
   const reviewCount = provider?.reviewCount ?? user?.reviewCount ?? 0;
 
   return (
-    <HStack className="gap-4 items-start">
+    <Pressable
+      className="flex flex-row gap-4 items-start"
+      // onTouchMove={() => console.log("I am touched")}
+      onTouchEnd={() => console.log("End action")}
+      onPress={() => {
+        router.push({
+          pathname: "/profile/[id]",
+          params: { id: provider?.owner || user?._id || "" },
+        });
+      }}
+    >
       <Avatar size="md">
         <AvatarFallbackText>
           {displayName ? displayName.charAt(0) : "U"}
@@ -52,12 +64,10 @@ const ProfileAvatar = ({
       </Avatar>
 
       <VStack>
-        <Heading className="text-brand-primary">
-          {displayName}
-        </Heading>
+        <Heading className="text-brand-primary">{displayName}</Heading>
         <RatingSection rating={rating} reviewCount={reviewCount} />
       </VStack>
-    </HStack>
+    </Pressable>
   );
 };
 

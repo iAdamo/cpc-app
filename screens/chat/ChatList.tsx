@@ -62,7 +62,7 @@ export const ChatList: React.FC = () => {
     [switchRole]
   );
 
-  console.log("Filtered Chats:", filteredChats);
+  // console.log("Filtered Chats:", filteredChats);
   return (
     <VStack className="flex-1">
       <ChatNavbar chats={chats} />

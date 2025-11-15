@@ -200,7 +200,7 @@ export interface ChatState {
     participantIds: string,
     isGroup?: boolean,
     groupInfo?: Partial<Chat["groupInfo"]>
-  ) => Promise<Chat>;
+  ) => Promise<void>;
   fetchChats: () => Promise<void>;
   sendTextMessage: (text: string, replyTo?: string) => Promise<void>;
   sendMediaMessage: (

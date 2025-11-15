@@ -543,7 +543,7 @@ const MessageView = () => {
         {/* Typing indicator */}
         {otherTyping && (
           <VStack className="w-full items-start px-6 pb-2">
-            <Text className="text-xs text-gray-500">Someone is typing...</Text>
+            <Text className="text-xs text-gray-500">Is typing...</Text>
           </VStack>
         )}
 

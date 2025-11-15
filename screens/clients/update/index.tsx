@@ -145,6 +145,8 @@ const ClientsUpdates = () => {
     );
   }
 
+  // console.log("Rendering Jobs:", jobs);
+
   return (
     <VStack>
       <FlatList

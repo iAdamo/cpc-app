@@ -209,8 +209,8 @@ const JobView = () => {
               {job.location} (
               {
                 getDistanceWithUnit(
-                  job?.coordinates?.lat ?? 0,
-                  job?.coordinates?.long ?? 0
+                  job?.coordinates?.[1] ?? 0,
+                  job?.coordinates?.[0] ?? 0
                 )?.text
               }{" "}
               away){" "}

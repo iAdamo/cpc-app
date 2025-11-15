@@ -16,12 +16,13 @@ import {
   UserState,
 } from "@/types";
 import appendFormData from "@/utils/AppendFormData";
+import chatService from "@/services/chatService";
 
 export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
   set,
   get
 ) => ({
-  isAvailable: true,
+  isAvailable: false,
   isFollowing: false,
   otherUser: null,
   setAvailability: (available: boolean) => set({ isAvailable: available }),
@@ -84,7 +85,7 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
     set({ error: null });
     try {
       const response = await getUserProfile(userId);
-      // console.log("fetched user", response);
+      console.log("fetched user", response);
       if (response) {
         if (get().user && get().user?._id === response._id) {
           // If fetching own profile, update the user state

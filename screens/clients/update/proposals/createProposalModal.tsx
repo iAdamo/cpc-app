@@ -92,20 +92,18 @@ const CreateProposal = ({
       formData.append("estimatedDuration", String(data.estimatedDuration));
       if (data.additionalNote)
         formData.append("additionalNote", data.additionalNote);
-      // attach media files if any
       if (Array.isArray(data.media) && data.media.length > 0) {
         data.media.forEach((file: any, idx: number) => {
-          // expecting MediaPicker file shape with uri/name/type
           formData.append("attachments", {
             uri: file.uri,
             name: file.name || `file-${idx}`,
-            type: file.type || "image/jpeg",
+            type: "image/jpeg",
           } as any);
         });
       }
 
       // TODO: Replace with real API call when available, e.g., createProposal(formData)
-      console.log("Proposal submit FormData: ", formData);
+      // console.log("Proposal submit FormData: ", Array.from(formData.entries()));
 
       await createProposal(job._id, formData);
       setSuccess("Proposal submitted successfully");
@@ -117,6 +115,7 @@ const CreateProposal = ({
       setError?.("Failed to submit proposal");
     } finally {
       setSubmitting(false);
+      useGlobalStore.setState({ selectedFiles: [] });
     }
   };
 
@@ -136,7 +135,7 @@ const CreateProposal = ({
       closeOnOverlayClick={false}
     >
       <ModalBackdrop />
-      <ModalContent className="flex-1 pt-16 w-full bg-white gap-8">
+      <ModalContent className="flex-1 pt-16 w-full">
         <ModalHeader className="items-center justify-start gap-2">
           <ModalCloseButton className="flex flex-row items-center gap-2">
             <Icon size="xl" as={ChevronLeftIcon} />
@@ -145,8 +144,8 @@ const CreateProposal = ({
         </ModalHeader>
         <ModalBody
           showsVerticalScrollIndicator={false}
-          className="flex flex-col"
-          contentContainerClassName="gap-4"
+          className="mt-8"
+          contentContainerClassName="gap-4 p-0"
         >
           <Heading size="xl" className="font-medium">
             {job.title}
@@ -165,8 +164,8 @@ const CreateProposal = ({
                 {job.location} (
                 {
                   getDistanceWithUnit(
-                    job?.coordinates?.lat ?? 0,
-                    job?.coordinates?.long ?? 0
+                    job?.coordinates?.[1] ?? 0,
+                    job?.coordinates?.[0] ?? 0
                   )?.text
                 }{" "}
                 away)
@@ -298,11 +297,10 @@ const CreateProposal = ({
                   name="media"
                   render={({ field: { onChange, value } }) => (
                     <>
-                      {/* MediaPicker is a RN component; keep usage similar to other forms */}
                       <MediaPicker
-                        maxFiles={4}
+                        maxFiles={1}
                         maxSize={200}
-                        allowedTypes={["image", "video"]}
+                        allowedTypes={["image"]}
                         initialFiles={value || []}
                         onFilesChange={(files: any[]) => onChange(files)}
                       />

@@ -125,6 +125,22 @@ export const createProposal = async (
   }
 };
 
+export const updateProposal = async (
+  jobId: string,
+  proposalId: string,
+  data: FormData
+): Promise<void> => {
+  await axiosInstance.patch(
+    `services/jobs/${jobId}/proposals/${proposalId}`,
+    data,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+};
+
 export const getProposalsByJob = async (jobId: string): Promise<any[]> => {
   const response = await axiosInstance.get(`services/jobs/${jobId}/proposals`);
   return response.data;

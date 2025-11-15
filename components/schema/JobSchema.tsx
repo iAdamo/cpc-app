@@ -46,12 +46,10 @@ export const JobFormSchema = z.object({
   // contactPreference: z.string().min(1, "Contact preference is required"),
   media: z
     .array(mediaFileSchema)
-    .min(1, "At least one media file is required")
-    .max(2, "You can upload up to 2 media files")
     .refine(
       (files) =>
         files.every((file) => !file.type || file.type.startsWith("image")),
-      { message: "All files must be images or videos" }
+      { message: "All files must be images" }
     )
     .refine(
       (files) =>
@@ -66,11 +64,8 @@ export const JobFormSchema = z.object({
         message: `Each image must be ≤ ${MAX_IMAGE_SIZE_MB}MB`,
       }
     )
-    .refine(
-      (files) =>
-        files.some((file) => file.type && file.type.startsWith("image")),
-      { message: "At least one image is required." }
-    ),
+   
+    .optional(),
 });
 
 export type JobFormSchemaType = z.infer<typeof JobFormSchema>;

@@ -40,7 +40,7 @@ export interface Message {
 
 export interface MessageContent {
   text?: string;
-  mediaUrl?: MediaItem;
+  mediaUrl?: MediaItem | string;
   mediaType?: string;
   size?: number;
   duration?: number;
@@ -64,4 +64,11 @@ export interface SendMessageParams {
 export interface MessageSection {
   title: string;
   data: Partial<Message>[];
+}
+
+export interface Presence {
+  userId: string;
+  isOnline: boolean;
+  lastSeen: string;
+  deviceId: string;
 }

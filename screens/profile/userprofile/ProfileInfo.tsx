@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
@@ -15,6 +16,9 @@ import { ProviderData, EditableFields } from "@/types";
 import useGlobalStore from "@/store/globalStore";
 import { Badge, BadgeText, BadgeIcon } from "@/components/ui/badge";
 import { router } from "expo-router";
+import { getLastSeen } from "@/services/axios/chat";
+import DateFormatter from "@/utils/DateFormat";
+import chatService from "@/services/chatService";
 import { GooglePlaceService } from "@/services/googlePlaceService";
 
 const ProfileInfo = ({
@@ -36,27 +40,43 @@ const ProfileInfo = ({
   handleCancelEdit: () => void;
   onLayout: any;
 }) => {
+  const [lastSeen, setLastSeen] = useState<string>("");
+  const [isOnline, setIsOnline] = useState<boolean>(false);
   const {
     user,
     switchRole,
     updateUserProfile,
-    isAvailable,
     createChat,
     selectedChat,
     setCurrentView,
   } = useGlobalStore();
   // console.log({ provider });
 
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const lastSeen = await getLastSeen(provider.owner);
+
+        if (!mounted) return;
+        if (lastSeen) {
+          setLastSeen(lastSeen.lastSeen);
+          setIsOnline(lastSeen.isOnline);
+        }
+      } catch (error) {
+        console.error("Failed to fetch last seen:", error);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [provider.owner]);
+
   const handleJoinChat = async () => {
-    setCurrentView("Chat");
     await createChat(provider.owner);
-    if (!selectedChat) {
-      router.push({
-        pathname: "/chat/[id]",
-        params: { id: useGlobalStore.getState().selectedChat?._id || "" },
-      });
-      return;
-    }
+    setCurrentView("Chat");
+    if (!selectedChat) return;
     router.push({
       pathname: "/chat/[id]",
       params: { id: selectedChat._id },
@@ -89,36 +109,38 @@ const ProfileInfo = ({
             <Text size="lg" className="font-bold">
               {provider.subcategories[0].name || "Tree Felling"}
             </Text>
-            <HStack space="xs" className="items-center ">
-              <Button></Button>
-              <Icon as={MapPinIcon} size="md" className="text-red-600" />
-              <Text className="break-words">
+            <Button
+              variant="outline"
+              className="h-auto py-2 border-0 bg-gray-200/50 "
+            >
+              <ButtonIcon as={MapPinIcon} size="md" className="text-red-600" />
+              <ButtonText className=" text-sm">
                 {provider.location.primary?.address?.address ||
                   "Florida, United States"}
-              </Text>
-            </HStack>
+              </ButtonText>
+            </Button>
           </Card>
           <Card className="gap-2 items-end flex-1">
             <HStack space="xs" className="items-center">
               {/* availability indicator */}
               <Badge
-                action={isAvailable ? "success" : "muted"}
+                action={isOnline ? "success" : "muted"}
                 className="px-2 py-1"
               >
                 <BadgeIcon
                   as={DotIcon}
                   className={`w-3 h-3 ${
-                    isAvailable ? "text-green-600" : "text-gray-500"
+                    isOnline ? "text-green-600" : "text-gray-500"
                   }`}
                 />
                 <BadgeText className="text-sm">
-                  {isAvailable ? "Available" : "Unavailable"}
+                  {isOnline ? "Available" : "Unavailable"}
                 </BadgeText>
               </Badge>
             </HStack>
-            {switchRole === "Client" && user?._id !== provider.owner && (
-              <VStack>
-                <Text>Last active 2 hours ago</Text>
+            {switchRole === "Client" && user?._id === provider.owner && (
+              <VStack className="items-end gap-2">
+                {!isOnline && <Text>{DateFormatter.toRelative(lastSeen)}</Text>}
                 <HStack className="gap-2">
                   <Button
                     size="sm"

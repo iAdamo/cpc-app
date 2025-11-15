@@ -2,6 +2,7 @@ import axios, { InternalAxiosRequestConfig } from "axios";
 import * as SecureStore from "expo-secure-store";
 import useGlobalStore from "@/store/globalStore";
 import Constants from "expo-constants";
+import { AxiosError } from "axios";
 
 const createClient = () => {
   const apiClient = axios.create({
@@ -27,15 +28,16 @@ const createClient = () => {
     (error) => Promise.reject(error)
   );
 
+
   // Handle response errors
   apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
-      console.warn(error);
+      // throw error;
       const { logout, setError } = useGlobalStore.getState();
       if (error.response?.status === 403 || error.response?.status === 401) {
         // token expired or forbidden
-        console.warn("Forbidden - maybe token expired, redirect to login");
+        // console.warn("Forbidden - maybe token expired, redirect to login");
         await logout();
       } else if (error.message === "Network Error") {
         setError("Please check your internet connection.");

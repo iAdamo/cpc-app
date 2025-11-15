@@ -25,7 +25,7 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
     participantIds: string,
     isGroup: boolean = false,
     groupInfo?: Partial<Chat["groupInfo"]>
-  ): Promise<Chat> => {
+  ) => {
     try {
       set({ chatLoading: true, chatError: null });
       // console.log(participantIds);
@@ -42,17 +42,14 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
       //     chatLoading: false,
       //   };
       // });
-
-      return newChat;
     } catch (error: any) {
       set({
-        chatError:
+        error:
           error?.response?.data?.message ||
           error?.message ||
           "Failed to create chat",
         chatLoading: false,
       });
-      throw error;
     }
   },
 

@@ -70,6 +70,9 @@ import {
   createJob,
   deleteJob,
   updateJob,
+  getAllCategoriesWithSubcategories,
+  getProposalsByJob,
+  updateProposal,
 } from "@/services/axios/service";
 import EmptyState from "@/components/EmptyState";
 import { JobData, FileType, MediaItem, ProposalData } from "@/types";
@@ -84,15 +87,12 @@ import {
 import ProfileVatar from "@/components/ProfileAvatar";
 import MediaView from "@/components/media/MediaView";
 import { Badge, BadgeText } from "@/components/ui/badge";
-import {
-  getAllCategoriesWithSubcategories,
-  getProposalsByJob,
-} from "@/services/axios/service";
 import { MapPinCheckIcon } from "lucide-react-native";
 import { getDistanceWithUnit } from "@/utils/GetDistance";
 import { MapPinIcon } from "lucide-react-native";
 import DateFormatter from "@/utils/DateFormat";
 import RatingSection from "@/components/RatingFunction";
+import { router } from "expo-router";
 
 export const PostJob = ({ userId }: { userId?: string }) => {
   const [loading, setLoading] = useState(false);
@@ -286,8 +286,8 @@ export const PostJob = ({ userId }: { userId?: string }) => {
               {job.location} (
               {
                 getDistanceWithUnit(
-                  job?.coordinates?.lat ?? 0,
-                  job?.coordinates?.long ?? 0
+                  job?.coordinates?.[1] ?? 0,
+                  job?.coordinates?.[0] ?? 0
                 )?.text
               }{" "}
               away)
@@ -419,8 +419,8 @@ export const CreatejobModal = ({
           .join(" ") ||
         "",
       coordinates: {
-        lat: job?.coordinates?.lat || currentLocation?.coords.latitude || 0,
-        long: job?.coordinates?.long || currentLocation?.coords.longitude || 0,
+        lat: job?.coordinates?.[1] || currentLocation?.coords.latitude || 0,
+        long: job?.coordinates?.[0] || currentLocation?.coords.longitude || 0,
       },
       budget: job?.budget || 0,
       deadline: DateFormatter.remainingDays(job?.deadline as Date) || 0,
@@ -512,7 +512,8 @@ export const CreatejobModal = ({
       setLoading(false);
       onClose();
       reset();
-      setSuccess("job job created successfully!");
+      useGlobalStore.setState({ selectedFiles: [] });
+      setSuccess("job created successfully!");
     } catch (error) {
       console.error("Error submitting form:", error);
       setLoading(false);
@@ -1036,6 +1037,43 @@ export const CreatejobModal = ({
   };
 
   const renderProposals = () => {
+    // console.log(job?.proposals);
+    const [viewMedia, setViewMedia] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [selectedProposal, setSelectedProposal] =
+      useState<ProposalData | null>(null);
+    const { setCurrentView, createChat, selectedChat } = useGlobalStore();
+
+    const handleJoinChat = async () => {
+      await createChat(selectedProposal?.providerId.owner || "");
+      setCurrentView("Chat");
+      if (!selectedChat) return;
+      router.push({
+        pathname: "/chat/[id]",
+        params: { id: selectedChat._id },
+      });
+    };
+    const handleProposalUpdate = async () => {
+      try {
+        setIsLoading(true);
+        // console.log({ selectedProposal });
+        if (!selectedProposal?._id || !job?._id) return;
+        const formData = new FormData();
+        formData.append("status", "accepted");
+        await updateProposal(job._id, selectedProposal._id, formData);
+        formData.delete("status");
+        formData.append("status", "in_progress");
+        formData.append("providerId", selectedProposal.providerId._id);
+        formData.append("proposals", selectedProposal._id);
+        await updateJob(job._id, formData);
+        await handleJoinChat();
+      } catch (error) {
+        console.error("Error updating proposal:", error);
+      } finally {
+        setIsLoading(false);
+        router.reload();
+      }
+    };
     return (
       <VStack>
         <Accordion>
@@ -1064,7 +1102,7 @@ export const CreatejobModal = ({
           </AccordionItem>
         </Accordion>
         {job?.proposals && job.proposals.length > 0 && (
-          <VStack className="mt-8 gap-4">
+          <VStack className="my-8">
             <HStack className="items-start justify-between mx-4">
               <Heading size="xl" className="text-brand-primary">
                 Proposals
@@ -1073,21 +1111,26 @@ export const CreatejobModal = ({
                 {job.proposals.length} Applications
               </Text>
             </HStack>
+            <Card className="mx-4 mb-4 bg-brand-primary/10 mt-2">
+              <Text className="text-typography-600">
+                Review the proposals below and select the service provider that
+                best fits your job requirements.
+              </Text>
+            </Card>
             {job.proposals.map((proposal: ProposalData) => (
               <Card key={proposal._id} className="gap-2">
                 <ProfileVatar provider={proposal.providerId} />
-
                 <Text size="lg" className="font-medium text-typography-600">
                   {proposal.message}
                 </Text>
 
-                <HStack className="mt-1 justify-between w-3/5">
+                <HStack className="mt-1 justify-between items-start">
                   <VStack>
                     <Heading className="text-typography-700">
                       ${proposal.proposedPrice}
                     </Heading>
                     <Text size="lg" className="text-typography-600">
-                      Propossed Price
+                      Proposed Price
                     </Text>
                   </VStack>
                   <VStack>
@@ -1098,15 +1141,50 @@ export const CreatejobModal = ({
                       Duration
                     </Text>
                   </VStack>
+                  <Button
+                    variant="link"
+                    onPress={() => {
+                      setViewMedia(proposal.attachments[0]?.url || null);
+                    }}
+                  >
+                    <ButtonText className="">
+                      View image
+                    </ButtonText>
+                  </Button>
                 </HStack>
-                <Button className="self-end mt-2 bg-brand-primary data-[active=true]:bg-brand-primary/80 w-2/5 rounded-lg">
-                  <ButtonText>Accept</ButtonText>
+                <Button
+                  isDisabled={job.status !== "active" || isLoading}
+                  onPress={() => {
+                    setSelectedProposal(proposal);
+                    handleProposalUpdate();
+                  }}
+                  className="self-end mt-2 bg-brand-primary data-[active=true]:bg-brand-primary/80 rounded-lg"
+                >
+                  {isLoading ? (
+                    <ButtonSpinner />
+                  ) : (
+                    <ButtonText>
+                      {job.status === "active"
+                        ? "Accept"
+                        : job.status
+                        ? `${job.status
+                            .charAt(0)
+                            .toUpperCase()}${job.status.slice(1)}`
+                        : ""}
+                    </ButtonText>
+                  )}
                 </Button>
-
-
               </Card>
             ))}
           </VStack>
+        )}
+        {/* Media viewer modal */}
+        {viewMedia && (
+          <MediaView
+            isOpen={!!viewMedia}
+            onClose={() => setViewMedia(null)}
+            url={viewMedia ?? ""}
+          />
         )}
       </VStack>
     );
@@ -1194,9 +1272,17 @@ export const CreatejobModal = ({
         </ModalHeader>
         <ModalBody className="mt-8" showsVerticalScrollIndicator={false}>
           {!previewMode ? (
-            <Heading size="xl" className="text-brand-primary mx-4">
-              Create a Request
-            </Heading>
+            <VStack>
+              <Heading size="xl" className="text-brand-primary mx-4">
+                Create a Request
+              </Heading>
+              <Card className="mx-4 mt-2 bg-brand-primary/10">
+                <Text className="text-typography-500">
+                  Fill in the details below to post a job request and find the
+                  right service provider for your needs.
+                </Text>
+              </Card>
+            </VStack>
           ) : (
             !job?.proposals &&
             job?._id && (
