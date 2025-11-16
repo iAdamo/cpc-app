@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import { Heading } from "@/components/ui/heading";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import { Link, LinkText } from "@/components/ui/link";
 import {
   DotIcon,
   MapPinIcon,
@@ -109,16 +110,13 @@ const ProfileInfo = ({
             <Text size="lg" className="font-bold">
               {provider.subcategories[0].name || "Tree Felling"}
             </Text>
-            <Button
-              variant="outline"
-              className="h-auto py-2 border-0 bg-gray-200/50 "
-            >
-              <ButtonIcon as={MapPinIcon} size="md" className="text-red-600" />
-              <ButtonText className=" text-sm">
+            <Link className=" rounded-md data-[active=true]:bg-blue-200">
+              {/* <ButtonIcon as={MapPinIcon} size="md" className="text-red-600" /> */}
+              <LinkText className=" font-medium data-[active=true]:text-blue-200">
                 {provider.location.primary?.address?.address ||
                   "Florida, United States"}
-              </ButtonText>
-            </Button>
+              </LinkText>
+            </Link>
           </Card>
           <Card className="gap-2 items-end flex-1">
             <HStack space="xs" className="items-center">
@@ -138,7 +136,7 @@ const ProfileInfo = ({
                 </BadgeText>
               </Badge>
             </HStack>
-            {switchRole === "Client" && user?._id === provider.owner && (
+            {switchRole === "Client" && user?._id !== provider.owner && (
               <VStack className="items-end gap-2">
                 {!isOnline && <Text>{DateFormatter.toRelative(lastSeen)}</Text>}
                 <HStack className="gap-2">

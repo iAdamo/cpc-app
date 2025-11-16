@@ -26,7 +26,14 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sanuxtech.companiescenterllc",
-      "associatedDomains": ["applinks:companiescenterllc.com"]
+      "associatedDomains": ["applinks:companiescenterllc.com"],
+      "info": {
+        "plist": {
+          "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show nearby service providers.",
+          "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to show nearby service providers.",
+          "NSLocationAlwaysUsageDescription": "This app needs access to your location to show nearby service providers."
+        }
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -100,14 +107,22 @@
           "locationPermission": "Allow $(PRODUCT_NAME) to use your location"
         }
       ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location.",
+          "locationAlwaysPermission": "Allow $(PRODUCT_NAME) to use your location.",
+          "locationWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+        }
+      ],
       "expo-font",
       "expo-web-browser",
       "expo-secure-store",
       "expo-image-picker",
-      "expo-location",
       "expo-video",
       "expo-sqlite",
-      "expo-audio"
+      "expo-audio",
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true

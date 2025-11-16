@@ -1,4 +1,3 @@
-
 export default ({ config }) => {
   const apiUrl = process.env.CC_PUBLIC_API_URL || "";
   const socketUrl = process.env.CC_SOCKET_URL || "";
@@ -29,6 +28,13 @@ export default ({ config }) => {
         googleMaps: {
           apiKey: googleMapsKey,
         },
+      },
+    },
+    ios: {
+      ...(config.ios || {}),
+      config: {
+        ...(config.ios?.config || {}),
+        googleMapsApiKey: googleMapsKey,
       },
     },
   };

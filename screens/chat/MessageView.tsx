@@ -50,6 +50,10 @@ import { SectionList } from "react-native";
 import { MessageSection } from "@/types";
 import AttactmentOptions from "./AttachmentPopover";
 import { Progress, ProgressFilledTrack } from "@/components/ui/progress";
+import {
+  KeyboardAwareScrollView,
+  KeyboardToolbar,
+} from "react-native-keyboard-controller";
 
 const MessageView = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -507,9 +511,8 @@ const MessageView = () => {
   const otherTyping = typingUsers && typingUsers.length > 0;
 
   return (
-    <KeyboardAvoidingView
+    <KeyboardAwareScrollView
       style={{ flex: 1, backgroundColor: "white" }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <View style={{ flex: 1 }}>
         <Headerbar />
@@ -568,7 +571,7 @@ const MessageView = () => {
         )}
         <FooterTextInput />
       </View>
-    </KeyboardAvoidingView>
+    </KeyboardAwareScrollView>
   );
 };
 
