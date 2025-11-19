@@ -78,6 +78,7 @@ const HomeView = () => {
         onPress={() => {
           setShowSearch((prev) => !prev);
           setIsSearchFocus(false);
+          showSearch && handleProvidersSearch();
         }}
       >
         <FabIcon as={SearchIcon} />

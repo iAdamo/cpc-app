@@ -4,7 +4,7 @@ import { ProviderData } from "./provider";
 export interface MediaItem {
   type: "image" | "video";
   url: string;
-  thumbnail?: string;
+  thumbnail: string;
   index?: number;
 }
 

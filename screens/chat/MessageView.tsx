@@ -10,9 +10,7 @@ import {
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
-import { Card } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
-import { Pressable } from "@/components/ui/pressable";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
@@ -30,18 +28,12 @@ import {
   PhoneIcon,
   ThreeDotsIcon,
 } from "@/components/ui/icon";
-import { FlatList, ListRenderItem, Keyboard, View } from "react-native";
+import { ListRenderItem, Keyboard, View } from "react-native";
 import useGlobalStore from "@/store/globalStore";
 import { Message } from "@/types";
 import { useLocalSearchParams } from "expo-router";
-import {
-  CameraIcon,
-  MicIcon,
-  SendIcon,
-  Clock3Icon,
-  ChevronsDownIcon,
-} from "lucide-react-native";
-import { KeyboardAvoidingView, Platform, Animated } from "react-native";
+import { MicIcon, SendIcon, ChevronsDownIcon } from "lucide-react-native";
+import { Animated } from "react-native";
 import { router } from "expo-router";
 import chatService from "@/services/chatService";
 import MessageItem from "./MessageItem";
@@ -50,10 +42,11 @@ import { SectionList } from "react-native";
 import { MessageSection } from "@/types";
 import AttactmentOptions from "./AttachmentPopover";
 import { Progress, ProgressFilledTrack } from "@/components/ui/progress";
-import {
-  KeyboardAwareScrollView,
-  KeyboardToolbar,
-} from "react-native-keyboard-controller";
+import { useKeyboardHandler } from "react-native-keyboard-controller";
+import Anime, {
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 
 const MessageView = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -432,27 +425,31 @@ const MessageView = () => {
     };
 
     return (
-      <VStack className="py-2 bg-white">
-        <HStack space="sm" className="justify-center items-center px-2">
-          {/* paperclip options */}
-          <AttactmentOptions onSendMedia={handleSendMedia} />
+      <VStack className="py-2 ">
+        <HStack space="sm" className=" justify-center items-center px-1">
+          <HStack
+            space="sm"
+            className="bg-white pr-4 flex-1 rounded-full items-center"
+          >
+            {/* paperclip options */}
+            <AttactmentOptions onSendMedia={handleSendMedia} />
 
-          <Textarea className="flex-1 h-14 rounded-xl border-0 bg-typography-50 data-[focus=true]:border-brand-primary/30 focus:bg-white">
-            <TextareaInput
-              placeholder="Write your message..."
-              onChangeText={handleInputChange}
-              value={inputMessage}
-              className=" focus:bg-blue-50 text-lg rounded-xl "
-              multiline
-              textAlignVertical="center"
-              // onSubmitEditing={handleSendMessage}
-              editable={!isSending}
-            />
-          </Textarea>
+            <Textarea className="flex-1 h-14 rounded-xl border-0 bg-typography-50 data-[focus=true]:border-brand-primary/30 focus:bg-white">
+              <TextareaInput
+                placeholder="Write your message..."
+                onChangeText={handleInputChange}
+                value={inputMessage}
+                className="bg-white text-lg rounded-xl "
+                multiline
+                textAlignVertical="center"
+                // onSubmitEditing={handleSendMessage}
+                editable={!isSending}
+              />
+            </Textarea>
+          </HStack>
           {inputMessage ? (
             <Button
-              variant="outline"
-              className="border-0 ml-2 bg-brand-primary data-[active=true]:bg-transparent"
+              className="bg-brand-primary rounded-full w-14 h-14 justify-center items-center"
               onPress={handleSendMessage}
               isDisabled={isSending}
             >
@@ -461,7 +458,7 @@ const MessageView = () => {
               ) : (
                 <ButtonIcon
                   as={SendIcon}
-                  className="text-white transform rotate-45"
+                  className="transform rotate-45 w-6 h-6"
                 />
               )}
             </Button>
@@ -510,10 +507,30 @@ const MessageView = () => {
   const { typingUsers } = useGlobalStore();
   const otherTyping = typingUsers && typingUsers.length > 0;
 
+  const useGradualAnimation = () => {
+    const height = useSharedValue(0);
+
+    useKeyboardHandler(
+      {
+        onMove: (event) => {
+          "worklet";
+          height.value = Math.max(event.height, 0);
+        },
+      },
+      []
+    );
+    return { height };
+  };
+  const { height } = useGradualAnimation();
+
+  const fakeView = useAnimatedStyle(() => {
+    return {
+      height: Math.abs(height.value),
+    };
+  }, []);
+
   return (
-    <KeyboardAwareScrollView
-      style={{ flex: 1, backgroundColor: "white" }}
-    >
+    <>
       <View style={{ flex: 1 }}>
         <Headerbar />
         <SectionList
@@ -569,9 +586,11 @@ const MessageView = () => {
             <FabIcon as={ChevronsDownIcon} className="text-brand-primary" />
           </Fab>
         )}
-        <FooterTextInput />
       </View>
-    </KeyboardAwareScrollView>
+
+      <FooterTextInput />
+      <Anime.View style={fakeView} />
+    </>
   );
 };
 

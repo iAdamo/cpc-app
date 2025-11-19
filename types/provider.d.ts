@@ -11,7 +11,7 @@ export interface ProviderData {
   isFeatured?: boolean;
   isPremium?: boolean;
   isOnline?: boolean;
-  isAvailable?: boolean;
+  availability: "Online" | "Busy" | "Offline";
   providerTagline?: string;
   providerDescription: string;
   providerEmail: string;
@@ -42,10 +42,8 @@ export interface ProviderData {
   updatedAt: string;
   location: {
     primary?: {
-      coordinates?: {
-        lat?: number;
-        long?: number;
-      };
+      coordinates?: number[];
+
       address?: {
         zip?: string;
         city?: string;
@@ -55,10 +53,8 @@ export interface ProviderData {
       };
     };
     secondary?: {
-      coordinates?: {
-        lat?: number;
-        long?: number;
-      };
+      coordinates?: number[];
+
       address?: {
         zip?: string;
         city?: string;
@@ -68,10 +64,8 @@ export interface ProviderData {
       };
     };
     tertiary?: {
-      coordinates?: {
-        lat?: number;
-        long?: number;
-      };
+      coordinates?: number[];
+
       address?: {
         zip?: string;
         city?: string;

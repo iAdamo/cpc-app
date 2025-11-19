@@ -121,7 +121,19 @@ const CompanyBasicInfo = () => {
           )
         : [],
 
-      providerLocation: user.activeRoleId?.location?.primary,
+      providerLocation: {
+        coordinates: {
+          lat: user.activeRoleId?.location?.primary?.coordinates?.[1],
+          long: user.activeRoleId?.location?.primary?.coordinates?.[0],
+        },
+        address: {
+          address: user.activeRoleId?.location?.primary?.address?.address || "",
+          city: user.activeRoleId?.location?.primary?.address?.city || "",
+          state: user.activeRoleId?.location?.primary?.address?.state || "",
+          zip: user.activeRoleId?.location?.primary?.address?.zip || "",
+          country: user.activeRoleId?.location?.primary?.address?.country || "",
+        },
+      },
     },
   });
   // console.log("isValid", user);
@@ -221,7 +233,21 @@ const CompanyBasicInfo = () => {
           providerLogo: data.providerLogo as any,
           providerImages: data.providerImages as any,
           location: {
-            primary: data.providerLocation,
+            primary: data.providerLocation
+              ? {
+                  address: data.providerLocation.address,
+                  coordinates:
+                    data.providerLocation.coordinates &&
+                    typeof data.providerLocation.coordinates.long ===
+                      "number" &&
+                    typeof data.providerLocation.coordinates.lat === "number"
+                      ? [
+                          data.providerLocation.coordinates.long,
+                          data.providerLocation.coordinates.lat,
+                        ]
+                      : undefined,
+                }
+              : undefined,
           },
         },
       });

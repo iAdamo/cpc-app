@@ -10,7 +10,7 @@ import { Pressable } from "@/components/ui/pressable";
 import useGlobalStore from "@/store/globalStore";
 import { JobData } from "@/types";
 import DateFormatter from "@/utils/DateFormat";
-import { getDistanceWithUnit } from "@/utils/GetDistance";
+import { locationService } from "@/utils/GetDistance";
 import { router } from "expo-router";
 
 const JobCard = ({ item: job }: { item: JobData }) => {
@@ -89,7 +89,7 @@ const JobCard = ({ item: job }: { item: JobData }) => {
                   <Text className="text-typography-600 ">
                     {job.location} (
                     {
-                      getDistanceWithUnit(
+                      locationService.getDistanceFromCurrentLocationWithUnit(
                         job?.coordinates?.[1] ?? 0,
                         job?.coordinates?.[0] ?? 0
                       )?.text

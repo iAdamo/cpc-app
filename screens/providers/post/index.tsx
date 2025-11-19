@@ -88,7 +88,7 @@ import ProfileVatar from "@/components/ProfileAvatar";
 import MediaView from "@/components/media/MediaView";
 import { Badge, BadgeText } from "@/components/ui/badge";
 import { MapPinCheckIcon } from "lucide-react-native";
-import { getDistanceWithUnit } from "@/utils/GetDistance";
+import { locationService } from "@/utils/GetDistance";
 import { MapPinIcon } from "lucide-react-native";
 import DateFormatter from "@/utils/DateFormat";
 import RatingSection from "@/components/RatingFunction";
@@ -285,7 +285,7 @@ export const PostJob = ({ userId }: { userId?: string }) => {
             <Text className="text-typography-600 ">
               {job.location} (
               {
-                getDistanceWithUnit(
+                locationService.getDistanceFromCurrentLocationWithUnit(
                   job?.coordinates?.[1] ?? 0,
                   job?.coordinates?.[0] ?? 0
                 )?.text
@@ -1147,9 +1147,7 @@ export const CreatejobModal = ({
                       setViewMedia(proposal.attachments[0]?.url || null);
                     }}
                   >
-                    <ButtonText className="">
-                      View image
-                    </ButtonText>
+                    <ButtonText className="">View image</ButtonText>
                   </Button>
                 </HStack>
                 <Button
