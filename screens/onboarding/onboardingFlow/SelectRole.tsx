@@ -26,7 +26,7 @@ const SelectRole = () => {
   };
   return (
     <VStack className="flex-1 p-4">
-      <Box className="gap-20 flex-1 mt-16">
+      <Box className="gap-20 flex-1">
         <VStack className="gap-4 ">
           <Heading size="2xl" className="text-brand-primary">
             Tell Us How You'll Use Companies Center

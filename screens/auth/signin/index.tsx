@@ -47,20 +47,14 @@ const SignInScreen = () => {
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
 
   const router = useRouter();
-  const {
-    login,
-    isLoading,
-    isAuthenticated,
-    isOnboardingComplete,
-    switchRole,
-  } = useGlobalStore();
+  const { login, isLoading, isAuthenticated, switchRole } = useGlobalStore();
 
-  if (
-    useGlobalStore.getState().isAuthenticated &&
-    useGlobalStore.getState().isOnboardingComplete
-  ) {
-    router.replace(switchRole === "Client" ? "/providers" : "/clients");
-  }
+  // if (
+  //   useGlobalStore.getState().isAuthenticated &&
+  //   useGlobalStore.getState().isOnboardingComplete
+  // ) {
+  //   router.replace(switchRole === "Client" ? "/providers" : "/clients");
+  // }
 
   const switchToSignUp = () => {
     useGlobalStore.setState({
@@ -97,12 +91,12 @@ const SignInScreen = () => {
     try {
       Keyboard.dismiss();
       await login(data);
-      if (!isAuthenticated) {
+      if (useGlobalStore.getState().isAuthenticated === false) {
         setValidated({ emailValid: false, passwordValid: false });
         return;
       }
       reset();
-      router.replace("/providers");
+      router.push("/");
     } catch (err) {}
   };
 

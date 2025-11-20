@@ -52,9 +52,7 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
         set({
           user: { ...response, accessToken: "" },
           switchRole: response.activeRole,
-          success: "Logged in successfully!",
           isAuthenticated: true,
-          isOnboardingComplete: true,
           isLoading: false,
         });
       }

@@ -7,7 +7,6 @@ import { Slot } from "expo-router";
 import { StatusBar, Platform } from "react-native";
 import Toast from "react-native-toast-message";
 import useGlobalStore from "@/store/globalStore";
-import { router } from "expo-router";
 import { ShareService } from "@/services/shareService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import "../global.css";

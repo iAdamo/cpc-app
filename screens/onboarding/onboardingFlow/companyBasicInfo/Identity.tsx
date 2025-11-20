@@ -32,7 +32,7 @@ import MediaPicker from "@/components/media/MediaPicker";
 import { GooglePlaceService } from "@/services/googlePlaceService";
 import { useCallback } from "react";
 import { FileType, Place, MediaItem } from "@/types";
-import { debounce } from "lodash";
+import { debounce, set } from "lodash";
 import ProfilePic from "@/components/profile/ProfilePic";
 
 const Identity = () => {
@@ -199,87 +199,55 @@ const Identity = () => {
 
   const handleNext = handleSubmit(async (data) => {
     console.log("Submitting company basic info:", data);
-    try {
-      updateProfile({
-        activeRoleId: {
-          ...user.activeRoleId,
-          providerName: data.providerName,
-          providerDescription: data.providerDescription,
-          providerEmail: data.providerEmail,
-          providerPhoneNumber: data.providerPhoneNumber,
-          providerLogo: data.providerLogo as any,
-          providerImages: data.providerImages as any,
-          location: {
-            primary: data.providerLocation
-              ? {
-                  address: data.providerLocation.address,
-                  coordinates:
-                    data.providerLocation.coordinates &&
-                    typeof data.providerLocation.coordinates.long ===
-                      "number" &&
-                    typeof data.providerLocation.coordinates.lat === "number"
-                      ? [
-                          data.providerLocation.coordinates.long,
-                          data.providerLocation.coordinates.lat,
-                        ]
-                      : undefined,
-                }
-              : undefined,
-          },
-        },
-      });
-      await updateUserProfile("Provider");
-      completeOnboarding();
-      setCurrentStep(0);
-    } catch (error) {
-      // console.error("Failed to update profile:", error);
-      setGError(error as any);
-    }
+    setCurrentStep(currentStep + 1);
   });
 
   return (
     <VStack className="flex-1 p-2 bg-white">
+      <Text size="sm" className="text-typography-400 font-medium mb-6">
+        Step 1 of 3
+      </Text>
       <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
-        <Heading className="text-brand-secondary text-2xl font-bold mb-4">
-          Company Basic Information
+        <Heading size="2xl" className="text-brand-secondary mb-4">
+          Let's get to know your company
         </Heading>
+        <Text className="text-brand-secondary mb-4 text-center">
+          Provide some basic info so clients can trust you.
+        </Text>
         <VStack className="flex-1 gap-6 mb-8">
-          <VStack className="w-1/3 justify-center items-center">
-            <FormControl className="flex-1" isInvalid={!!errors.providerLogo}>
-              <FormControlLabel className="justify-center">
-                <FormControlLabelText className="font-semibold text-base text-typography-700">
-                  Company's Logo
-                </FormControlLabelText>
-              </FormControlLabel>
-              <Controller
-                control={control}
-                name="providerLogo"
-                render={({ field: { value } }) => (
-                  <ProfilePic
-                    size="md"
-                    isEditable={true}
-                    showChangeButton={false}
-                    button={true}
-                    imageUri={
-                      typeof user?.activeRoleId?.providerImages?.[0] ===
-                      "string"
-                        ? user?.activeRoleId?.providerImages[0]
-                        : undefined
-                    }
-                    onImageSelected={(file) => handleLogoChange(file)}
-                  />
-                )}
-              />
-
-              {errors.providerLogo && (
-                <FormControlError>
-                  <FormControlErrorText className="text-sm bg-red-200 px-2 py-1 rounded-md">
-                    {errors.providerLogo.message}
-                  </FormControlErrorText>
-                </FormControlError>
+          <FormControl className="flex-1" isInvalid={!!errors.providerLogo}>
+            <FormControlLabel className="justify-center">
+              <FormControlLabelText className="font-semibold text-base text-typography-700">
+                Company's Logo
+              </FormControlLabelText>
+            </FormControlLabel>
+            <Controller
+              control={control}
+              name="providerLogo"
+              render={({ field: { value } }) => (
+                <ProfilePic
+                  size="md"
+                  isEditable={true}
+                  showChangeButton={false}
+                  button={true}
+                  imageUri={
+                    typeof user?.activeRoleId?.providerImages?.[0] === "string"
+                      ? user?.activeRoleId?.providerImages[0]
+                      : undefined
+                  }
+                  onImageSelected={(file) => handleLogoChange(file)}
+                />
               )}
-            </FormControl>
-          </VStack>
+            />
+
+            {errors.providerLogo && (
+              <FormControlError>
+                <FormControlErrorText className="text-sm bg-red-200 px-2 py-1 rounded-md">
+                  {errors.providerLogo.message}
+                </FormControlErrorText>
+              </FormControlError>
+            )}
+          </FormControl>
           <VStack className="flex-1 gap-4">
             {/**Company Name */}
             <FormControl className="" isInvalid={!!errors.providerName}>
@@ -294,7 +262,7 @@ const Identity = () => {
                 render={({ field: { onChange, onBlur, value } }) => (
                   <Input className="h-12">
                     <InputField
-                      placeholder="Company Name"
+                      placeholder="e.g John's Plumbing Services"
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
@@ -324,7 +292,7 @@ const Identity = () => {
                 render={({ field: { onChange, onBlur, value } }) => (
                   <Textarea className="h-24">
                     <TextareaInput
-                      placeholder="Company's Description"
+                      placeholder="Describe your company, services, and values..."
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
@@ -343,14 +311,24 @@ const Identity = () => {
           </VStack>
         </VStack>
       </ScrollView>
-      <Button
-        size="xl"
-        className="mb-4 mt-2 bg-brand-secondary border-0 mx-2"
-        isDisabled={isLoading}
-        onPress={() => handleNext()}
-      >
-        <ButtonText className="text-white">Continue</ButtonText>
-      </Button>
+      <HStack className="my-4">
+        <Button
+          variant="outline"
+          className="bg-brand-secondary border-0 mx-2"
+          isDisabled={isLoading}
+          onPress={() => handle()}
+        >
+          <ButtonText className="text-white">Back</ButtonText>
+        </Button>
+        <Button
+          variant="outline"
+          className="bg-brand-secondary border-0 mx-2"
+          isDisabled={isLoading}
+          onPress={() => handleNext()}
+        >
+          <ButtonText className="text-white">Next</ButtonText>
+        </Button>
+      </HStack>
     </VStack>
   );
 };

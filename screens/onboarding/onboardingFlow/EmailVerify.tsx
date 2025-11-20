@@ -136,7 +136,7 @@ const EmailVerificationPage = () => {
     form.append("email", tempEmail);
     form.append("emailEditCount", (editCount + 1).toString());
     form.append("isEmailVerified", "false");
-    await updateUserProfile(form);
+    await updateUserProfile("Client", form);
 
     setEmail(tempEmail); // <-- update local state
     setEditCount(editCount + 1);

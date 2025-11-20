@@ -6,7 +6,7 @@ import { VStack } from "../ui/vstack";
 import { HStack } from "../ui/hstack";
 import { Text } from "../ui/text";
 import { Heading } from "../ui/heading";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Icon, CloseIcon } from "../ui/icon";
 import { Alert } from "react-native";
 import { CameraIcon } from "lucide-react-native";
@@ -69,7 +69,8 @@ const ProfilePic = ({
   const currentSize = sizeMap[size];
 
   useEffect(() => {
-    setSelectedImage(imageUri as string);
+    // Preserve the incoming shape (string or FileType or null)
+    setSelectedImage(imageUri as any);
   }, [imageUri]);
 
   const pickImage = async (source: "gallery" | "camera") => {
@@ -85,8 +86,8 @@ const ProfilePic = ({
       });
 
       if (file.length > 0) {
-        const uri = file[0].uri;
-        setSelectedImage(uri);
+        // Keep the full FileType so callers have access to name/type/uri
+        setSelectedImage(file[0]);
         onImageSelected(file[0]);
       }
     } catch (error) {
@@ -138,11 +139,18 @@ const ProfilePic = ({
         >
           <Pressable
             className="w-full h-full items-center justify-center"
-            onPress={isEditable && isLogo ? openOptionsModal : undefined}
+            onPress={isEditable ? openOptionsModal : undefined}
+            accessibilityRole="button"
+            accessibilityLabel="Open profile image options"
           >
             {selectedImage ? (
               <Image
-                source={{ uri: (selectedImage as string) || "https://" }}
+                source={{
+                  uri:
+                    typeof selectedImage === "string"
+                      ? selectedImage
+                      : (selectedImage as FileType)?.uri || "",
+                }}
                 alt="Profile Picture"
                 className="w-full h-full"
                 style={{
@@ -152,7 +160,7 @@ const ProfilePic = ({
                 }}
               />
             ) : (
-              <Heading className="text-typography-400">LOGO</Heading>
+              <Icon as={Gallery} className="w-12 h-12 text-gray-400" />
             )}
           </Pressable>
         </Card>
@@ -165,10 +173,6 @@ const ProfilePic = ({
               variant="solid"
               size="sm"
               className="bg-brand-secondary rounded-lg mt-4"
-              style={{
-                width: currentSize.button + 16,
-                height: currentSize.button + 16,
-              }}
               onPress={openOptionsModal}
               isDisabled={isUploading}
             >
@@ -189,7 +193,7 @@ const ProfilePic = ({
               <ButtonIcon
                 as={CameraIcon}
                 size={size}
-                className="fill-white text-brand-secondary w-6 h-6"
+                className="fill-white  w-6 h-6"
               />
             </Button>
           ))}
@@ -209,97 +213,101 @@ const ProfilePic = ({
           </ButtonText>
         </Button>
       )}
-
-      <Actionsheet isOpen={showOptionsModal} onClose={handleClose}>
-        <ActionsheetBackdrop />
-        <ActionsheetContent className="gap-2 px-0">
-          <ActionsheetDragIndicatorWrapper>
-            <ActionsheetDragIndicator />
-          </ActionsheetDragIndicatorWrapper>
-          <Heading className="text-brand-primary font-medium self-start py-4 pl-6 border-b border-gray-200 w-full">
-            Profile Image
-          </Heading>
-          <ActionsheetItem
-            onPress={() => {
-              handleClose(), pickImage("camera");
-            }}
-            isDisabled={isUploading}
-            className="pl-6"
-          >
-            <Box className="bg-brand-primary/40 rounded-full p-4">
-              <Icon as={Camera} className="text-brand-primary w-6 h-6" />
-            </Box>
-            <ActionsheetItemText size="xl" className="">
-              Camera
-            </ActionsheetItemText>
-          </ActionsheetItem>
-          <ActionsheetItem
-            onPress={() => {
-              handleClose(), pickImage("gallery");
-            }}
-            isDisabled={isUploading}
-            className="pl-6"
-          >
-            <Box className="bg-brand-primary/40 rounded-full p-4">
-              <Icon as={Gallery} className="text-brand-primary w-6 h-6" />
-            </Box>
-            <ActionsheetItemText size="xl" className="">
-              Choose from Photos
-            </ActionsheetItemText>
-          </ActionsheetItem>
-          {selectedImage && !isLogo && (
+      {/* Options Modal */}
+      {showOptionsModal && (
+        <Actionsheet isOpen={showOptionsModal} onClose={handleClose}>
+          <ActionsheetBackdrop />
+          <ActionsheetContent className="gap-2 px-0">
+            <ActionsheetDragIndicatorWrapper>
+              <ActionsheetDragIndicator />
+            </ActionsheetDragIndicatorWrapper>
+            <Heading className="text-brand-primary font-medium self-start py-4 pl-6 border-b border-gray-200 w-full">
+              Profile Image
+            </Heading>
             <ActionsheetItem
               onPress={() => {
-                removeImage();
+                handleClose();
+                pickImage("camera");
               }}
               isDisabled={isUploading}
               className="pl-6"
             >
-              <Box className="bg-red-800/30 rounded-full p-4">
-                <Icon as={CloseIcon} className="text-red-800 w-6 h-6" />
+              <Box className="bg-brand-primary/40 rounded-full p-4">
+                <Icon as={Camera} className="text-brand-primary w-6 h-6" />
               </Box>
-              <ActionsheetItemText
-                size="xl"
-                className="font-medium text-red-500"
-              >
-                Remove Current Photo
+              <ActionsheetItemText size="xl" className="">
+                Camera
               </ActionsheetItemText>
             </ActionsheetItem>
-          )}
-          {isLogo && (
-            <VStack className="w-full">
-              <Heading className="text-brand-primary font-medium self-start py-4 pl-6 border-b border-gray-200 w-full">
-                Set Status
-              </Heading>
-              <ActionsheetItem className="justify-between items-center w-full pl-6">
-                <Text size="lg" className="">
-                  Status
-                </Text>
-                <HStack space="sm" className="items-center">
-                  <Text
-                    size="lg"
-                    className={`${
-                      isAvailable ? "text-green-600" : "text-gray-500"
-                    }`}
-                  >
-                    Available
-                  </Text>
-                  <Switch
-                    value={isAvailable}
-                    onValueChange={setAvailability}
-                    trackColor={{ false: "#d4d4d4", true: "#16a34a" }}
-                    thumbColor="#fafafa"
-                    ios_backgroundColor="#d4d4d4"
-                  />
-                </HStack>
+            <ActionsheetItem
+              onPress={() => {
+                handleClose();
+                pickImage("gallery");
+              }}
+              isDisabled={isUploading}
+              className="pl-6"
+            >
+              <Box className="bg-brand-primary/40 rounded-full p-4">
+                <Icon as={Gallery} className="text-brand-primary w-6 h-6" />
+              </Box>
+              <ActionsheetItemText size="xl" className="">
+                Choose from Photos
+              </ActionsheetItemText>
+            </ActionsheetItem>
+            {selectedImage && !isLogo && (
+              <ActionsheetItem
+                onPress={() => {
+                  removeImage();
+                }}
+                isDisabled={isUploading}
+                className="pl-6"
+              >
+                <Box className="bg-red-800/30 rounded-full p-4">
+                  <Icon as={CloseIcon} className="text-red-800 w-6 h-6" />
+                </Box>
+                <ActionsheetItemText
+                  size="xl"
+                  className="font-medium text-red-500"
+                >
+                  Remove Current Photo
+                </ActionsheetItemText>
               </ActionsheetItem>
-              <Text className="pl-6 mb-6">
-                Clients will be able to see you are availble
-              </Text>
-            </VStack>
-          )}
-        </ActionsheetContent>
-      </Actionsheet>
+            )}
+            {isLogo && (
+              <VStack className="w-full">
+                <Heading className="text-brand-primary font-medium self-start py-4 pl-6 border-b border-gray-200 w-full">
+                  Set Status
+                </Heading>
+                <ActionsheetItem className="justify-between items-center w-full pl-6">
+                  <Text size="lg" className="">
+                    Status
+                  </Text>
+                  <HStack space="sm" className="items-center">
+                    <Text
+                      size="lg"
+                      className={`${
+                        isAvailable ? "text-green-600" : "text-gray-500"
+                      }`}
+                    >
+                      Available
+                    </Text>
+                    <Switch
+                      value={isAvailable}
+                      onValueChange={setAvailability}
+                      trackColor={{ false: "#d4d4d4", true: "#16a34a" }}
+                      thumbColor="#fafafa"
+                      ios_backgroundColor="#d4d4d4"
+                    />
+                  </HStack>
+                </ActionsheetItem>
+                <Text className="pl-6 mb-6">
+                  Clients will be able to see you are available
+                </Text>
+              </VStack>
+            )}
+          </ActionsheetContent>
+        </Actionsheet>
+      )}
 
       {/* Uploading Indicator */}
       {isUploading && (

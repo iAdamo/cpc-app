@@ -73,7 +73,7 @@ const HomeView = () => {
       />
 
       <Fab
-        size="xl"
+        size="lg"
         className="bg-teal-500 shadow-xl data-[active=true]:bg-teal-400 mb-16"
         onPress={() => {
           setShowSearch((prev) => !prev);
@@ -86,7 +86,7 @@ const HomeView = () => {
       </Fab>
       {!isSearchFocus && (
         <Fab
-          size="xl"
+          size="lg"
           className="bg-red-500 shadow-xl data-[active=true]:bg-red-400"
           onPress={() => {
             setCurrentView("Map");

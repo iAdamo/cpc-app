@@ -73,7 +73,11 @@ export function OnboardingFlow() {
     setCurrentStep(currentStep + 1);
   };
   return (
-    <VStack className="flex-1 bg-white">
+    <VStack
+      className={`flex-1 bg-white ${
+        currentStep === 5 && !showForwardButton ? "pt-16" : ""
+      }`}
+    >
       {(showBackButton || showForwardButton) && (
         <HStack className="w-full items-center mt-16 px-6">
           {showBackButton && (

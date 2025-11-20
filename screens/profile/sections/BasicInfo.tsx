@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "expo-router";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
+import { ScrollView } from "@/components/ui/scroll-view";
 import { Card } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
@@ -58,6 +59,10 @@ const ProfileInfo = () => {
           type: "image/jpeg",
         } as any);
       }
+      console.log(
+        "Updating profile with data:",
+        Array.from(formData.entries())
+      );
       await updateUserProfile("Client", formData);
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -84,11 +89,15 @@ const ProfileInfo = () => {
     }
   };
 
-  console.log("Rendering ProfileInfo with user:", user);
+  // console.log("Rendering ProfileInfo with user:", user);
 
   return (
-    <VStack className="px-6 mt-4 gap-10">
-      <VStack space="md">
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      contentContainerClassName="gap-10 justify-between"
+      className="px-6 mt-4"
+    >
+      <VStack>
         <Heading size="3xl" className="text-brand-primary">
           {isProfileEdit
             ? "Edit Profile Information"
@@ -105,11 +114,12 @@ const ProfileInfo = () => {
           size="lg"
           isEditable={true}
           showChangeButton={false}
+          button={true}
           imageUri={user?.profilePicture?.thumbnail}
           onImageSelected={(file) => setProfilePic(file)}
         />
       </VStack>
-      <VStack className="mt-6 h-64 justify-between">
+      <VStack className="h-64 justify-between">
         <FormControl>
           <FormControlLabel>
             <FormControlLabelText>First Name</FormControlLabelText>
@@ -162,7 +172,7 @@ const ProfileInfo = () => {
       </VStack>
       <Button
         size="xl"
-        className="bg-brand-primary mt-20 w-full"
+        className="bg-brand-primary w-full mt-10"
         isDisabled={isLoading}
         onPress={
           isProfileEdit
@@ -175,7 +185,7 @@ const ProfileInfo = () => {
       >
         <ButtonText>{isProfileEdit ? "Save" : "Continue"}</ButtonText>
       </Button>
-    </VStack>
+    </ScrollView>
   );
 };
 
