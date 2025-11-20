@@ -47,7 +47,7 @@ export const ChatList: React.FC = () => {
       chatService.leaveCurrentChat();
       // chatService.disconnect();
     };
-  }, [fetchChats, chats]);
+  }, [fetchChats]);
 
   // console.log("Chats in ChatList:", chats);
 

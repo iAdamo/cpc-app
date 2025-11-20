@@ -58,7 +58,7 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
           } else {
             appendFormData(formData, user?.activeRoleId);
             // for deugging only
-            // console.log("Submitting formData:", Array.from(formData.entries()));
+            console.log("Submitting formData:", Array.from(formData.entries()));
             response = await createProviderProfile(formData);
           }
         }
@@ -69,6 +69,7 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
         set({
           user: { ...response },
           switchRole: !data ? response.activeRole : get().switchRole,
+          selectedFiles: [],
           isLoading: false,
           success: "Profile updated successfully!",
         });

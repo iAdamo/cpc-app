@@ -32,6 +32,7 @@ interface ProfilePicProps {
   isEditable?: boolean;
   isLoading?: boolean;
   isLogo?: boolean;
+  button?: boolean;
   onImageSelected: (file: FileType) => void;
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   showChangeButton?: boolean;
@@ -43,6 +44,7 @@ const ProfilePic = ({
   isEditable = true,
   isLoading = false,
   isLogo = false,
+  button = false,
   onImageSelected,
   size = "lg",
   showChangeButton = true,
@@ -156,25 +158,41 @@ const ProfilePic = ({
         </Card>
 
         {/* Camera/Edit Button */}
-        {isEditable && !isLogo && (
-          <Button
-            variant="solid"
-            size="xs"
-            className="absolute -bottom-3 -right-1 rounded-full bg-brand-secondary border-2 border-white shadow-md"
-            style={{
-              width: currentSize.icon + 16,
-              height: currentSize.icon + 16,
-            }}
-            onPress={openOptionsModal}
-            isDisabled={isUploading}
-          >
-            <ButtonIcon
-              as={CameraIcon}
-              size={size}
-              className="fill-white text-brand-secondary w-6 h-6"
-            />
-          </Button>
-        )}
+        {isEditable &&
+          !isLogo &&
+          (button ? (
+            <Button
+              variant="solid"
+              size="sm"
+              className="bg-brand-secondary rounded-lg mt-4"
+              style={{
+                width: currentSize.button + 16,
+                height: currentSize.button + 16,
+              }}
+              onPress={openOptionsModal}
+              isDisabled={isUploading}
+            >
+              <ButtonText>Upload Logo</ButtonText>
+            </Button>
+          ) : (
+            <Button
+              variant="solid"
+              size="xs"
+              className="absolute -bottom-3 -right-1 rounded-full bg-brand-secondary border-2 border-white shadow-md"
+              style={{
+                width: currentSize.icon + 16,
+                height: currentSize.icon + 16,
+              }}
+              onPress={openOptionsModal}
+              isDisabled={isUploading}
+            >
+              <ButtonIcon
+                as={CameraIcon}
+                size={size}
+                className="fill-white text-brand-secondary w-6 h-6"
+              />
+            </Button>
+          ))}
       </Box>
 
       {/* Change Picture Button */}

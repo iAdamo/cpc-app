@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-const MAX_IMAGE_SIZE_MB = 10;
+const MAX_IMAGE_SIZE_MB = 40;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
-const MAX_LOGO_SIZE_MB = 5;
+const MAX_LOGO_SIZE_MB = 40;
 const MAX_LOGO_SIZE_BYTES = MAX_LOGO_SIZE_MB * 1024 * 1024;
 
 export const companyFormSchema = z.object({

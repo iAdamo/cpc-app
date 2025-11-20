@@ -138,7 +138,7 @@ const CompanyBasicInfo = () => {
   });
   // console.log("isValid", user);
 
-  // console.log("form errors", errors);
+  console.log("form errors", errors);
   // console.log("form values", getValues());
 
   const handleFilesChange = (files: FileType[]) => {
@@ -300,7 +300,7 @@ const CompanyBasicInfo = () => {
 
                   {errors.providerLogo && (
                     <FormControlError>
-                      <FormControlErrorText className="text-sm">
+                      <FormControlErrorText className="text-sm bg-red-200 px-2 py-1 rounded-md">
                         {errors.providerLogo.message}
                       </FormControlErrorText>
                     </FormControlError>
@@ -332,7 +332,7 @@ const CompanyBasicInfo = () => {
                   />
                   {errors.providerName && (
                     <FormControlError>
-                      <FormControlErrorText className="text-sm">
+                      <FormControlErrorText className="text-sm bg-red-200 px-2 py-1 rounded-md">
                         {errors.providerName.message}
                       </FormControlErrorText>
                     </FormControlError>
@@ -361,7 +361,7 @@ const CompanyBasicInfo = () => {
                   />
                   {errors.providerDescription && (
                     <FormControlError>
-                      <FormControlErrorText className="text-sm">
+                      <FormControlErrorText className="text-sm bg-red-200 px-2 py-1 rounded-md">
                         {errors.providerDescription.message}
                       </FormControlErrorText>
                     </FormControlError>
@@ -394,7 +394,7 @@ const CompanyBasicInfo = () => {
               />
               {errors.providerEmail && (
                 <FormControlError>
-                  <FormControlErrorText className="text-sm">
+                  <FormControlErrorText className="text-sm bg-red-200 px-2 py-1 rounded-md">
                     {errors.providerEmail.message}
                   </FormControlErrorText>
                 </FormControlError>
@@ -438,7 +438,7 @@ const CompanyBasicInfo = () => {
 
               {errors.providerPhoneNumber && (
                 <FormControlError>
-                  <FormControlErrorText className="text-sm">
+                  <FormControlErrorText className="text-sm bg-red-200 px-2 py-1 rounded-md">
                     {errors.providerPhoneNumber.message}
                   </FormControlErrorText>
                 </FormControlError>
@@ -501,7 +501,7 @@ const CompanyBasicInfo = () => {
               </Menu>
               {errors.providerLocation?.address?.address && (
                 <FormControlError>
-                  <FormControlErrorText className="text-sm">
+                  <FormControlErrorText className="text-sm bg-red-200 px-2 py-1 rounded-md">
                     {errors.providerLocation.address.address.message}
                   </FormControlErrorText>
                 </FormControlError>
@@ -519,7 +519,7 @@ const CompanyBasicInfo = () => {
                 render={({ field: { value } }) => (
                   <MediaPicker
                     maxFiles={4}
-                    maxSize={10}
+                    maxSize={40}
                     initialFiles={value as any}
                     onFilesChange={handleFilesChange}
                   />
@@ -527,7 +527,7 @@ const CompanyBasicInfo = () => {
               />
               {errors.providerImages && (
                 <FormControlError>
-                  <FormControlErrorText className="text-sm">
+                  <FormControlErrorText className="text-sm bg-red-200 px-2 py-1 rounded-md">
                     {errors.providerImages.message}
                   </FormControlErrorText>
                 </FormControlError>
@@ -539,7 +539,7 @@ const CompanyBasicInfo = () => {
       <Button
         size="xl"
         className="mb-4 mt-2 bg-brand-secondary border-0 mx-2"
-        isDisabled={!isValid || isLoading}
+        isDisabled={isLoading}
         onPress={() => handleNext()}
       >
         <ButtonText className="text-white">Continue</ButtonText>

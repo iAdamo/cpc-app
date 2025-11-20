@@ -8,6 +8,7 @@ import FinalPage from "./FinalPage";
 import SignUpScreen from "@/screens/auth/signup";
 import WelcomeScreen from "./ProviderStart";
 import CompanyBasicInfo from "./CompanyBasicInfo";
+import Identity from "./companyBasicInfo/Identity";
 
 export {
   EmailVerificationPage,
@@ -20,6 +21,7 @@ export {
   SignUpScreen,
   WelcomeScreen,
   CompanyBasicInfo,
+  Identity,
 };
 
 // export * from "./onboardingFlow"; // Removed because the module does not exist

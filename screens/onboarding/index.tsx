@@ -13,6 +13,7 @@ import {
   FinalPage,
   WelcomeScreen,
   CompanyBasicInfo,
+  Identity,
 } from "./onboardingFlow";
 import { Button, ButtonIcon } from "@/components/ui/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "@/components/ui/icon";
@@ -43,7 +44,8 @@ export function OnboardingFlow() {
     6: ProfileInfo,
     7: WelcomeScreen,
     8: ChooseService,
-    9: CompanyBasicInfo,
+    9: Identity,
+    10: CompanyBasicInfo,
   };
   const StepComponent: React.ComponentType =
     stepComponents[currentStep] || FinalPage;

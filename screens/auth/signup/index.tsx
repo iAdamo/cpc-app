@@ -109,6 +109,7 @@ const SignUpScreen = () => {
       await signUp(data);
       reset();
       setCurrentStep(currentStep + 1);
+      router.replace("/onboarding");
     } catch (e) {
       // error is already set in store, do nothing or show a message
     }

@@ -8,7 +8,7 @@ export default ({ config }) => {
 
   return {
     ...config,
-    name: "CompaniesCenter",
+    name: "Companies Center",
     slug: "companiescenterllc",
     extra: {
       ...(config.extra || {}),
