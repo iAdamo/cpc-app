@@ -92,7 +92,7 @@ const SignUpScreen = () => {
     phoneNumberValid: true,
     passwordValid: true,
   });
-
+  console.debug({ currentStep });
   // handle form submission
   const onSubmit = async (data: SignUpFormType) => {
     try {
@@ -108,7 +108,7 @@ const SignUpScreen = () => {
 
       await signUp(data);
       reset();
-      setCurrentStep(currentStep + 1);
+      setCurrentStep(3);
       router.replace("/onboarding");
     } catch (e) {
       // error is already set in store, do nothing or show a message

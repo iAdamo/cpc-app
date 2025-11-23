@@ -77,6 +77,7 @@ const ProfileInfo = ({
   const handleJoinChat = async () => {
     await createChat(provider.owner);
     setCurrentView("Chat");
+    const selectedChat = useGlobalStore.getState().selectedChat;
     if (!selectedChat) return;
     router.push({
       pathname: "/chat/[id]",

@@ -5,6 +5,30 @@ const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
 const MAX_LOGO_SIZE_MB = 40;
 const MAX_LOGO_SIZE_BYTES = MAX_LOGO_SIZE_MB * 1024 * 1024;
 
+const coordinatesSchema = z.tuple([
+  z.number().optional(),
+  z.number().optional(),
+]);
+
+const addressSchema = z.object({
+  zip: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  country: z.string().optional(),
+  address: z.string().optional(),
+});
+
+const locationSchema = z.object({
+  coordinates: coordinatesSchema.optional(),
+  address: addressSchema,
+});
+
+export const fullLocationSchema = z.object({
+  primary: locationSchema,
+  secondary: locationSchema.optional(),
+  tertiary: locationSchema.optional(),
+});
+
 export const companyFormSchema = z.object({
   providerEmail: z
     .string()
@@ -23,23 +47,7 @@ export const companyFormSchema = z.object({
       /^\+?[1-9]\d{1,14}$/,
       "Company phone number must be a valid phone number"
     ),
-  providerLocation: z
-    .object({
-      coordinates: z
-        .object({
-          lat: z.number().optional(),
-          long: z.number().optional(),
-        })
-        .optional(),
-      address: z.object({
-        address: z.string().min(1, "Address is required"),
-        state: z.string().optional(),
-        zip: z.string().optional(),
-        city: z.string().optional(),
-        country: z.string().optional(),
-      }),
-    })
-    .optional(),
+  providerLocation: fullLocationSchema,
   providerLogo: z
     .object({
       uri: z.string().min(1, "Logo URI is required"),
@@ -69,30 +77,6 @@ export const companyFormSchema = z.object({
         message: `Each image must be less than ${MAX_IMAGE_SIZE_MB}MB`,
       }
     ),
-});
-
-const coordinatesSchema = z.object({
-  lat: z.number().optional(),
-  long: z.number().optional(),
-});
-
-const addressSchema = z.object({
-  zip: z.string().min(1, "Zip code is required"),
-  city: z.string().min(1, "City is required"),
-  state: z.string().min(1, "State is required"),
-  country: z.string().min(1, "Country is required"),
-  address: z.string().optional(),
-});
-
-const locationSchema = z.object({
-  coordinates: coordinatesSchema.optional(),
-  address: addressSchema,
-});
-
-export const fullLocationSchema = z.object({
-  primary: locationSchema,
-  secondary: locationSchema.optional(),
-  tertiary: locationSchema.optional(),
 });
 
 export type companyFormSchemaType = z.infer<typeof companyFormSchema>;

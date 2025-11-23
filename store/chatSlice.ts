@@ -30,7 +30,7 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
       set({ chatLoading: true, chatError: null });
       // console.log(participantIds);
       const newChat = await chatService.createDirectChat(participantIds);
-      // console.log("Created chat:", newChat);
+      console.log("Created chat:", newChat);
       set({ selectedChat: newChat });
 
       // set((state) => {

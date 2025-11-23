@@ -3,7 +3,8 @@ import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { Card } from "@/components/ui/card";
-import { ScrollView, View, Dimensions } from "react-native";
+import { ScrollView } from "@/components/ui/scroll-view";
+import { View, Dimensions } from "react-native";
 import { Pressable } from "@/components/ui/pressable";
 import useGlobalStore from "@/store/globalStore";
 
@@ -42,7 +43,7 @@ const Categories = () => {
   const { width } = Dimensions.get("window");
 
   return (
-    <VStack className="mx-2 mt-2">
+    <VStack className="mx-2 mt-2 gap-2">
       {/* Progress Indicator */}
       <HStack className="justify-center mb-2">
         {Array.from({ length: totalPages }).map((_, i) => (
@@ -65,9 +66,11 @@ const Categories = () => {
         onScroll={handleScroll}
         scrollEventThrottle={16}
         style={{ width }}
+        className=""
+        contentContainerClassName=""
       >
         {Array.from({ length: totalPages }).map((_, pageIndex) => (
-          <HStack key={pageIndex} style={{ width }} space="sm" className="">
+          <HStack key={pageIndex} style={{ width }} className="justify-around">
             {categories
               .slice(
                 pageIndex * CATEGORIES_PER_PAGE,
@@ -81,7 +84,6 @@ const Categories = () => {
                       ? "bg-brand-primary/20 border-2 border-brand-primary/80"
                       : ""
                   }`}
-
                   onPress={() => {
                     if (selectedCategories.includes(category.name)) {
                       setCategories(

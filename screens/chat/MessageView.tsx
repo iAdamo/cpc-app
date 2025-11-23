@@ -13,7 +13,12 @@ import { Text } from "@/components/ui/text";
 import { Heading } from "@/components/ui/heading";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
-import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import {
+  Button,
+  ButtonIcon,
+  ButtonText,
+  ButtonSpinner,
+} from "@/components/ui/button";
 import {
   Avatar,
   AvatarFallbackText,
@@ -30,7 +35,7 @@ import {
 } from "@/components/ui/icon";
 import { ListRenderItem, Keyboard, View } from "react-native";
 import useGlobalStore from "@/store/globalStore";
-import { Message } from "@/types";
+import { MediaItem, Message } from "@/types";
 import { useLocalSearchParams } from "expo-router";
 import { MicIcon, SendIcon, ChevronsDownIcon } from "lucide-react-native";
 import { Animated } from "react-native";
@@ -72,7 +77,10 @@ const MessageView = () => {
   const flatListRef = useRef<SectionList<Message, MessageSection>>(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  if (!selectedChat || selectedChat._id !== id) return <Text>Loading...</Text>;
+  if (!selectedChat || selectedChat._id !== id) {
+    router.back();
+    return null;
+  }
   const isClient = switchRole === "Client";
 
   useEffect(() => {
@@ -196,7 +204,7 @@ const MessageView = () => {
   };
 
   const Headerbar = () => {
-    const otherParticipant = selectedChat.participants[0];
+    const otherParticipant = selectedChat?.participants[0];
     const [isOnline, setIsOnline] = useState<boolean | null>(null);
 
     useEffect(() => {
@@ -246,13 +254,12 @@ const MessageView = () => {
                 <AvatarImage
                   source={{
                     uri: isClient
-                      ? typeof otherParticipant.activeRoleId?.providerLogo ===
-                        "string"
-                        ? otherParticipant.activeRoleId?.providerLogo
-                        : undefined
-                      : typeof otherParticipant?.profilePicture === "string"
-                      ? otherParticipant.profilePicture
-                      : undefined,
+                      ? (
+                          otherParticipant.activeRoleId
+                            ?.providerLogo as MediaItem
+                        ).thumbnail
+                      : (otherParticipant.profilePicture as MediaItem)
+                          .thumbnail,
                   }}
                 />
                 <AvatarBadge
@@ -449,17 +456,14 @@ const MessageView = () => {
           </HStack>
           {inputMessage ? (
             <Button
-              className="bg-brand-primary rounded-full w-14 h-14 justify-center items-center"
+              className="bg-brand-primary rounded-full w-12 h-12 justify-center items-center"
               onPress={handleSendMessage}
               isDisabled={isSending}
             >
               {isSending ? (
-                <Spinner size="small" color="white" />
+                <ButtonSpinner size="small" color="white" />
               ) : (
-                <ButtonIcon
-                  as={SendIcon}
-                  className="transform rotate-45 w-6 h-6"
-                />
+                <ButtonIcon as={SendIcon} className="w-6 h-6" />
               )}
             </Button>
           ) : (

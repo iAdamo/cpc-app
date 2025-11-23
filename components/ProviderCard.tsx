@@ -81,15 +81,15 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
               />
               {/* Heart icon at top-left */}
               <HStack className="absolute">
-                <HStack className="justify-between items-center w-full px-3">
+                <HStack className="justify-between items-center w-full px-1.5 pt-1.5">
                   <Button
-                    variant="link"
+                    variant="outline"
                     onPress={handleSaveToggle}
-                    className=""
+                    className="bg-white/80 rounded-full border-0 h-7 w-12"
                   >
                     <ButtonIcon
                       as={HeartIcon}
-                      className={`w-6 h-6 text-black/40 ${
+                      className={`text-black/40 ${
                         isSaved
                           ? "fill-red-600 text-red-400"
                           : "fill-white text-black/50"
@@ -176,15 +176,15 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
               />
               {/* Heart icon at top-left */}
               <HStack className="absolute">
-                <HStack className="justify-between items-center w-full px-3">
+                <HStack className="justify-between items-center w-full px-1.5 pt-1.5">
                   <Button
-                    variant="link"
+                    variant="outline"
                     onPress={handleSaveToggle}
-                    className=""
+                    className="bg-white/80 rounded-full border-0 h-8 w-8"
                   >
                     <ButtonIcon
                       as={HeartIcon}
-                      className={`w-6 h-6 text-black/40 ${
+                      className={`text-black/40 ${
                         isSaved
                           ? "fill-red-600 text-red-400"
                           : "fill-white text-black/50"

@@ -1,5 +1,5 @@
 import { StateCreator } from "zustand";
-import { OnboardingData, OnboardingState, GlobalStore } from "@/types";
+import { OnboardingState, GlobalStore } from "@/types";
 import { updateUserProfile } from "@/services/axios/user";
 
 export const onboardingSlice: StateCreator<
@@ -9,8 +9,15 @@ export const onboardingSlice: StateCreator<
   OnboardingState
 > = (set, get) => ({
   currentStep: 1,
-  totalSteps: 11,
+  totalSteps: 12,
   isOnboardingComplete: false,
+  onboardingData: {},
+
+  setOnboardingData: (data: { [key: string]: any }) => {
+    set((state) => ({
+      onboardingData: { ...state.onboardingData, ...data },
+    }));
+  },
 
   setCurrentStep: (step: number) => {
     set((state) => ({

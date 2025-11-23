@@ -13,7 +13,7 @@ import { UserData, OnboardingData } from "@/types";
 import { router } from "expo-router";
 
 const SelectRole = () => {
-  const { setCurrentStep, currentStep, updateProfile, user, setSwitchRole } = useGlobalStore();
+  const { setCurrentStep, currentStep, updateProfile, user } = useGlobalStore();
   const [activeRole, setActiveRole] = useState(user?.activeRole);
 
   const handleSubmit = () => {

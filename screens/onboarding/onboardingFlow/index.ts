@@ -7,8 +7,9 @@ import ChooseService from "./ChooseService";
 import FinalPage from "./FinalPage";
 import SignUpScreen from "@/screens/auth/signup";
 import WelcomeScreen from "./ProviderStart";
-import CompanyBasicInfo from "./CompanyBasicInfo";
+import Gallery from "./companyBasicInfo/Gallery";
 import Identity from "./companyBasicInfo/Identity";
+import ContactInfo from "./companyBasicInfo/Contact";
 
 export {
   EmailVerificationPage,
@@ -20,8 +21,9 @@ export {
   FinalPage,
   SignUpScreen,
   WelcomeScreen,
-  CompanyBasicInfo,
+  Gallery,
   Identity,
+  ContactInfo,
 };
 
 // export * from "./onboardingFlow"; // Removed because the module does not exist

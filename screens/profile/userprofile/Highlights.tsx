@@ -48,7 +48,7 @@ const Highlights = ({provider}: {provider: any | null}) => {
     // Add more highlights as needed
   ];
   return (
-    <Card variant="ghost" className="gap-2 py-2 justify-center">
+    <Card variant="ghost" className="gap-2 py-2 justify-center hidden">
       <Text size="lg" className="text-brand-primary font-medium">
         Highlights
       </Text>

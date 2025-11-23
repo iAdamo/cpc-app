@@ -80,6 +80,8 @@ export interface OnboardingState {
   setCurrentStep: (step: number) => void;
   completeOnboarding: () => void;
   resetOnboarding: () => void;
+  onboardingData: { [key: string]: any };
+  setOnboardingData: (data: { [key: string]: any }) => void;
 }
 
 export type LayoutView =

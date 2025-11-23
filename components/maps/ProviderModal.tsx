@@ -1,15 +1,16 @@
-import React from "react";
+import { useState } from "react";
 import { Linking } from "react-native";
 import { VStack } from "../ui/vstack";
 import { HStack } from "../ui/hstack";
 import { Heading } from "../ui/heading";
 import { Text } from "../ui/text";
 import { Button, ButtonText } from "../ui/button";
+import { Pressable } from "../ui/pressable";
 import { ScrollView } from "../ui/scroll-view";
 import { LocationObject } from "expo-location";
 import { locationService } from "@/utils/GetDistance";
 import RatingSection from "../RatingFunction";
-import { ProviderData, SubcategoryData } from "@/types";
+import { MediaItem, ProviderData, SubcategoryData } from "@/types";
 import {
   Actionsheet,
   ActionsheetContent,
@@ -23,6 +24,8 @@ import {
 import ProfileAvatar from "../ProfileAvatar";
 import useGlobalStore from "@/store/globalStore";
 import { router } from "expo-router";
+import { Image } from "expo-image";
+import MediaView from "../media/MediaView";
 
 interface ProviderModalProps {
   provider: ProviderData;
@@ -39,10 +42,11 @@ const ProviderModal: React.FC<ProviderModalProps> = ({
   onClose,
   onFocusLocation,
 }) => {
+  const [viewMedia, setViewMedia] = useState<string | undefined>("");
   const { createChat, selectedChat, setCurrentView } = useGlobalStore();
 
-  const providerLat = provider.location?.primary?.coordinates?.[1];
-  const providerLon = provider.location?.primary?.coordinates?.[0];
+  const providerLat = provider.location?.primary?.coordinates?.[0];
+  const providerLon = provider.location?.primary?.coordinates?.[1];
 
   const distance =
     userLocation && providerLat != null && providerLon != null
@@ -60,10 +64,10 @@ const ProviderModal: React.FC<ProviderModalProps> = ({
   // };
 
   const handleMessage = async () => {
-    onClose();
     await createChat(provider.owner);
-    if (!selectedChat) return;
     setCurrentView("Chat");
+    const selectedChat = useGlobalStore.getState().selectedChat;
+    if (!selectedChat) return;
     router.push({
       pathname: "/chat/[id]",
       params: { id: selectedChat._id },
@@ -191,6 +195,36 @@ const ProviderModal: React.FC<ProviderModalProps> = ({
               </VStack>
             )}
           </ActionsheetItem>
+          <ActionsheetItem className="data-[active=true]:bg-transparent flex-col items-start">
+            <Heading>Highlights</Heading>
+            {provider.providerImages && provider.providerImages.length > 0 && (
+              <VStack className="flex-1">
+                {provider.providerImages.map((image, idx: number) => (
+                  console.log("Rendering image:", image),
+                  <Pressable
+                    key={idx}
+                    onPress={() => setViewMedia((image as MediaItem).url)}
+                    className="flex-1"
+                  >
+                    <Image
+                      source={{
+                        uri: (image as MediaItem).thumbnail,
+                      }}
+                      className="w-52 h-32 rounded-lg"
+                      contentFit="cover"
+                    />
+                  </Pressable>
+                ))}
+                {!!viewMedia && (
+                  <MediaView
+                    isOpen={!!viewMedia}
+                    onClose={() => setViewMedia(undefined)}
+                    url={viewMedia}
+                  />
+                )}
+              </VStack>
+            )}
+          </ActionsheetItem>
         </ActionsheetScrollView>
         {/* Action buttons */}
         <ActionsheetItem className="p-4 border-t border-gray-200 w-full justify-between data-[active=true]:bg-transaprent">
@@ -226,8 +260,3 @@ const ProviderModal: React.FC<ProviderModalProps> = ({
 };
 
 export default ProviderModal;
-
-//  <ScrollView
-//                     className="max-h-96 w-full self-start"
-//                     showsVerticalScrollIndicator={false}
-//                   ></ScrollView>

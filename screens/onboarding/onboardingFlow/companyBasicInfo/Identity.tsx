@@ -1,11 +1,8 @@
-import { useState, useEffect, useRef, use } from "react";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
-import { Card } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
-import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
-import { Box } from "@/components/ui/box";
+import { Button, ButtonText } from "@/components/ui/button";
 import {
   FormControl,
   FormControlLabel,
@@ -13,122 +10,54 @@ import {
   FormControlError,
   FormControlErrorText,
 } from "@/components/ui/form-control";
-import { Menu, MenuItem, MenuItemLabel } from "@/components/ui/menu";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
-import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
-import { TrashIcon } from "@/components/ui/icon";
-import { MapPinIcon } from "lucide-react-native";
+import { Input, InputField } from "@/components/ui/input";
 import useGlobalStore from "@/store/globalStore";
-import { Image } from "@/components/ui/image";
-import {
-  companyFormSchema,
-  companyFormSchemaType,
-} from "@/components/schema/CompanySchema";
+import { companyFormSchema } from "@/components/schema/CompanySchema";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
-import PhoneInput from "react-native-phone-number-input";
 import { ScrollView } from "@/components/ui/scroll-view";
-import MediaPicker from "@/components/media/MediaPicker";
-import { GooglePlaceService } from "@/services/googlePlaceService";
-import { useCallback } from "react";
 import { FileType, Place, MediaItem } from "@/types";
-import { debounce, set } from "lodash";
 import ProfilePic from "@/components/profile/ProfilePic";
 
 const Identity = () => {
-  const [locationInput, setLocationInput] = useState<boolean>(false);
-  const [locationQuery, setLocationQuery] = useState<string>("");
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [predictions, setPredictions] = useState<Place[]>([]);
-  const [filterQuery, setFilterQuery] = useState<string>("");
   const {
     user,
-    updateProfile,
     currentStep,
     setCurrentStep,
-    selectedPlace,
-    setSelectedPlace,
     isLoading,
-    setError: setGError,
-    updateUserProfile,
-    completeOnboarding,
+    onboardingData,
+    setOnboardingData,
   } = useGlobalStore();
   if (!user) return;
+
+  const IdentitySchema = companyFormSchema.pick({
+    providerName: true,
+    providerDescription: true,
+    providerLogo: true,
+  });
+  type IdentitySchemaType = z.infer<typeof IdentitySchema>;
 
   const {
     control,
     handleSubmit,
     setValue,
     getValues,
-    setError,
     clearErrors,
     formState: { errors, isValid },
-  } = useForm<companyFormSchemaType>({
-    resolver: zodResolver(companyFormSchema),
+  } = useForm<IdentitySchemaType>({
+    resolver: zodResolver(IdentitySchema),
     defaultValues: {
-      providerName: user.activeRoleId?.providerName || "",
-      providerDescription: user.activeRoleId?.providerDescription || "",
-      providerEmail: user.activeRoleId?.providerEmail || "",
-      providerPhoneNumber: user.activeRoleId?.providerPhoneNumber || "",
-      providerLogo: user.activeRoleId?.providerLogo
-        ? typeof (user?.activeRoleId?.providerLogo as MediaItem)?.thumbnail ===
-          "string"
-          ? {
-              uri: (user?.activeRoleId?.providerLogo as MediaItem).thumbnail,
-              name:
-                (user.activeRoleId?.providerLogo as MediaItem).url
-                  .split("/")
-                  .pop() || "companylogo.jpg",
-              type: (user.activeRoleId?.providerLogo as MediaItem).url.endsWith(
-                ".mp4"
-              )
-                ? "video/mp4"
-                : "image/jpeg",
-            }
-          : undefined
-        : undefined,
-      providerImages: Array.isArray(user?.activeRoleId?.providerImages)
-        ? user?.activeRoleId?.providerImages.map((img, idx) =>
-            typeof (img as MediaItem).thumbnail === "string"
-              ? {
-                  uri: (img as MediaItem).url,
-                  type: "image/jpeg" as FileType["type"],
-                }
-              : (img as FileType)
-          )
-        : [],
-
-      providerLocation: {
-        coordinates: {
-          lat: user.activeRoleId?.location?.primary?.coordinates?.[1],
-          long: user.activeRoleId?.location?.primary?.coordinates?.[0],
-        },
-        address: {
-          address: user.activeRoleId?.location?.primary?.address?.address || "",
-          city: user.activeRoleId?.location?.primary?.address?.city || "",
-          state: user.activeRoleId?.location?.primary?.address?.state || "",
-          zip: user.activeRoleId?.location?.primary?.address?.zip || "",
-          country: user.activeRoleId?.location?.primary?.address?.country || "",
-        },
-      },
+      providerName: onboardingData["providerName"],
+      providerDescription: onboardingData["providerDescription"],
+      providerLogo: onboardingData["providerLogo"] || {},
     },
   });
   // console.log("isValid", user);
 
-  console.log("form errors", errors);
-  // console.log("form values", getValues());
-
-  const handleFilesChange = (files: FileType[]) => {
-    const mappedFiles = files.map((file, index) => ({
-      ...file,
-      name: file.name ?? "", // Ensure name is always a string
-      // type: "image/jpeg", // Default to image/jpeg if type is missing
-    }));
-    setValue("providerImages", mappedFiles);
-    if (files.length > 0) {
-      clearErrors("providerImages");
-    }
-  };
+  // console.log("form errors", errors);
+  // console.log("form values", getValues("providerLogo"));
 
   const handleLogoChange = (file: FileType) => {
     setValue("providerLogo", {
@@ -139,88 +68,47 @@ const Identity = () => {
     clearErrors("providerLogo");
   };
 
-  useEffect(() => {
-    if (locationQuery.length === 0) {
-      setPredictions([]);
-    }
-  }, [locationQuery]);
-
-  const debouncedFetchPredictions = useRef(
-    debounce(async (query: string) => {
-      if (query.length > 2) {
-        try {
-          const results = await GooglePlaceService.autocomplete(query);
-          setPredictions(results);
-        } catch (err: any) {
-          setGError(`Autocomplete error ${err.message}`);
-        }
-      } else {
-        setPredictions([]);
-      }
-    }, 300)
-  ).current;
-
-  useEffect(() => {
-    if (locationQuery) {
-      debouncedFetchPredictions(locationQuery);
-    } else {
-      setPredictions([]);
-    }
-  }, [locationQuery, debouncedFetchPredictions]);
-
-  const handleLocationSelect = async (prediction: Place) => {
-    try {
-      const details = await GooglePlaceService.getPlaceDetails(
-        prediction.place_id
-      );
-      const parsed = GooglePlaceService.parseAddressComponents(
-        details.address_components || []
-      );
-      setValue("providerLocation", {
-        coordinates: {
-          lat: details.geometry.location.lat,
-          long: details.geometry.location.lng,
-        },
-        address: {
-          state: parsed.state,
-          address: details.formatted_address || parsed.address,
-          zip: parsed.zip,
-          city: parsed.city,
-          country: parsed.country,
-        },
-      });
-      setLocationQuery("");
-      setPredictions([]);
-    } catch (err: any) {
-      console.error(err);
-      setGError("Failed to fetch place details.");
-    }
-  };
-
-  const handleNext = handleSubmit(async (data) => {
-    console.log("Submitting company basic info:", data);
+  const handleNext = handleSubmit((data) => {
+    setOnboardingData({
+      providerName: data.providerName,
+      providerDescription: data.providerDescription,
+      providerLogo: data.providerLogo,
+    });
     setCurrentStep(currentStep + 1);
   });
 
+  const handleBack = () => {
+    setOnboardingData({
+      providerName: getValues().providerName,
+      providerDescription: getValues().providerDescription,
+      providerLogo: getValues().providerLogo || {},
+    });
+    setCurrentStep(currentStep - 1);
+  };
+
   return (
-    <VStack className="flex-1 p-2 bg-white">
-      <Text size="sm" className="text-typography-400 font-medium mb-6">
-        Step 1 of 3
+    <VStack className="flex-1 pt-16 bg-white">
+      <Text
+        size="sm"
+        className="text-typography-400 font-medium mb-6 self-center"
+      >
+        Step 1 of 3 . Identity
       </Text>
       <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
-        <Heading size="2xl" className="text-brand-secondary mb-4">
+        <Heading
+          size="2xl"
+          className="text-brand-secondary mb-4 self-center text-center"
+        >
           Let's get to know your company
         </Heading>
-        <Text className="text-brand-secondary mb-4 text-center">
+        <Text
+          size="xl"
+          className="text-brand-secondary mb-4 self-center px-12 text-center"
+        >
           Provide some basic info so clients can trust you.
         </Text>
-        <VStack className="flex-1 gap-6 mb-8">
+        <VStack className="flex-1 gap-6 mb-8 p-4">
           <FormControl className="flex-1" isInvalid={!!errors.providerLogo}>
-            <FormControlLabel className="justify-center">
-              <FormControlLabelText className="font-semibold text-base text-typography-700">
-                Company's Logo
-              </FormControlLabelText>
-            </FormControlLabel>
             <Controller
               control={control}
               name="providerLogo"
@@ -231,10 +119,16 @@ const Identity = () => {
                   showChangeButton={false}
                   button={true}
                   imageUri={
-                    typeof user?.activeRoleId?.providerImages?.[0] === "string"
-                      ? user?.activeRoleId?.providerImages[0]
-                      : undefined
+                    onboardingData["providerLogo"]?.uri ||
+                    (user?.activeRoleId?.providerLogo as MediaItem)
+                      ?.thumbnail ||
+                    undefined
                   }
+                  // imageUri={
+                  //   typeof user?.activeRoleId?.providerImages?.[0] === "string"
+                  //     ? user?.activeRoleId?.providerImages[0]
+                  //     : undefined
+                  // }
                   onImageSelected={(file) => handleLogoChange(file)}
                 />
               )}
@@ -248,11 +142,11 @@ const Identity = () => {
               </FormControlError>
             )}
           </FormControl>
-          <VStack className="flex-1 gap-4">
+          <VStack className="flex-1 gap-6">
             {/**Company Name */}
             <FormControl className="" isInvalid={!!errors.providerName}>
               <FormControlLabel>
-                <FormControlLabelText className="font-semibold text-base text-typography-700">
+                <FormControlLabelText className="">
                   Company's Name
                 </FormControlLabelText>
               </FormControlLabel>
@@ -290,7 +184,7 @@ const Identity = () => {
                 name="providerDescription"
                 control={control}
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <Textarea className="h-24">
+                  <Textarea className="h-28">
                     <TextareaInput
                       placeholder="Describe your company, services, and values..."
                       value={value}
@@ -311,22 +205,26 @@ const Identity = () => {
           </VStack>
         </VStack>
       </ScrollView>
-      <HStack className="my-4">
+      <HStack className="my-4 justify-between p-4">
         <Button
           variant="outline"
-          className="bg-brand-secondary border-0 mx-2"
+          className=" border-0 mx-2"
           isDisabled={isLoading}
-          onPress={() => handle()}
+          onPress={() => handleBack()}
         >
-          <ButtonText className="text-white">Back</ButtonText>
+          <ButtonText size="xl" className="">
+            Back
+          </ButtonText>
         </Button>
         <Button
           variant="outline"
-          className="bg-brand-secondary border-0 mx-2"
+          className="border-0 mx-2"
           isDisabled={isLoading}
           onPress={() => handleNext()}
         >
-          <ButtonText className="text-white">Next</ButtonText>
+          <ButtonText size="xl" className="text-brand-secondary">
+            Next
+          </ButtonText>
         </Button>
       </HStack>
     </VStack>

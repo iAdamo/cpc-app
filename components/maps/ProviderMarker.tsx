@@ -13,8 +13,8 @@ export const ProviderMarker: React.FC<ProviderMarkerProps> = ({
   userLocation,
   isSelected,
 }) => {
-  const providerLat = provider.location.primary?.coordinates?.[1];
-  const providerLong = provider.location.primary?.coordinates?.[0];
+  const providerLat = provider.location.primary?.coordinates?.[0];
+  const providerLong = provider.location.primary?.coordinates?.[1];
 
   const distance =
     userLocation && providerLat && providerLong
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
   wrapper: {
     alignItems: "center",
     width: 120,
-    
+
   },
   selectedWrapper: {
     transform: [{ scale: 1.1 }],

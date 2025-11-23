@@ -126,11 +126,11 @@ const ProvidersMap: React.FC<ProvidersMapProps> = ({
     if (mapRef.current) {
       const lat =
         location?.coords.latitude ??
-        provider.location.primary?.coordinates?.[1] ??
+        provider.location.primary?.coordinates?.[0] ??
         region.latitude;
       const lon =
         location?.coords.longitude ??
-        provider.location.primary?.coordinates?.[0] ??
+        provider.location.primary?.coordinates?.[1] ??
         region.longitude;
 
       mapRef.current.animateToRegion({
@@ -182,9 +182,9 @@ const ProvidersMap: React.FC<ProvidersMapProps> = ({
 
         {providers.map((provider) => {
           const latitude =
-            provider.location.primary?.coordinates?.[1] ?? region.latitude;
+            provider.location.primary?.coordinates?.[0] ?? region.latitude;
           const longitude =
-            provider.location.primary?.coordinates?.[0] ?? region.longitude;
+            provider.location.primary?.coordinates?.[1] ?? region.longitude;
           return (
             <Marker
               key={provider._id}
@@ -194,8 +194,7 @@ const ProvidersMap: React.FC<ProvidersMapProps> = ({
                 selectedProvider?._id === provider._id ? "green" : "red"
               }
               onPress={() => handleProviderSelect(provider)}
-            >
-            </Marker>
+            ></Marker>
           );
         })}
       </MapView>

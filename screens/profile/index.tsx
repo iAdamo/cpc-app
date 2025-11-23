@@ -120,6 +120,19 @@ const ProfileView = () => {
                     ? `${user?.firstName} ${user?.lastName}`
                     : `${user?.activeRoleId?.providerName}`
                 }`}</Heading>
+                <Text
+                  className={`font-medium ${
+                    switchRole === "Client"
+                      ? "text-yellow-900"
+                      : "text-brand-primary"
+                  }`}
+                >
+                  {`${
+                    switchRole === "Client"
+                      ? `${user?.email}`
+                      : `${user?.activeRoleId?.providerEmail}`
+                  }`}
+                </Text>
                 <HStack space="xs" className="items-center">
                   <Icon
                     size="sm"
@@ -146,19 +159,30 @@ const ProfileView = () => {
                 </HStack>
               </VStack>
             </HStack>
-            <Button
-              variant="outline"
-              className="px-2 border-gray-100/30 bg-white/20 rounded-xl"
-            >
-              <ButtonIcon
-                as={ThreeDotsIcon}
-                className={`rotate-90 w-6 h-6 ${
+            <VStack  space="md" className="justify-between">
+              <Button
+                variant="outline"
+                className="px-2 border-gray-100/30 bg-white/20 rounded-xl"
+              >
+                <ButtonIcon
+                  as={ThreeDotsIcon}
+                  className={`rotate-90 w-6 h-6 ${
+                    switchRole === "Client"
+                      ? "text-yellow-900"
+                      : "text-brand-primary"
+                  }`}
+                />
+              </Button>
+              <Text
+                className={`font-medium ${
                   switchRole === "Client"
                     ? "text-yellow-900"
                     : "text-brand-primary"
                 }`}
-              />
-            </Button>
+              >
+                {user?.activeRole}
+              </Text>
+            </VStack>
           </HStack>
         </VStack>
         <Card className="flex-row rounded-xl justify-between items-center p-3 px-4 mx-4 bottom-6 shadow-lg bg-white">

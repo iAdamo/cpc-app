@@ -58,6 +58,7 @@ const MediaPicker = ({
   const showBothOptions = showImageOption && showVideoOption;
 
   const getMediaTypeLabel = () => {
+    if (label) return label;
     if (showBothOptions) return "Choose Image or Video";
     if (showImageOption) return "Choose Image";
     if (showVideoOption) return "Choose Video";
@@ -70,9 +71,9 @@ const MediaPicker = ({
 
   return (
     <VStack className="flex-1 gap-4">
-      {label && (
+      {/* {label && (
         <Text className="font-semibold text-center text-lg">{label}</Text>
-      )}
+      )} */}
 
       {/* Selected Files - Vertical Scroll */}
       {selectedFiles.length > 0 && (

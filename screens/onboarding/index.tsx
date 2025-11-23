@@ -12,8 +12,9 @@ import {
   ChooseService,
   FinalPage,
   WelcomeScreen,
-  CompanyBasicInfo,
+  Gallery,
   Identity,
+  ContactInfo,
 } from "./onboardingFlow";
 import { Button, ButtonIcon } from "@/components/ui/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "@/components/ui/icon";
@@ -26,7 +27,6 @@ export function OnboardingFlow() {
   const params = useLocalSearchParams();
   const from = params.from as string;
   const pathname = usePathname();
-  const showForwardButton = backPressed && currentStep !== 2;
 
   // If the user navigated here with a "from" parameter, set it in the store
   if (from && paramsFrom !== from)
@@ -45,13 +45,18 @@ export function OnboardingFlow() {
     7: WelcomeScreen,
     8: ChooseService,
     9: Identity,
-    10: CompanyBasicInfo,
+    10: ContactInfo,
+    11: Gallery,
   };
   const StepComponent: React.ComponentType =
     stepComponents[currentStep] || FinalPage;
 
+  const noForwardButtonSteps = new Set([0, 2, 9]);
+  const showForwardButton =
+    backPressed && !noForwardButtonSteps.has(currentStep);
+
   // Use a set for steps that should NOT show the back button
-  const noBackButtonSteps = new Set([0, 1, 2, 5]);
+  const noBackButtonSteps = new Set([0, 1, 2, 5, 9]);
   const showBackButton =
     !noBackButtonSteps.has(currentStep) && currentStep < 12;
   // console.log(paramsFrom, currentStep);

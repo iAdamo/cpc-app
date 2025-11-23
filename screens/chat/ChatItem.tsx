@@ -1,4 +1,4 @@
-import {memo} from "react";
+import { memo } from "react";
 import { Pressable } from "@/components/ui/pressable";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
@@ -10,7 +10,7 @@ import {
   AvatarFallbackText,
   AvatarImage,
 } from "@/components/ui/avatar";
-import { Chat, ProviderData } from "@/types";
+import { Chat, MediaItem } from "@/types";
 import { router } from "expo-router";
 import useGlobalStore from "@/store/globalStore";
 import DateFormatter from "@/utils/DateFormat";
@@ -41,13 +41,9 @@ function ChatItem({ chat, switchRole }: { chat: Chat; switchRole: string }) {
                   ? chat.groupInfo.avatarUrl
                   : undefined
                 : isClient
-                ? typeof otherParticipant.activeRoleId?.providerLogo ===
-                  "string"
-                  ? otherParticipant.activeRoleId?.providerLogo
-                  : undefined
-                : typeof otherParticipant?.profilePicture === "string"
-                ? otherParticipant.profilePicture
-                : undefined,
+                ? (otherParticipant.activeRoleId?.providerLogo as MediaItem)
+                    .thumbnail
+                : (otherParticipant.profilePicture as MediaItem).thumbnail,
           }}
         />
       </Avatar>

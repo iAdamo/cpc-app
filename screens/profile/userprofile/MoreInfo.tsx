@@ -28,7 +28,7 @@ const MoreInfo = ({
 
   return (
     <Card className="bg-white mt-2 h-auto p-0">
-      <HStack className="flex-1 justify-between items-center rounded-lg bg-gray-100 m-4">
+      <HStack className="flex-1 justify-between items-center rounded-lg bg-gray-100 mx-4">
         {TABS.map((tab) => (
           <Button
             key={tab.label}

@@ -6,38 +6,13 @@ import { router } from "expo-router";
 import useGlobalStore from "@/store/globalStore";
 
 export default function App() {
-  // useEffect(() => {
-  //   const timer = setTimeout(() => {
-  //     if (isAuthenticated) {
-  //       if (!isOnboardingComplete) {
-  //         router.replace("/onboarding");
-  //       } else if (!user?.isEmailVerified) {
-  //         useGlobalStore.setState({ currentStep: 3 });
-  //         router.replace("/onboarding");
-  //       } else {
-  //         router.replace(switchRole === "Client" ? "/providers" : "/clients");
-  //       }
-  //     } else {
-  //       router.replace("/auth/signin");
-  //     }
-  //   }, 2000); // 2 seconds delay
-
-  //   return () => clearTimeout(timer); // Cleanup the timer on unmount
-  // }, []);
-
   const { isAuthenticated, isOnboardingComplete, switchRole, user } =
     useGlobalStore();
   const lastRedirectRef = useRef<string | null>(null);
 
   useEffect(() => {
-    console.log("App Layout Effect Triggered");
     const timer = setTimeout(() => {
       // avoid running while auth state is unknown (optional)
-      console.debug("App Layout Effect:", {
-        isAuthenticated,
-        isOnboardingComplete,
-        user,
-      });
       if (typeof isAuthenticated === "undefined") return;
 
       let target:
@@ -61,7 +36,6 @@ export default function App() {
       }
 
       if (target && lastRedirectRef.current !== target) {
-        console.log(`Redirecting to: ${target}`);
         lastRedirectRef.current = target;
         router.replace(target);
       }
@@ -69,7 +43,7 @@ export default function App() {
 
     return () => clearTimeout(timer); // Cleanup the timer on unmount
   }, [isAuthenticated, isOnboardingComplete, user]);
-  
+
   return (
     <VStack className="flex-1 bg-brand-primary">
       <VStack className="items-center mt-80 flex-1 gap-2">

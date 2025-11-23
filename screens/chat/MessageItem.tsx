@@ -61,7 +61,7 @@ const MessageItem = memo(
             } ${
               isOwnMessage
                 ? "bg-brand-primary rounded-br-xl rounded-l-xl"
-                : " bg-gray-100 rounded-r-xl rounded-bl-xl"
+                : " bg-gray-200 rounded-r-xl rounded-bl-xl"
             }`}
           >
             {message.isOptimistic && (
@@ -92,13 +92,27 @@ const MessageItem = memo(
               />
             ) : message.type === "video" ? (
               <HStack space="sm" className="justify-center items-center">
-                <Text className="text-white">
+                <Text
+                  className={`${
+                    isOwnMessage
+                      ? "text-typography-200 rounded-br-xl rounded-l-xl"
+                      : " text-brand-primary rounded-r-xl rounded-bl-xl"
+                  }`}
+                >
                   {resolveMediaUrl(message.content?.mediaUrl)
                     .toString()
                     .split("/")
                     .pop()}
                 </Text>
-                <Icon size="xl" as={FilePlayIcon} className="text-white" />
+                <Icon
+                  size="xl"
+                  as={FilePlayIcon}
+                  className={`${
+                    isOwnMessage
+                      ? "text-typography-200 rounded-br-xl rounded-l-xl"
+                      : " text-brand-primary rounded-r-xl rounded-bl-xl"
+                  }`}
+                />
               </HStack>
             ) : (
               <HStack space="sm" className="justify-center items-center">

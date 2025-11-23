@@ -35,6 +35,7 @@ class ChatService {
     const response = await this.axiosInstance.post("/chat", {
       participants: participantId,
     });
+    console.log("Create chat response:", response.data);
     return response.data;
   }
 
