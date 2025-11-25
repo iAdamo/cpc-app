@@ -71,4 +71,5 @@ export interface Presence {
   isOnline: boolean;
   lastSeen: string;
   deviceId: string;
+  availability: "available" | "offline" | "busy" | "away";
 }

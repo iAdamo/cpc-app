@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Linking } from "react-native";
 import { VStack } from "../ui/vstack";
 import { HStack } from "../ui/hstack";
@@ -10,7 +10,7 @@ import { ScrollView } from "../ui/scroll-view";
 import { LocationObject } from "expo-location";
 import { locationService } from "@/utils/GetDistance";
 import RatingSection from "../RatingFunction";
-import { MediaItem, ProviderData, SubcategoryData } from "@/types";
+import { MediaItem, ProviderData, SubcategoryData, Presence } from "@/types";
 import {
   Actionsheet,
   ActionsheetContent,
@@ -26,6 +26,7 @@ import useGlobalStore from "@/store/globalStore";
 import { router } from "expo-router";
 import { Image } from "expo-image";
 import MediaView from "../media/MediaView";
+import { getLastSeen } from "@/services/axios/chat";
 
 interface ProviderModalProps {
   provider: ProviderData;
@@ -43,10 +44,29 @@ const ProviderModal: React.FC<ProviderModalProps> = ({
   onFocusLocation,
 }) => {
   const [viewMedia, setViewMedia] = useState<string | undefined>("");
-  const { createChat, selectedChat, setCurrentView } = useGlobalStore();
+  const [presence, setPresence] = useState<Presence>();
+
+  const { createChat, setCurrentView } = useGlobalStore();
 
   const providerLat = provider.location?.primary?.coordinates?.[0];
   const providerLon = provider.location?.primary?.coordinates?.[1];
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const presence = await getLastSeen(provider.owner);
+        if (!mounted) return;
+        if (presence) setPresence(presence);
+      } catch (error) {
+        console.error("Failed to fetch last seen:", error);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [provider.owner]);
 
   const distance =
     userLocation && providerLat != null && providerLon != null
@@ -80,16 +100,18 @@ const ProviderModal: React.FC<ProviderModalProps> = ({
   };
 
   const getAvailabilityColor = (availability?: string) => {
-    switch ((availability || "").toLowerCase()) {
-      case "online":
+    const status = (availability || "").toLowerCase();
+    switch (status) {
       case "available":
-        return "#4CAF50";
+        return "#4CAF50"; // green
       case "busy":
-        return "#FF9800";
+        return "#FF9800"; // orange
       case "offline":
-        return "#9E9E9E";
+        return "#9E9E9E"; // gray
+      case "away":
+        return "#FFC107"; // amber
       default:
-        return "#4CAF50";
+        return "#9E9E9E"; // fallback gray
     }
   };
 
@@ -98,11 +120,6 @@ const ProviderModal: React.FC<ProviderModalProps> = ({
     provider.location?.primary?.address?.address ||
     provider.location?.primary?.address?.city ||
     "";
-  const availability = provider.availability
-    ? provider.availability
-    : provider.isOnline
-    ? "Online"
-    : undefined;
 
   return (
     <Actionsheet isOpen={visible} onClose={onClose} className="">
@@ -153,10 +170,10 @@ const ProviderModal: React.FC<ProviderModalProps> = ({
             <HStack className="items-center">
               <VStack
                 className="w-3 h-3 rounded-full mr-2"
-                style={{ backgroundColor: getAvailabilityColor(availability) }}
+                style={{ backgroundColor: getAvailabilityColor(presence?.availability) }}
               />
               <Text className="text-typography-500 font-medium">
-                {availability || "Available"}
+                {presence?.availability || "Available"}
               </Text>
             </HStack>
           </ActionsheetItem>
@@ -199,22 +216,26 @@ const ProviderModal: React.FC<ProviderModalProps> = ({
             <Heading>Highlights</Heading>
             {provider.providerImages && provider.providerImages.length > 0 && (
               <VStack className="flex-1">
-                {provider.providerImages.map((image, idx: number) => (
-                  console.log("Rendering image:", image),
-                  <Pressable
-                    key={idx}
-                    onPress={() => setViewMedia((image as MediaItem).url)}
-                    className="flex-1"
-                  >
-                    <Image
-                      source={{
-                        uri: (image as MediaItem).thumbnail,
-                      }}
-                      className="w-52 h-32 rounded-lg"
-                      contentFit="cover"
-                    />
-                  </Pressable>
-                ))}
+                {provider.providerImages.map(
+                  (image, idx: number) => (
+                    console.log("Rendering image:", image),
+                    (
+                      <Pressable
+                        key={idx}
+                        onPress={() => setViewMedia((image as MediaItem).url)}
+                        className="flex-1"
+                      >
+                        <Image
+                          source={{
+                            uri: (image as MediaItem).thumbnail,
+                          }}
+                          className="w-52 h-32 rounded-lg"
+                          contentFit="cover"
+                        />
+                      </Pressable>
+                    )
+                  )
+                )}
                 {!!viewMedia && (
                   <MediaView
                     isOpen={!!viewMedia}
@@ -232,7 +253,8 @@ const ProviderModal: React.FC<ProviderModalProps> = ({
             size="lg"
             variant="outline"
             onPress={() => {
-              onClose(), onFocusLocation;
+              onClose?.();
+              onFocusLocation?.();
             }}
             className="border-gray-300 data-[active=true]:border-gray-400"
           >

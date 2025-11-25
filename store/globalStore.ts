@@ -58,6 +58,7 @@ const useGlobalStore = create<GlobalStore>()(
             draftProjects: state.draftProjects,
             draftJobs: state.draftJobs,
             onboardingData: state.onboardingData,
+            availability: state.availability,
           }),
         }
       )

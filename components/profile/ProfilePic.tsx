@@ -6,7 +6,7 @@ import { VStack } from "../ui/vstack";
 import { HStack } from "../ui/hstack";
 import { Text } from "../ui/text";
 import { Heading } from "../ui/heading";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Icon, CloseIcon } from "../ui/icon";
 import { Alert } from "react-native";
 import { CameraIcon } from "lucide-react-native";
@@ -26,6 +26,15 @@ import { Switch } from "../ui/switch";
 import MediaService from "@/services/mediaService";
 import useGlobalStore from "@/store/globalStore";
 import { FileType } from "@/types";
+import { normalizePresence } from "@/utils/presence";
+import {
+  Radio,
+  RadioGroup,
+  RadioIcon,
+  RadioIndicator,
+  RadioLabel,
+} from "@/components/ui/radio";
+import { CircleIcon } from "@/components/ui/icon";
 
 interface ProfilePicProps {
   imageUri?: string | FileType | null;
@@ -55,7 +64,7 @@ const ProfilePic = ({
   );
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const { isAvailable, setAvailability } = useGlobalStore();
+  const { availability, setAvailability, switchRole } = useGlobalStore();
 
   // Size mappings
   const sizeMap = {
@@ -67,6 +76,39 @@ const ProfilePic = ({
   };
 
   const currentSize = sizeMap[size];
+
+  // memoized status options for availability radios
+  const statusOptions = useMemo(
+    () => [
+      {
+        value: "available",
+        label: "Available",
+        color: "fill-green-600 border-green-600",
+        b: "border-green-600",
+      },
+      {
+        value: "busy",
+        label: "Busy",
+        color: "fill-yellow-600 border-yellow-600",
+        b: "border-yellow-600",
+      },
+      {
+        value: "away",
+        label: "Away",
+        color: "fill-orange-500 border-orange-500",
+        b: "border-orange-600",
+      },
+    ],
+    []
+  );
+
+  const handleAvailabilityChange = useCallback(
+    (v: string) => {
+      // cast to any if your store expects a specific union
+      setAvailability(v as any);
+    },
+    [setAvailability]
+  );
 
   useEffect(() => {
     // Preserve the incoming shape (string or FileType or null)
@@ -273,32 +315,45 @@ const ProfilePic = ({
                 </ActionsheetItemText>
               </ActionsheetItem>
             )}
-            {isLogo && (
+            {isLogo && switchRole === "Provider" && (
               <VStack className="w-full">
                 <Heading className="text-brand-primary font-medium self-start py-4 pl-6 border-b border-gray-200 w-full">
                   Set Status
                 </Heading>
                 <ActionsheetItem className="justify-between items-center w-full pl-6">
-                  <Text size="lg" className="">
+                  <Text size="xl" className="">
                     Status
                   </Text>
                   <HStack space="sm" className="items-center">
-                    <Text
-                      size="lg"
-                      className={`${
-                        isAvailable ? "text-green-600" : "text-gray-500"
-                      }`}
+                    <RadioGroup
+                      value={availability}
+                      onChange={handleAvailabilityChange}
+                      accessibilityLabel="Availability"
                     >
-                      Available
-                    </Text>
-                    <Switch
+                      <HStack space="sm">
+                        {statusOptions.map((opt) => (
+                          <Radio size="lg" key={opt.value} value={opt.value}>
+                            <RadioIndicator
+                              className={`data-[checked=true]:${opt.b} `}
+                            >
+                              <RadioIcon
+                                as={CircleIcon}
+                                className={opt.color}
+                              />
+                            </RadioIndicator>
+                            <RadioLabel>{opt.label}</RadioLabel>
+                          </Radio>
+                        ))}
+                      </HStack>
+                    </RadioGroup>
+                  </HStack>
+                  {/* <Switch
                       value={isAvailable}
-                      onValueChange={setAvailability}
+                      onValueChange={setAvailability()}
                       trackColor={{ false: "#d4d4d4", true: "#16a34a" }}
                       thumbColor="#fafafa"
                       ios_backgroundColor="#d4d4d4"
-                    />
-                  </HStack>
+                    /> */}
                 </ActionsheetItem>
                 <Text className="pl-6 mb-6">
                   Clients will be able to see you are available

@@ -1,3 +1,4 @@
+import { updateAvailability } from "./../services/axios/chat";
 import { updateProviderProfile } from "../services/axios/user";
 import { SignUpData, LoginData } from "./auth";
 import { UserData } from "./user";
@@ -61,12 +62,14 @@ export interface AuthState {
   logout: () => Promise<void>;
 }
 
+export type Status = "available" | "offline" | "busy" | "away";
+
 export interface UserState {
-  isAvailable: boolean;
+  availability: Status;
   isFollowing: boolean;
   otherUser: UserData | null;
   setOtherUser: (user: UserData | null) => void;
-  setAvailability: (available: boolean) => void;
+  setAvailability: (availability: Status) => Promise<void>;
   updateProfile: (updates: Partial<UserData>) => void;
   updateUserProfile: (role: ActiveRole, data?: FormData) => Promise<void>;
   fetchUserProfile: (userId?: string) => Promise<void>;

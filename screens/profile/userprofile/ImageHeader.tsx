@@ -107,11 +107,11 @@ const ImageHeader = ({ provider }: { provider: ProviderData }) => {
                 {provider.favoriteCount === 1 ? "follower" : "followers"}
               </Text>
             </VStack>
-            <Divider orientation="vertical" className="mx-4 h-5 self-center" />
+            {/* <Divider orientation="vertical" className="mx-4 h-5 self-center" />
             <VStack>
               <Heading className="text-white">30yrs</Heading>
               <Text className="text-white">exp</Text>
-            </VStack>
+            </VStack> */}
           </HStack>
           {user?._id !== provider.owner && (
             <Button

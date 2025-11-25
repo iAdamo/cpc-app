@@ -14,18 +14,23 @@ import {
   SignUpData,
   LoginData,
   UserState,
+  Status,
 } from "@/types";
 import appendFormData from "@/utils/AppendFormData";
 import chatService from "@/services/chatService";
+import { updateAvailability } from "@/services/axios/chat";
 
 export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
   set,
   get
 ) => ({
-  isAvailable: false,
+  availability: "offline",
   isFollowing: false,
   otherUser: null,
-  setAvailability: (available: boolean) => set({ isAvailable: available }),
+  setAvailability: async (status: string) => {
+    const presence = await updateAvailability(status);
+    set({ availability: presence.availability });
+  },
   setOtherUser: (user: UserData | null) => set({ otherUser: user }),
   // Action to directly update user state
   updateProfile: (updates: Partial<UserData>) => {

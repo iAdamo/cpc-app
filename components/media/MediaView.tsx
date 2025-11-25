@@ -81,6 +81,7 @@ const MediaView = ({
               source={url}
               className="w-full h-full object-cover bg-black"
               resizeMode="contain"
+              alt={url}
             />
           )}
           {isVideo && (

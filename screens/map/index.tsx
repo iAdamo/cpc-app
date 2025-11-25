@@ -28,11 +28,7 @@ import { View, StyleSheet } from "react-native";
 import { ProviderData } from "@/types";
 import { Spinner } from "@/components/ui/spinner";
 
-export interface MapsProp {
-  markers: [];
-}
-
-const MapView = (props: { props: MapsProp }) => {
+const MapView = ({ provider }: { provider?: ProviderData }) => {
   const [providers, setProviders] = useState<ProviderData[]>([]);
   const [selectedProvider, setSelectedProvider] = useState<ProviderData>();
   const { searchResults, isLoading } = useGlobalStore();
@@ -48,18 +44,17 @@ const MapView = (props: { props: MapsProp }) => {
     // console.log("Selected provider:", provider);
   };
 
-  return (
-    providers &&
-    providers.length > 0 ? (
-      <View style={styles.container}>
-        <ProvidersMap
-          providers={providers}
-          onProviderSelect={handleProviderSelect}
-          showUserLocation={true}
-          enableLiveTracking={false}
-        />
-      </View>
-    ) : (<Spinner size="large" className="flex-1" />)
+  return providers && providers.length > 0 ? (
+    <View style={styles.container}>
+      <ProvidersMap
+        providers={providers}
+        onProviderSelect={handleProviderSelect}
+        showUserLocation={true}
+        enableLiveTracking={false}
+      />
+    </View>
+  ) : (
+    <Spinner size="large" className="flex-1" />
   );
 };
 

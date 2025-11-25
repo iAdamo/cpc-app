@@ -174,6 +174,7 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       groupedMessages: [],
       hasMoreMessages: true,
       chats: [],
+      availability: "offline",
     });
     socketService.disconnect();
     await SecureStore.deleteItemAsync("accessToken");

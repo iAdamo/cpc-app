@@ -3,33 +3,21 @@ import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { Card } from "@/components/ui/card";
-import { Icon } from "@/components/ui/icon";
 import { Heading } from "@/components/ui/heading";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Link, LinkText } from "@/components/ui/link";
-import {
-  DotIcon,
-  MapPinIcon,
-  MessageSquareTextIcon,
-  PhoneIcon,
-} from "lucide-react-native";
-import { ProviderData, EditableFields } from "@/types";
+import { MessageSquareTextIcon, PhoneIcon } from "lucide-react-native";
+import { ProviderData, EditableFields, Presence } from "@/types";
 import useGlobalStore from "@/store/globalStore";
-import { Badge, BadgeText, BadgeIcon } from "@/components/ui/badge";
+import { Badge, BadgeText } from "@/components/ui/badge";
 import { router } from "expo-router";
 import { getLastSeen } from "@/services/axios/chat";
 import DateFormatter from "@/utils/DateFormat";
-import chatService from "@/services/chatService";
-import { GooglePlaceService } from "@/services/googlePlaceService";
+import PresenceBadge from "@/components/PresenceBadge";
 
 const ProfileInfo = ({
   provider,
   isSticky,
-  isEditable,
-  editingFields,
-  handleSave,
-  handleEditStart,
-  handleCancelEdit,
   onLayout,
 }: {
   provider: ProviderData;
@@ -41,8 +29,7 @@ const ProfileInfo = ({
   handleCancelEdit: () => void;
   onLayout: any;
 }) => {
-  const [lastSeen, setLastSeen] = useState<string>("");
-  const [isOnline, setIsOnline] = useState<boolean>(false);
+  const [presence, setPresence] = useState<Presence>();
   const {
     user,
     switchRole,
@@ -57,13 +44,9 @@ const ProfileInfo = ({
     let mounted = true;
     (async () => {
       try {
-        const lastSeen = await getLastSeen(provider.owner);
-
+        const presence = await getLastSeen(provider.owner);
         if (!mounted) return;
-        if (lastSeen) {
-          setLastSeen(lastSeen.lastSeen);
-          setIsOnline(lastSeen.isOnline);
-        }
+        if (presence) setPresence(presence);
       } catch (error) {
         console.error("Failed to fetch last seen:", error);
       }
@@ -92,15 +75,15 @@ const ProfileInfo = ({
     >
       {/* Profile Info Section */}
       <VStack className="">
-        <HStack className="justify-between">
+        <HStack className="">
           <Card className="w-1/2 gap-2 items-start">
-            <HStack space="xs" className="">
-              <Heading size="xl" className="">
+            <HStack space="xs">
+              <Heading size="xl" className="flex-1">
                 {provider?.providerName || "Alejandro De'Armas"}
               </Heading>
               <Badge
                 action={provider?.isVerified ? "success" : "muted"}
-                className="ml-2"
+                className="ml-2 h-6"
               >
                 <BadgeText>
                   {provider?.isVerified ? "Verified" : "Unverified"}
@@ -111,7 +94,10 @@ const ProfileInfo = ({
             <Text size="lg" className="font-bold">
               {provider.subcategories[0].name || "Tree Felling"}
             </Text>
-            <Link className=" rounded-md data-[active=true]:bg-blue-200">
+            <Link
+              className=" rounded-md data-[active=true]:bg-blue-200"
+              onPress={() => setCurrentView("Map")}
+            >
               {/* <ButtonIcon as={MapPinIcon} size="md" className="text-red-600" /> */}
               <LinkText className=" font-medium data-[active=true]:text-blue-200">
                 {provider.location.primary?.address?.address ||
@@ -120,26 +106,13 @@ const ProfileInfo = ({
             </Link>
           </Card>
           <Card className="gap-2 items-end flex-1">
-            <HStack space="xs" className="items-center">
-              {/* availability indicator */}
-              <Badge
-                action={isOnline ? "success" : "muted"}
-                className="px-2 py-1"
-              >
-                <BadgeIcon
-                  as={DotIcon}
-                  className={`w-3 h-3 ${
-                    isOnline ? "text-green-600" : "text-gray-500"
-                  }`}
-                />
-                <BadgeText className="text-sm">
-                  {isOnline ? "Available" : "Unavailable"}
-                </BadgeText>
-              </Badge>
-            </HStack>
+            {/** Presence badge */}
+            <PresenceBadge presence={presence} className="" iconSize={12} />
             {switchRole === "Client" && user?._id !== provider.owner && (
               <VStack className="items-end gap-2">
-                {!isOnline && <Text>{DateFormatter.toRelative(lastSeen)}</Text>}
+                {!presence?.isOnline && (
+                  <Text>{DateFormatter.toRelative(presence?.lastSeen!)}</Text>
+                )}
                 <HStack className="gap-2">
                   <Button
                     size="sm"

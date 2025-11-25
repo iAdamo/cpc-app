@@ -16,7 +16,12 @@ import useGlobalStore from "@/store/globalStore";
 const { axiosInstance } = ApiClientSingleton.getInstance();
 
 export const getLastSeen = async (userId: string): Promise<Presence> => {
-  const response = await axiosInstance.get(`/chat/lastseen/${userId}`);
+  const response = await axiosInstance.get(`/notif/presence/${userId}`);
+  return response.data;
+};
+
+export const updateAvailability = async (status: string): Promise<Presence> => {
+  const response = await axiosInstance.post("/notif/presence/status", { status });
   return response.data;
 };
 
