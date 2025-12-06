@@ -1,30 +1,13 @@
 import { FlatList, ListRenderItemInfo } from "react-native";
 import { VStack } from "@/components/ui/vstack";
-import { HStack } from "@/components/ui/hstack";
-import { Heading } from "@/components/ui/heading";
-import { Text } from "@/components/ui/text";
-import { Center } from "@/components/ui/center";
-import { useNavigation } from "@react-navigation/native";
 import { Chat } from "@/types";
-import { router } from "expo-router";
 import useGlobalStore from "@/store/globalStore";
 import { useEffect, useCallback } from "react";
 import chatService from "@/services/chatService";
-import { Pressable } from "@/components/ui/pressable";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  Avatar,
-  AvatarFallbackText,
-  AvatarImage,
-} from "@/components/ui/avatar";
 import NoActiveChat from "./NoActiveChat";
 import ChatItem from "./ChatItem";
-import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
-import { SearchIcon } from "@/components/ui/icon";
 import ChatNavbar from "./ChatNavbar";
-import { UserData, ProviderData } from "@/types";
-import DateFormatter from "@/utils/DateFormat";
-import SearchBar from "@/components/SearchEngine";
 
 export const ChatList: React.FC = () => {
   const { fetchChats, chats, chatLoading, switchRole, user, filteredChats } =
@@ -36,7 +19,7 @@ export const ChatList: React.FC = () => {
       try {
         await fetchChats();
         if (!mounted) return;
-        await chatService.connect();
+        // await chatService.connect();
       } catch (error) {
         console.error("Failed to initialize chat:", error);
       }

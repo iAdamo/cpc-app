@@ -117,7 +117,7 @@ const AttactmentOptions = ({
   return (
     <Popover
       size="full"
-      offset={15}
+      offset={-30}
       isKeyboardDismissable={false}
       trigger={(triggerProps) => {
         return (
@@ -148,7 +148,7 @@ const AttactmentOptions = ({
                 onPress={option.action}
               >
                 <Icon
-                  size={24}
+                  size="xl"
                   as={option.icon}
                   className={`text-${option.color}-500`}
                 />

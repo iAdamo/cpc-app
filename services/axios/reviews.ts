@@ -24,6 +24,6 @@ export const updateReview = async (
 };
 
 export const getReviews = async (id?: string): Promise<ReviewData[]> => {
-  const response = await axiosInstance.get(`reviews/${id}`);
+  const response = await axiosInstance.get(`reviews/${id || "me"}`);
   return response.data;
 };

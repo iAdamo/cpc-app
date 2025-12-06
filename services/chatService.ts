@@ -26,9 +26,9 @@ class ChatService {
   }
 
   // connect to socket server
-  async connect(): Promise<void> {
-    await this.socket.connect();
-  }
+  // async connect(): Promise<void> {
+  //   await this.socket.connect();
+  // }
 
   // Chat Management
   async createDirectChat(participantId: string): Promise<Chat> {

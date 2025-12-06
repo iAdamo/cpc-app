@@ -42,7 +42,7 @@ export const BottomNavbar = () => {
   // console.log(pathname, "Current Pathname");
 
   return (
-    <HStack className="p-2 px-6 justify-between bg-white items-center border border-t border-gray-300 fixed bottom-0">
+    <HStack className="p-2 px-6 justify-between bg-white items-center border-t border-gray-300 fixed bottom-0">
       {buttons
         .filter(
           (button) => button.showFor === "Both" || button.showFor === switchRole
@@ -180,7 +180,7 @@ export const TopNavbar = () => {
                 }
               />
             </Button>
-            
+
           </HStack>
         </HStack>
         {/** Search bar */}

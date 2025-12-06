@@ -30,6 +30,7 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
           user: response,
           success: "Account created successfully!",
           isAuthenticated: true,
+          switchRole: "Client",
           isLoading: false,
         });
         await SecureStore.setItemAsync("accessToken", response.accessToken);
@@ -178,6 +179,7 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
     });
     socketService.disconnect();
     await SecureStore.deleteItemAsync("accessToken");
+    await SecureStore.deleteItemAsync("sessionId");
     router.replace("/");
   },
 });

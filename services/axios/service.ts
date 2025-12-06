@@ -77,7 +77,7 @@ export const createJob = async (data: FormData): Promise<JobData> => {
 };
 
 export const getJobsByUser = async (): Promise<JobData[]> => {
-  const response = await axiosInstance.get("services/jobs");
+  const response = await axiosInstance.get("services/jobs/me");
   return response.data;
 };
 

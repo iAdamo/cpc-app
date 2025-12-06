@@ -1,8 +1,5 @@
-import { Progress } from "@/components/ui/progress";
-import { updateUserProfile } from "@/services/axios/user";
-import { ApiClientSingleton } from "@/services/axios/conf";
 import { StateCreator } from "zustand";
-import { GlobalStore, GlobalState, ActiveRole, LayoutView } from "@/types";
+import { GlobalStore, GlobalState, LayoutView } from "@/types";
 
 export const globalSlice: StateCreator<GlobalStore, [], [], GlobalState> = (
   set,
@@ -25,8 +22,7 @@ export const globalSlice: StateCreator<GlobalStore, [], [], GlobalState> = (
   setSwitchRole: async (role) => {
     const formData = new FormData();
     formData.append("activeRole", role);
-    await updateUserProfile(formData);
-    set({ switchRole: role, chats: [] });
+    get().updateUserProfile("Client", formData);
   },
   paramsFrom: null,
   setParamsFrom: (params) => set({ paramsFrom: params }),

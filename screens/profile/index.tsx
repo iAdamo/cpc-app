@@ -51,7 +51,7 @@ const ProfileView = () => {
 
   const handleCompanyOnboarding = () => {
     if (!user) return false;
-    console.log(switchRole);
+    // console.log(switchRole);
     if (user.activeRoleId?.owner && switchRole === "Client") {
       setSwitchRole("Provider");
       router.push("/clients");

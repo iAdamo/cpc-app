@@ -59,10 +59,10 @@ const ProfileInfo = () => {
           type: "image/jpeg",
         } as any);
       }
-      console.log(
-        "Updating profile with data:",
-        Array.from(formData.entries())
-      );
+      // console.log(
+      //   "Updating profile with data:",
+      //   Array.from(formData.entries())
+      // );
       await updateUserProfile("Client", formData);
     } catch (error) {
       console.error("Error updating profile:", error);

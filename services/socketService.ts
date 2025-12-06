@@ -38,7 +38,6 @@ class SocketService {
     // console.log("Creating new socket connection...");
 
     this.socket = io(SOCKET_URL, {
-      path: Constants.expoConfig?.extra?.socketPath || "",
       auth: {
         token: token ? token : undefined,
       },
@@ -50,13 +49,15 @@ class SocketService {
       reconnectionDelayMax: 5000,
     });
 
+    // console.log(this.socket);
+
     this.setupEventListeners();
   }
 
   private setupEventListeners(): void {
     if (!this.socket) return;
 
-    this.socket.on("connect", () => {
+    this.socket.on("connection", () => {
       console.log("Socket connected");
       this.isConnected = true;
       // flush queued emits

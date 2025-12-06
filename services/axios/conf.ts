@@ -3,6 +3,7 @@ import * as SecureStore from "expo-secure-store";
 import useGlobalStore from "@/store/globalStore";
 import Constants from "expo-constants";
 import { AxiosError } from "axios";
+import { getDeviceId, getSessionId } from "@/utils/device";
 
 const createClient = () => {
   const apiClient = axios.create({
@@ -20,6 +21,15 @@ const createClient = () => {
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
+        console.debug(config.url);
+        if (config.url?.startsWith("auth")) {
+          const deviceId = await getDeviceId();
+          const sessionId = await getSessionId();
+
+          config.headers["x-device-id"] = deviceId;
+          config.headers["x-session-id"] = sessionId;
+        }
+        // console.log(config.headers);
       } catch (err) {
         console.error("Error reading token", err);
       }
@@ -27,7 +37,6 @@ const createClient = () => {
     },
     (error) => Promise.reject(error)
   );
-
 
   // Handle response errors
   apiClient.interceptors.response.use(

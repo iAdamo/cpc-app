@@ -79,14 +79,8 @@ import { JobData, FileType, MediaItem, ProposalData } from "@/types";
 import MediaPicker from "@/components/media/MediaPicker";
 import appendFormData from "@/utils/AppendFormData";
 import { Image } from "@/components/ui/image";
-import {
-  Avatar,
-  AvatarFallbackText,
-  AvatarImage,
-} from "@/components/ui/avatar";
 import ProfileVatar from "@/components/ProfileAvatar";
 import MediaView from "@/components/media/MediaView";
-import { Badge, BadgeText } from "@/components/ui/badge";
 import { MapPinCheckIcon } from "lucide-react-native";
 import { locationService } from "@/utils/GetDistance";
 import { MapPinIcon } from "lucide-react-native";
