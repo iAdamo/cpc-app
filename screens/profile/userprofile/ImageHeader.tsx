@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
@@ -24,6 +24,7 @@ import {
   ActionsheetDragIndicatorWrapper,
   ActionsheetBackdrop,
 } from "@/components/ui/actionsheet";
+import { socketService, PresenceEvents } from "@/services/socketService";
 
 const styles = StyleSheet.create({
   header: {
@@ -35,12 +36,48 @@ const styles = StyleSheet.create({
 });
 const ImageHeader = ({ provider }: { provider: ProviderData }) => {
   const [showOptions, setShowOptions] = useState(false);
-  const { toggleFollow, isFollowing, user, otherUser } = useGlobalStore();
+  const [subData, setSubData] = useState<{
+    providerId: string;
+    followersCount: number;
+    isFollowing: boolean;
+    followedBy: string[];
+  }>();
+  const { user, isFollowing } = useGlobalStore();
 
-  const handleFollow = async () => {
+  const handleFollow = useCallback(async () => {
     if (!provider || !provider._id) return;
-    await toggleFollow(provider._id);
-  };
+    try {
+      socketService.emitEvent(PresenceEvents.SUBSCRIBE, {
+        userIds: [provider._id],
+      });
+    } catch (error) {
+      console.error("Error handling follow subscription:", error);
+    }
+  }, [provider]);
+
+  useEffect(() => {
+    const handleSubscribedEvent = (data: {
+      providerId: string;
+      followersCount: number;
+      isFollowing: boolean;
+      followedBy: string[];
+    }) => {
+      if (!data.providerId || data.providerId !== provider._id) return;
+      setSubData(data);
+      useGlobalStore.setState((state) => {
+        state.isFollowing = data.isFollowing;
+      });
+    };
+
+    socketService.onEvent(
+      PresenceEvents.SUBSCRIBED,
+      handleSubscribedEvent as any
+    );
+
+    return () => {
+      socketService.offEvent(PresenceEvents.SUBSCRIBED, handleSubscribedEvent);
+    };
+  }, [handleFollow]);
 
   const options = [
     { label: "Report", action: () => alert("Report") },
@@ -50,15 +87,13 @@ const ImageHeader = ({ provider }: { provider: ProviderData }) => {
 
   // console.log(provider.providerImages[0]);
 
-  useEffect(() => {
-    useGlobalStore.setState((state) => {
-      state.isFollowing = Boolean(
-        otherUser?.activeRoleId?.followedBy?.includes(
-          state.user?._id || ""
-        )
-      );
-    });
-  }, [otherUser, isFollowing, user]);
+  // useEffect(() => {
+  //   useGlobalStore.setState((state) => {
+  //     state.isFollowing = Boolean(
+  //       otherUser?.activeRoleId?.followedBy?.includes(state.user?._id || "")
+  //     );
+  //   });
+  // }, [otherUser, isFollowing, user]);
 
   return (
     <VStack className="h-72">
@@ -101,7 +136,7 @@ const ImageHeader = ({ provider }: { provider: ProviderData }) => {
             <Divider orientation="vertical" className="mx-4 h-5 self-center" />
             <VStack>
               <Heading className="text-white">
-                {provider.followersCount}
+                {subData?.followersCount}
               </Heading>
               <Text className="text-white">
                 {provider.favoriteCount === 1 ? "follower" : "followers"}
@@ -131,7 +166,9 @@ const ImageHeader = ({ provider }: { provider: ProviderData }) => {
                 } w-4 h-4`}
               />
               <ButtonText
-                className={`${isFollowing ? "text-white/80" : "text-white"}`}
+                className={`${
+                  isFollowing ? "text-white/80" : "text-white"
+                }`}
               >
                 {isFollowing ? "Following" : "Follow"}
               </ButtonText>

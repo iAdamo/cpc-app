@@ -1,4 +1,3 @@
-import { SectionList } from "react-native";
 import { ApiClientSingleton } from "./axios/conf";
 import { socketService } from "./socketService";
 import {
@@ -10,8 +9,10 @@ import {
   MessageStatus,
   SendMessageParams,
   MessageSection,
+  EventEnvelope,
 } from "@/types";
 import useGlobalStore from "@/store/globalStore";
+import { SocketEvents, ChatEvents } from "./socketService";
 
 class ChatService {
   private axiosInstance;
@@ -20,22 +21,17 @@ class ChatService {
 
   constructor() {
     const { axiosInstance } = ApiClientSingleton.getInstance();
-    const socket = socketService;
     this.axiosInstance = axiosInstance;
-    this.socket = socket;
+    this.socket = socketService;
   }
 
-  // connect to socket server
-  // async connect(): Promise<void> {
-  //   await this.socket.connect();
-  // }
-
-  // Chat Management
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // REST
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   async createDirectChat(participantId: string): Promise<Chat> {
     const response = await this.axiosInstance.post("/chat", {
       participants: participantId,
     });
-    console.log("Create chat response:", response.data);
     return response.data;
   }
 
@@ -43,7 +39,6 @@ class ChatService {
     const response = await this.axiosInstance.get("/chat/user/chats", {
       params: { page, limit },
     });
-    // console.log("User chats:", response.data);
     return response.data;
   }
 
@@ -58,22 +53,12 @@ class ChatService {
     return response.data;
   }
 
-  // Real-time Messaging
-  async checkOnlineStatus(userId: string): Promise<boolean> {
-    return new Promise((resolve) => {
-      const handler = (data: { userId: string; online: boolean }) => {
-        if (data.userId === userId) {
-          this.socket.offEvent("online_status", handler); // Clean up listener
-          resolve(data.online);
-        }
-      };
-      this.socket.onEvent("online_status", handler);
-      this.socket.emitEvent("check_online", { userId });
-    });
-  }
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // REALTIME — ENVELOPE-BASED
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   async sendMessage(params: SendMessageParams): Promise<void> {
-    this.socket.emitEvent("send_message", params);
+    await this.socket.emitEvent(SocketEvents.CHAT_SEND_MESSAGE, params);
   }
 
   async sendTextMessage(
@@ -81,13 +66,13 @@ class ChatService {
     text: string,
     replyTo?: string
   ): Promise<void> {
-    const messageParams: SendMessageParams = {
+    const params: SendMessageParams = {
       chatId,
       type: "text",
       content: { text },
       replyTo,
     };
-    await this.sendMessage(messageParams);
+    await this.sendMessage(params);
   }
 
   async sendMediaMessage(
@@ -97,75 +82,96 @@ class ChatService {
     options: Partial<MessageContent> = {},
     replyTo?: string
   ): Promise<void> {
-    const messageParams: SendMessageParams = {
+    const params: SendMessageParams = {
       chatId,
       type,
       content: { mediaUrl, ...options },
       replyTo,
     };
-    await this.sendMessage(messageParams);
+    await this.sendMessage(params);
   }
 
-  // Real-time Event Handling
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // LISTENERS (Envelope-based)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  offEvent(event: string, callback?: (data: any) => void): void {
-    this.socket.offEvent(event, callback);
+  // offEvent(event: SocketEvents, callback?: (data: any) => void): void {
+  //   this.socket.offEvent(event, callback);
+  // }
+
+  onNewMessage(
+    callback: (data: EventEnvelope<{ message: Message }>) => void
+  ): void {
+    this.socket.onEvent(SocketEvents.CHAT_MESSAGE_SENT, callback);
   }
 
-  onNewMessage(callback: (message: { message: Message }) => void): void {
-    this.socket.onEvent("new_message", callback);
-  }
-
-  onMessageError(callback: (error: any) => void): void {
-    socketService.onEvent("message_error", callback);
+  onMessageError(
+    callback: (data: EventEnvelope<{ error: string; chatId?: string }>) => void
+  ): void {
+    this.socket.onEvent(SocketEvents.ERROR, callback);
   }
 
   onUserTyping(
-    callback: (data: {
+    callback: EventEnvelope<{
       userId: string;
       chatId: string;
       typing: boolean;
-    }) => void
+    }> extends infer T
+      ? (data: T) => void
+      : never
   ): void {
-    socketService.onEvent("user_typing", callback);
+    this.socket.onEvent(SocketEvents.CHAT_TYPING_START, callback);
+    this.socket.onEvent(SocketEvents.CHAT_TYPING_STOP, callback);
   }
 
   onMessagesDelivered(
-    callback: (data: { userId: string; chatId: string }) => void
+    callback: (data: EventEnvelope<{ userId: string; chatId: string }>) => void
   ): void {
-    socketService.onEvent("messages_delivered", callback);
+    this.socket.onEvent(SocketEvents.CHAT_MESSAGE_DELIVERED, callback);
   }
 
-  // Typing Indicators
-  startTyping(chatId: string): void {
-    socketService.emitEvent("typing_start", { chatId });
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // TYPING INDICATORS
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  startTyping(chatId: string, isTyping: boolean): void {
+    this.socket.emitEvent(ChatEvents.TYPING_INDICATOR, { chatId, isTyping });
   }
 
   stopTyping(chatId: string): void {
-    socketService.emitEvent("typing_stop", { chatId });
-  }
-  // Message Status
-  markMessagesAsDelivered(chatId: string): void {
-    socketService.emitEvent("mark_delivered", { chatId });
+    this.socket.emitEvent(SocketEvents.CHAT_TYPING_STOP, { chatId });
   }
 
-  // Chat Room Management
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // MESSAGE STATUS
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  markMessagesAsDelivered(chatId: string): void {
+    this.socket.emitEvent(SocketEvents.CHAT_MESSAGE_DELIVERED, { chatId });
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // CHAT ROOM
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   joinChat(chat: Chat): void {
     this.currentChat = chat;
     useGlobalStore.setState({ selectedChat: chat });
-    socketService.joinChat(chat._id);
+    this.socket.emitEvent(SocketEvents.CHAT_JOIN_ROOM, { chatId: chat._id });
   }
 
   leaveCurrentChat(): void {
     if (this.currentChat) {
-      socketService.leaveChat(this.currentChat._id);
+      this.socket.emitEvent(SocketEvents.CHAT_LEAVE_ROOM, {
+        chatId: this.currentChat._id,
+      });
       this.currentChat = null;
     }
   }
-  // Cleanup
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // CLEANUP
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   disconnect(): void {
     this.leaveCurrentChat();
-    socketService.disconnect();
+    this.socket.disconnect();
   }
 }
 

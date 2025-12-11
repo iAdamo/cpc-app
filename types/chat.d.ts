@@ -1,5 +1,9 @@
 import { MediaItem, UserData } from "./user";
-
+import {
+  ChatEvents,
+  SocketEvents,
+  PresenceEvents,
+} from "@/services/socketService";
 export interface Chat {
   _id: string;
   participants: UserData[];
@@ -72,4 +76,16 @@ export interface Presence {
   lastSeen: string;
   deviceId: string;
   availability: "available" | "offline" | "busy" | "away";
+}
+
+export interface EventEnvelope<T = any> {
+  version: string;
+  event: SocketEvents | ChatEvents | PresenceEvents;
+  timestamp: number;
+  payload: T;
+  metadata?: {
+    requestId?: string;
+    deviceId?: string;
+    sessionId?: string;
+  };
 }

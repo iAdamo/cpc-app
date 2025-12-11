@@ -44,4 +44,11 @@ export interface UserData {
   owner: string;
 }
 
+export interface ResEventEnvelope<T = any> {
+  version: string;
+  timestamp: number;
+  targetId?: string;
+  payload: T;
+}
+
 export type EditableFields = keyof UserData | keyof ProviderData;

@@ -19,6 +19,7 @@ import {
 import appendFormData from "@/utils/AppendFormData";
 import chatService from "@/services/chatService";
 import { updateAvailability } from "@/services/axios/chat";
+import { socketService, PresenceEvents } from "@/services/socketService";
 
 export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
   set,
@@ -73,10 +74,10 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
         // console.log("Updated user profile:", response);
         set({
           user: { ...response },
-          switchRole: !data ? response.activeRole : get().switchRole,
+          switchRole: response.activeRole,
           selectedFiles: [],
           isLoading: false,
-          success: "Profile updated successfully!",
+          success: role === "Client" ? "" : "Profile updated successfully!",
         });
       }
     } catch (error: any) {
@@ -116,32 +117,35 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
   toggleFollow: async (providerId: string) => {
     set({ error: null });
     try {
-      const response = await toggleFollowProvider(providerId);
-      if (response) {
-        // console.log("Follow toggle response:", response);
-        const currentUser = get().user;
-        const isSelf = currentUser && response._id === currentUser._id;
-        const updateObj = {
-          isFollowing: response.followedProviders.some(
-            (p) => p._id === providerId
-          ),
-          info: response.followedProviders.some((p) => p._id === providerId)
-            ? "Started following provider"
-            : "Unfollowed provider",
-          isLoading: false,
-        };
-        if (isSelf) {
-          set({
-            user: { ...response },
-            ...updateObj,
-          });
-        } else {
-          set({
-            otherUser: { ...response },
-            ...updateObj,
-          });
-        }
-      }
+      socketService.emitEvent(PresenceEvents.SUBSCRIBE, {
+        userIds: [providerId],
+      });
+      //       // const response = await toggleFollowProvider(providerId);
+      // if (response) {
+      //   // console.log("Follow toggle response:", response);
+      //   const currentUser = get().user;
+      //   const isSelf = currentUser && response._id === currentUser._id;
+      //   const updateObj = {
+      //     isFollowing: response.followedProviders.some(
+      //       (p) => p._id === providerId
+      //     ),
+      //     info: response.followedProviders.some((p) => p._id === providerId)
+      //       ? "Started following provider"
+      //       : "Unfollowed provider",
+      //     isLoading: false,
+      //   };
+      //   if (isSelf) {
+      //     set({
+      //       user: { ...response },
+      //       ...updateObj,
+      //     });
+      //   } else {
+      //     set({
+      //       otherUser: { ...response },
+      //       ...updateObj,
+      //     });
+      //   }
+      // }
     } catch (error: any) {
       set({
         error:

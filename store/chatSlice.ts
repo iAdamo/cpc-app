@@ -176,11 +176,11 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
   startTyping: () => {
     const { selectedChat } = get();
     if (!selectedChat) return;
-    chatService.startTyping(selectedChat._id);
+    chatService.startTyping(selectedChat._id, true);
   },
   stopTyping: () => {
     const { selectedChat } = get();
     if (!selectedChat) return;
-    chatService.stopTyping(selectedChat._id);
+    chatService.startTyping(selectedChat._id, false);
   },
 });

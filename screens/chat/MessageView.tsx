@@ -1,12 +1,4 @@
-import {
-  useState,
-  useEffect,
-  useCallback,
-  useRef,
-  memo,
-  useMemo,
-  use,
-} from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
@@ -35,7 +27,7 @@ import {
 } from "@/components/ui/icon";
 import { ListRenderItem, Keyboard, View } from "react-native";
 import useGlobalStore from "@/store/globalStore";
-import { MediaItem, Message } from "@/types";
+import { MediaItem, Message, EventEnvelope } from "@/types";
 import { useLocalSearchParams } from "expo-router";
 import { MicIcon, SendIcon, ChevronsDownIcon } from "lucide-react-native";
 import { Animated } from "react-native";
@@ -52,6 +44,13 @@ import Anime, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
+import {
+  ChatEvents,
+  SocketEvents,
+  socketService,
+} from "@/services/socketService";
+import { usePresence } from "@/hooks/usePresence";
+import DateFormatter from "@/utils/DateFormat";
 
 const MessageView = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -82,89 +81,9 @@ const MessageView = () => {
     return null;
   }
   const isClient = switchRole === "Client";
+  const otherParticipant = selectedChat?.participants[0];
 
-  useEffect(() => {
-    if (!selectedChat) return;
-    console.log("Initializing chat...");
-
-    // Join chat room via WebSocket
-    chatService.joinChat(selectedChat);
-
-    // Load initial messages
-    loadMessages(1);
-
-    const handleNewMessage = ({ message }: { message: Message }) => {
-      // console.log("New message received:", message);
-
-      // remove all optimistic messages
-      useGlobalStore.setState((state) => ({
-        groupedMessages: state.groupedMessages.map(
-          (section: MessageSection) => ({
-            ...section,
-            data: section.data.filter((msg) => !msg.isOptimistic),
-          })
-        ),
-      }));
-
-      // add to groupMessage without duplicates
-      useGlobalStore.setState((state) => ({
-        groupedMessages: (() => {
-          const todayTitle = "Today";
-          const existingSection = state.groupedMessages.find(
-            (section: MessageSection) => section.title === todayTitle
-          );
-          if (existingSection) {
-            // Avoid duplicates
-            if (
-              existingSection.data.find(
-                (msg: Message) => msg._id === message._id
-              )
-            ) {
-              return state.groupedMessages;
-            }
-            return state.groupedMessages.map((section: MessageSection) =>
-              section.title === todayTitle
-                ? { ...section, data: [message, ...section.data] }
-                : section
-            );
-          } else {
-            return [
-              { title: todayTitle, data: [message] },
-              ...state.groupedMessages,
-            ];
-          }
-        })(),
-      }));
-    };
-
-    const handleUserTyping = (data: { userId: string; typing: boolean }) => {
-      useGlobalStore.setState((state) => ({
-        typingUsers: data.typing
-          ? [
-              ...state.typingUsers.filter((id) => id !== data.userId),
-              data.userId,
-            ]
-          : state.typingUsers.filter((id) => id !== data.userId),
-      }));
-    };
-
-    const handleMessageError = (error: any) => {
-      console.error("Message error:", error);
-    };
-
-    // Set up event listeners
-    chatService.onNewMessage(handleNewMessage);
-    chatService.onUserTyping(handleUserTyping);
-    chatService.onMessageError(handleMessageError);
-
-    return () => {
-      console.log("Cleaning up chat...");
-      chatService.leaveCurrentChat();
-      chatService.offEvent("new_message", handleNewMessage);
-      chatService.offEvent("user_typing", handleUserTyping);
-      chatService.offEvent("message_error", handleMessageError);
-    };
-  }, [selectedChat]);
+  const { status, lastSeen, isOnline, isTyping } = usePresence(otherParticipant._id);
 
   /** Scroll handler to toggle button visibility based on proximity to bottom */
   // ...existing code...
@@ -205,28 +124,6 @@ const MessageView = () => {
 
   const Headerbar = () => {
     const otherParticipant = selectedChat?.participants[0];
-    const [isOnline, setIsOnline] = useState<boolean | null>(null);
-
-    useEffect(() => {
-      let isMounted = true;
-      const checkStatus = async () => {
-        if (user?._id) {
-          try {
-            const status = await chatService.checkOnlineStatus(
-              otherParticipant._id
-            );
-            if (isMounted) setIsOnline(status);
-          } catch (error) {
-            console.error("Error checking online status:", error);
-          }
-        }
-      };
-      checkStatus();
-
-      return () => {
-        isMounted = false;
-      };
-    }, [otherParticipant._id, user?._id]);
 
     return (
       <VStack className="mt-16 mb-4">
@@ -267,17 +164,24 @@ const MessageView = () => {
                   className={`${isOnline ? "bg-green-500" : "bg-gray-400"}`}
                 />
               </Avatar>
-              <VStack>
-                <Heading>
+              <VStack className="flex-1">
+                <Heading className="">
                   {isClient
                     ? otherParticipant?.activeRoleId?.providerName
                     : (otherParticipant?.firstName || "") +
                       " " +
                       (otherParticipant?.lastName || "")}
                 </Heading>
-                <Text size="sm" className="text-typography-500">
-                  {isOnline ? "Online" : "Offline"}
-                </Text>
+
+                {isOnline ? (
+                  <Text size="sm" className="text-typography-500">
+                    {status}
+                  </Text>
+                ) : (
+                  <Text size="sm" className="text-typography-500">
+                    {status} {DateFormatter.toRelative(lastSeen)}
+                  </Text>
+                )}
               </VStack>
             </HStack>
           </HStack>
@@ -507,10 +411,6 @@ const MessageView = () => {
 
   const keyExtractor = useCallback((item: Message) => item._id, []);
 
-  // Typing indicator UI
-  const { typingUsers } = useGlobalStore();
-  const otherTyping = typingUsers && typingUsers.length > 0;
-
   const useGradualAnimation = () => {
     const height = useSharedValue(0);
 
@@ -565,7 +465,7 @@ const MessageView = () => {
         />
 
         {/* Typing indicator */}
-        {otherTyping && (
+        {isTyping && (
           <VStack className="w-full items-start px-6 pb-2">
             <Text className="text-xs text-gray-500">Is typing...</Text>
           </VStack>

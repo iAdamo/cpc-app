@@ -11,6 +11,7 @@ import { ShareService } from "@/services/shareService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView } from "react-native-safe-area-context";
 import "../global.css";
+import { socketService } from "@/services/socketService";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -69,6 +70,16 @@ function RootLayoutNav() {
   const { error, success, clearError, clearSuccess, info, clearInfo } =
     useGlobalStore();
 
+  const { currentView, switchRole } = useGlobalStore();
+
+  useEffect(() => {
+    const socketConnect = async () => {
+      const socket = socketService;
+      await socket.connect();
+    };
+
+    socketConnect();
+  }, [currentView, switchRole]);
   useEffect(() => {
     if (error) {
       Toast.show({
@@ -109,7 +120,9 @@ function RootLayoutNav() {
         translucent={true}
         backgroundColor={"transparent"}
       />
-      <SafeAreaView style={{ flex: 1, backgroundColor: "white", paddingTop: -50 }}>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "white", paddingTop: -50 }}
+      >
         <Slot />
         <Toast position="bottom" />
       </SafeAreaView>

@@ -22,7 +22,7 @@ const Screen = () => {
     };
 
     socketConnect();
-  }, []);
+  }, [currentView, switchRole]);
 
   return (
     <VStack className="flex-1 bg-white">

@@ -27,7 +27,7 @@ function ChatItem({ chat, switchRole }: { chat: Chat; switchRole: string }) {
         router.push({ pathname: "/chat/[id]", params: { id: chat._id } });
       }}
     >
-      <Avatar size="lg">
+      {/* <Avatar size="lg">
         <AvatarFallbackText>
           {isClient
             ? otherParticipant.activeRoleId?.providerName
@@ -42,11 +42,11 @@ function ChatItem({ chat, switchRole }: { chat: Chat; switchRole: string }) {
                   : undefined
                 : isClient
                 ? (otherParticipant.activeRoleId?.providerLogo as MediaItem)
-                    .thumbnail
-                : (otherParticipant.profilePicture as MediaItem).thumbnail,
+                    ?.thumbnail
+                : (otherParticipant.profilePicture as MediaItem)?.thumbnail,
           }}
         />
-      </Avatar>
+      </Avatar> */}
       <HStack className="flex-1 justify-between items-center">
         <VStack space="sm" className="flex-1">
           <Heading size="lg" className="font-medium">
