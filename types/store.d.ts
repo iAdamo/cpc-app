@@ -64,12 +64,26 @@ export interface AuthState {
 
 export type Status = "available" | "offline" | "busy" | "away";
 
+export type PresenceStatus =
+  (typeof PRESENCE_STATUS)[keyof typeof PRESENCE_STATUS];
+
+export interface PresenceResponse {
+  userId?: string;
+  status?: PresenceStatus;
+  lastSeen?: Date;
+  customStatus?: PresenceStatus;
+  isOnline?: boolean;
+  deviceId?: string;
+}
+
 export interface UserState {
-  availability: Status;
+  availability: PresenceResponse | null;
+  otherAvailability: PresenceResponse | null;
   isFollowing: boolean;
   otherUser: UserData | null;
   setOtherUser: (user: UserData | null) => void;
-  setAvailability: (availability: Status) => Promise<void>;
+  setAvailability: (availability: PresenceResponse) => void;
+  setOtherAvailability: (availability: PresenceResponse) => void;
   updateProfile: (updates: Partial<UserData>) => void;
   updateUserProfile: (role: ActiveRole, data?: FormData) => Promise<void>;
   fetchUserProfile: (userId?: string) => Promise<void>;
@@ -201,6 +215,7 @@ export interface ChatState {
   currentPage: number;
   chatLoading: boolean;
   chatError: string | null;
+  setChats: (chats: Chats[]) => void;
   createChat: (
     participantIds: string,
     isGroup?: boolean,

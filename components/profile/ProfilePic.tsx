@@ -25,7 +25,7 @@ import { Spinner } from "../ui/spinner";
 import { Switch } from "../ui/switch";
 import MediaService from "@/services/mediaService";
 import useGlobalStore from "@/store/globalStore";
-import { FileType } from "@/types";
+import { FileType, ResEventEnvelope } from "@/types";
 import { normalizePresence } from "@/utils/presence";
 import {
   Radio,
@@ -35,6 +35,12 @@ import {
   RadioLabel,
 } from "@/components/ui/radio";
 import { CircleIcon } from "@/components/ui/icon";
+import {
+  socketService,
+  SocketEvents,
+  PresenceEvents,
+} from "@/services/socketService";
+import { PresenceResponse } from "@/types";
 
 interface ProfilePicProps {
   imageUri?: string | FileType | null;
@@ -81,7 +87,7 @@ const ProfilePic = ({
   const statusOptions = useMemo(
     () => [
       {
-        value: "available",
+        value: "online",
         label: "Available",
         color: "fill-green-600 border-green-600",
         b: "border-green-600",
@@ -102,13 +108,24 @@ const ProfilePic = ({
     []
   );
 
-  const handleAvailabilityChange = useCallback(
-    (v: string) => {
-      // cast to any if your store expects a specific union
-      setAvailability(v as any);
-    },
-    [setAvailability]
-  );
+  const handleAvailabilityChange = useCallback((status: string) => {
+    socketService.emitEvent(PresenceEvents.UPDATE_STATUS, {
+      customStatus: status,
+      lastSeen: Date.now(),
+    });
+  }, []);
+
+  useEffect(() => {
+    const onStatusUpdated = (envelope: ResEventEnvelope) => {
+      setAvailability(envelope.payload);
+    };
+
+    socketService.onEvent(PresenceEvents.STATUS_UPDATED, onStatusUpdated);
+
+    return () => {
+      socketService.offEvent(PresenceEvents.STATUS_UPDATED, onStatusUpdated);
+    };
+  }, [setAvailability]);
 
   useEffect(() => {
     // Preserve the incoming shape (string or FileType or null)
@@ -326,7 +343,7 @@ const ProfilePic = ({
                   </Text>
                   <HStack space="sm" className="items-center">
                     <RadioGroup
-                      value={availability}
+                      value={availability?.customStatus || availability?.status}
                       onChange={handleAvailabilityChange}
                       accessibilityLabel="Availability"
                     >

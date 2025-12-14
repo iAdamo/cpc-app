@@ -24,6 +24,7 @@ import useGlobalStore from "@/store/globalStore";
 import { LinearGradient } from "expo-linear-gradient";
 import { MediaItem } from "@/types";
 import { router, usePathname } from "expo-router";
+import { socketService } from "@/services/socketService";
 
 export const BottomNavbar = () => {
   const { currentView, setCurrentView, switchRole } = useGlobalStore();
@@ -126,7 +127,12 @@ export const TopNavbar = () => {
       </HStack>
       <VStack className="pt-10 gap-4">
         <HStack className="w-full p-4 items-center">
-          <Avatar size="md">
+          <Avatar
+            size="md"
+            className={`${
+              socketService.isConnected && "border-2 border-green-500"
+            }`}
+          >
             <AvatarFallbackText>
               {isProvider
                 ? user?.activeRoleId?.providerName
@@ -138,6 +144,7 @@ export const TopNavbar = () => {
                   ? (user?.activeRoleId?.providerLogo as MediaItem).thumbnail
                   : user?.profilePicture?.thumbnail,
               }}
+              className=""
             />
           </Avatar>
           {isProvider && (
@@ -180,7 +187,6 @@ export const TopNavbar = () => {
                 }
               />
             </Button>
-
           </HStack>
         </HStack>
         {/** Search bar */}

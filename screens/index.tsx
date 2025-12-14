@@ -10,19 +10,13 @@ import Chat from "./chat";
 import Update from "./providers/update";
 import MapView from "./map";
 import PostJob from "./providers/post";
-import { socketService } from "@/services/socketService";
+import { SocketEvents, socketService, PRESENCE_STATUS } from "@/services/socketService";
+import { PresenceEvents } from "@/services/socketService";
+import { AppState } from "react-native";
+import { router } from "expo-router";
 
 const Screen = () => {
   const { currentView, switchRole } = useGlobalStore();
-
-  useEffect(() => {
-    const socketConnect = async () => {
-      const socket = socketService;
-      await socket.connect();
-    };
-
-    socketConnect();
-  }, [currentView, switchRole]);
 
   return (
     <VStack className="flex-1 bg-white">

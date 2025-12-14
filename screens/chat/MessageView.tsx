@@ -81,9 +81,9 @@ const MessageView = () => {
     return null;
   }
   const isClient = switchRole === "Client";
-  const otherParticipant = selectedChat?.participants[0];
+  // const otherParticipant = selectedChat?.participants[0];
 
-  const { status, lastSeen, isOnline, isTyping } = usePresence(otherParticipant._id);
+  // const { status, lastSeen, isOnline, isTyping } = usePresence(otherParticipant._id);
 
   /** Scroll handler to toggle button visibility based on proximity to bottom */
   // ...existing code...
@@ -140,7 +140,7 @@ const MessageView = () => {
               <ButtonIcon as={ArrowLeftIcon} />
             </Button>
             <HStack className="items-center gap-2">
-              <Avatar size="md">
+              {/* <Avatar size="md">
                 <AvatarFallbackText>
                   {isClient
                     ? otherParticipant?.activeRoleId?.providerName
@@ -158,8 +158,8 @@ const MessageView = () => {
                       : (otherParticipant.profilePicture as MediaItem)
                           .thumbnail,
                   }}
-                />
-                <AvatarBadge
+                /> */}
+                {/* <AvatarBadge
                   size="lg"
                   className={`${isOnline ? "bg-green-500" : "bg-gray-400"}`}
                 />
@@ -181,8 +181,8 @@ const MessageView = () => {
                   <Text size="sm" className="text-typography-500">
                     {status} {DateFormatter.toRelative(lastSeen)}
                   </Text>
-                )}
-              </VStack>
+                )} */}
+              {/* </VStack> */}
             </HStack>
           </HStack>
           <HStack>
@@ -465,11 +465,11 @@ const MessageView = () => {
         />
 
         {/* Typing indicator */}
-        {isTyping && (
+        {/* {isTyping && (
           <VStack className="w-full items-start px-6 pb-2">
             <Text className="text-xs text-gray-500">Is typing...</Text>
           </VStack>
-        )}
+        )} */}
 
         {progress > 0 && progress < 100 ? (
           <Progress

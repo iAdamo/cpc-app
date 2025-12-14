@@ -1,4 +1,4 @@
-import { UserData, ActiveRole } from "@/types";
+import { UserData, ActiveRole, PresenceResponse } from "@/types";
 import {
   updateUserProfile,
   setUserFavourites,
@@ -25,13 +25,27 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
   set,
   get
 ) => ({
-  availability: "offline",
+  availability: null,
+  otherAvailability: null,
   isFollowing: false,
   otherUser: null,
-  setAvailability: async (status: string) => {
-    const presence = await updateAvailability(status);
-    set({ availability: presence.availability });
+  setAvailability: (data: Partial<PresenceResponse>) => {
+    set((state) => ({
+      availability: {
+        ...state.availability,
+        ...data,
+      },
+    }));
   },
+  setOtherAvailability: (data: Partial<PresenceResponse>) => {
+    set((state) => ({
+      otherAvailability: {
+        ...state.otherAvailability,
+        ...data,
+      },
+    }));
+  },
+
   setOtherUser: (user: UserData | null) => set({ otherUser: user }),
   // Action to directly update user state
   updateProfile: (updates: Partial<UserData>) => {
@@ -89,7 +103,7 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
     }
   },
   fetchUserProfile: async (userId?: string) => {
-    set({ error: null });
+    set({ error: null, isLoading: true });
     try {
       const response = await getUserProfile(userId);
       // console.log("fetched user", response);
@@ -108,6 +122,7 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
           isLoading: false,
         });
       }
+      set({ isLoading: false });
     } catch (error: any) {
       set({
         error: error?.response?.data?.message || "Failed to fetch user profile",
@@ -120,32 +135,6 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
       socketService.emitEvent(PresenceEvents.SUBSCRIBE, {
         userIds: [providerId],
       });
-      //       // const response = await toggleFollowProvider(providerId);
-      // if (response) {
-      //   // console.log("Follow toggle response:", response);
-      //   const currentUser = get().user;
-      //   const isSelf = currentUser && response._id === currentUser._id;
-      //   const updateObj = {
-      //     isFollowing: response.followedProviders.some(
-      //       (p) => p._id === providerId
-      //     ),
-      //     info: response.followedProviders.some((p) => p._id === providerId)
-      //       ? "Started following provider"
-      //       : "Unfollowed provider",
-      //     isLoading: false,
-      //   };
-      //   if (isSelf) {
-      //     set({
-      //       user: { ...response },
-      //       ...updateObj,
-      //     });
-      //   } else {
-      //     set({
-      //       otherUser: { ...response },
-      //       ...updateObj,
-      //     });
-      //   }
-      // }
     } catch (error: any) {
       set({
         error:

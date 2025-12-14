@@ -2,10 +2,10 @@ import React from "react";
 import { Badge, BadgeText, BadgeIcon } from "@/components/ui/badge";
 import { CircleDotIcon } from "lucide-react-native";
 import { normalizePresence } from "@/utils/presence";
-import { Presence } from "@/types";
+import { PresenceResponse } from "@/types";
 
 interface PresenceBadgeProps {
-  presence?: Presence | null;
+  presence?: PresenceResponse | null;
   showLabel?: boolean; // Optional: show "Available", "Busy", etc.
   className?: string;
   iconSize?: number;
@@ -30,6 +30,7 @@ const PresenceBadge = ({
         style={{ width: iconSize, height: iconSize }}
       />
       {showLabel && <BadgeText className="ml-2">{p.label}</BadgeText>}
+      {showLabel && <BadgeText className="ml-2">{p.lastSeenText}</BadgeText>}
     </Badge>
   );
 };

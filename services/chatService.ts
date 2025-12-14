@@ -99,9 +99,7 @@ class ChatService {
   //   this.socket.offEvent(event, callback);
   // }
 
-  onNewMessage(
-    callback: (data: EventEnvelope<{ message: Message }>) => void
-  ): void {
+  onNewMessage(callback: (data: EventEnvelope) => void): void {
     this.socket.onEvent(SocketEvents.CHAT_MESSAGE_SENT, callback);
   }
 

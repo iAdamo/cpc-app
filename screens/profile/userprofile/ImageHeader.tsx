@@ -37,23 +37,35 @@ const styles = StyleSheet.create({
 const ImageHeader = ({ provider }: { provider: ProviderData }) => {
   const [showOptions, setShowOptions] = useState(false);
   const [subData, setSubData] = useState<{
-    providerId: string;
-    followersCount: number;
-    isFollowing: boolean;
-    followedBy: string[];
+    providerId?: string;
+    followersCount?: number;
+    isFollowing?: boolean;
+    followedBy?: string[];
   }>();
-  const { user, isFollowing } = useGlobalStore();
+  const { user } = useGlobalStore();
+
+  // setSubData((prev) => ({
+  //   ...prev,
+  //   isFollowing: provider.followedBy.some((p) => p._id === user?._id),
+  // }));
 
   const handleFollow = useCallback(async () => {
     if (!provider || !provider._id) return;
     try {
       socketService.emitEvent(PresenceEvents.SUBSCRIBE, {
-        userIds: [provider._id],
+        userIds: [provider.owner],
       });
     } catch (error) {
       console.error("Error handling follow subscription:", error);
     }
   }, [provider]);
+
+  useEffect(() => {
+    setSubData((prev) => ({
+      ...prev,
+      isFollowing: provider.followedBy.some((id) => id === user?._id),
+    }));
+  }, []);
 
   useEffect(() => {
     const handleSubscribedEvent = (data: {
@@ -62,6 +74,7 @@ const ImageHeader = ({ provider }: { provider: ProviderData }) => {
       isFollowing: boolean;
       followedBy: string[];
     }) => {
+      // console.debug({ data });
       if (!data.providerId || data.providerId !== provider._id) return;
       setSubData(data);
       useGlobalStore.setState((state) => {
@@ -136,10 +149,12 @@ const ImageHeader = ({ provider }: { provider: ProviderData }) => {
             <Divider orientation="vertical" className="mx-4 h-5 self-center" />
             <VStack>
               <Heading className="text-white">
-                {subData?.followersCount}
+                {subData?.followersCount || provider.followersCount}
               </Heading>
               <Text className="text-white">
-                {provider.favoriteCount === 1 ? "follower" : "followers"}
+                {subData?.followersCount || provider.followersCount === 1
+                  ? "follower"
+                  : "followers"}
               </Text>
             </VStack>
             {/* <Divider orientation="vertical" className="mx-4 h-5 self-center" />
@@ -153,24 +168,24 @@ const ImageHeader = ({ provider }: { provider: ProviderData }) => {
               size="sm"
               variant="outline"
               className={
-                isFollowing
+                subData?.isFollowing
                   ? "border-green-500 bg-green-600/20"
                   : "border-white bg-transparent"
               }
               onPress={handleFollow}
             >
               <ButtonIcon
-                as={isFollowing ? CheckIcon : AddIcon}
+                as={subData?.isFollowing ? CheckIcon : AddIcon}
                 className={`${
-                  isFollowing ? "text-white/80" : "text-white"
+                  subData?.isFollowing ? "text-white/80" : "text-white"
                 } w-4 h-4`}
               />
               <ButtonText
                 className={`${
-                  isFollowing ? "text-white/80" : "text-white"
+                  subData?.isFollowing ? "text-white/80" : "text-white"
                 }`}
               >
-                {isFollowing ? "Following" : "Follow"}
+                {subData?.isFollowing ? "Following" : "Follow"}
               </ButtonText>
             </Button>
           )}

@@ -20,7 +20,13 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
   typingUsers: [],
   hasMoreMessages: true,
   setFilteredChats: (chats: Chat[]) => set({ filteredChats: chats }),
-
+  setChats: (chats: Chat[]) => set({ chats: chats }),
+  //  set((state) => ({
+  //       availability: {
+  //         ...state.availability,
+  //         ...data,
+  //       },
+  //     }));
   createChat: async (
     participantIds: string,
     isGroup: boolean = false,
@@ -137,7 +143,7 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
         currentPage: page,
       }));
 
-      // console.log("Loaded messages:", chatMessages);
+      // console.log("Loaded messages:", chatMessages[0]);
 
       // set((state) => ({
       //   messages:

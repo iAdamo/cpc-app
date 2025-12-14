@@ -3,7 +3,9 @@ import {
   ChatEvents,
   SocketEvents,
   PresenceEvents,
+  PRESENCE_STATUS,
 } from "@/services/socketService";
+
 export interface Chat {
   _id: string;
   participants: UserData[];
@@ -75,7 +77,7 @@ export interface Presence {
   isOnline: boolean;
   lastSeen: string;
   deviceId: string;
-  availability: "available" | "offline" | "busy" | "away";
+  status: "online" | "offline" | "busy" | "away";
 }
 
 export interface EventEnvelope<T = any> {

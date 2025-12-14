@@ -1,3 +1,3 @@
-import MessageView from "@/screens/chat/MessageView";
+import Chat from "@/screens/chat";
 
-export default MessageView;
+export default Chat;

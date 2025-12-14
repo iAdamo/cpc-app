@@ -13,6 +13,7 @@ import {
 } from "@/services/axios/auth";
 import { router } from "expo-router";
 import { socketService } from "@/services/socketService";
+import { PresenceEvents } from "@/services/socketService";
 
 export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
   set,
@@ -175,8 +176,12 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       groupedMessages: [],
       hasMoreMessages: true,
       chats: [],
-      availability: "offline",
     });
+    // socketService.emitEvent(PresenceEvents.UPDATE_STATUS, {
+    //   status: "offline",
+    //   customStatus: "offline",
+    //   lastSeen: Date.now(),
+    // });
     socketService.disconnect();
     await SecureStore.deleteItemAsync("accessToken");
     await SecureStore.deleteItemAsync("sessionId");

@@ -13,6 +13,12 @@ import ProfileSection from "./ProfileSection";
 import { router } from "expo-router";
 import ProfilePic from "@/components/profile/ProfilePic";
 import { FileType, MediaItem } from "@/types";
+import { EventEnvelope, ResEventEnvelope, PresenceResponse } from "@/types";
+import {
+  socketService,
+  SocketEvents,
+  PresenceEvents,
+} from "@/services/socketService";
 
 const ProfileView = () => {
   const [profilePic, setProfilePic] = useState<FileType | null>(null);
@@ -25,7 +31,58 @@ const ProfileView = () => {
     setCurrentStep,
     resetOnboarding,
     updateUserProfile,
+    setAvailability,
+    availability,
   } = useGlobalStore();
+
+  useEffect(() => {
+    if (switchRole === "Client") return;
+    // Request current presence
+    socketService.emitEvent(PresenceEvents.GET_STATUS, {
+      targetId: user?._id,
+    });
+    const handleStatusResponse = (envelope: ResEventEnvelope) => {
+      let data: PresenceResponse;
+      data = envelope.payload;
+      console.log({ data });
+      setAvailability({
+        lastSeen: data.lastSeen,
+        status: data.status,
+        customStatus: data.customStatus,
+        isOnline: data.isOnline,
+      });
+      // console.log(
+      //   "from index of profile",
+      //   useGlobalStore.getState().availability
+      // );
+    };
+
+    // When presence changes
+    const handleStatusChange = (envelope: EventEnvelope) => {
+      console.log("change", { envelope });
+
+      const data = envelope.payload;
+      if (data.userId !== user?._id) return;
+      // console.log(envelope.payload);
+
+      setAvailability({
+        lastSeen: data.lastSeen,
+        status: data.status,
+        customStatus: data.customStatus,
+        isOnline: data.isOnline,
+      });
+    };
+
+    socketService.onEvent(PresenceEvents.STATUS_CHANGE, handleStatusChange);
+    socketService.onEvent(PresenceEvents.STATUS_RESPONSE, handleStatusResponse);
+    return () => {
+      socketService.offEvent(PresenceEvents.STATUS_CHANGE, handleStatusChange);
+      socketService.offEvent(
+        PresenceEvents.STATUS_RESPONSE,
+        handleStatusResponse
+      );
+    };
+  }, []);
 
   useEffect(() => {
     // console.log("I ran");
@@ -159,7 +216,7 @@ const ProfileView = () => {
                 </HStack>
               </VStack>
             </HStack>
-            <VStack  space="md" className="justify-between">
+            <VStack space="md" className="justify-between">
               <Button
                 variant="outline"
                 className="px-2 border-gray-100/30 bg-white/20 rounded-xl"

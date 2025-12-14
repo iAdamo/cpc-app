@@ -1,5 +1,5 @@
 import DateFormatter from "@/utils/DateFormat";
-import { Presence } from "@/types";
+import { PresenceResponse } from "@/types";
 
 export const STATUS_MAP: Record<
   string,
@@ -34,9 +34,9 @@ export const STATUS_MAP: Record<
 /**
  * Convert raw presence response to UI-ready normalized data
  */
-export function normalizePresence(presence?: Presence) {
+export function normalizePresence(presence?: PresenceResponse) {
   const rawStatus =
-    presence?.availability ?? (presence?.isOnline ? "available" : "offline");
+    presence?.customStatus ?? (presence?.isOnline ? "available" : "offline");
 
   const status = String(rawStatus).toLowerCase();
 

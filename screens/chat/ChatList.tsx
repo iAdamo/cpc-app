@@ -8,31 +8,24 @@ import { Spinner } from "@/components/ui/spinner";
 import NoActiveChat from "./NoActiveChat";
 import ChatItem from "./ChatItem";
 import ChatNavbar from "./ChatNavbar";
+import { router } from "expo-router";
 
-export const ChatList: React.FC = () => {
-  const { fetchChats, chats, chatLoading, switchRole, user, filteredChats } =
+export const ChatList = ({ chats }: { chats: Chat[] }) => {
+  const { fetchChats, chatLoading, switchRole, user, filteredChats } =
     useGlobalStore();
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        await fetchChats();
-        if (!mounted) return;
-        // await chatService.connect();
-      } catch (error) {
-        console.error("Failed to initialize chat:", error);
-      }
-    })();
+  console.log(chats[0]);
 
-    return () => {
-      mounted = false;
-      chatService.leaveCurrentChat();
-      // chatService.disconnect();
-    };
-  }, [fetchChats]);
+  // useEffect(() => {
+  //   fetchChats();
 
-  // console.log("Chats in ChatList:", chats);
+  //   return () => {
+  //     chatService.leaveCurrentChat();
+  //   };
+  // }, [fetchChats]);
+
+  // Remember to return participants data from the BE
+  // console.log("Chats in ChatList:",chats[0], chats[0].participants);
 
   const renderChatItem = useCallback(
     ({ item: chat }: ListRenderItemInfo<Chat>) => {
@@ -51,24 +44,32 @@ export const ChatList: React.FC = () => {
       <ChatNavbar chats={chats} />
       <FlatList
         data={filteredChats.length > 0 ? filteredChats : chats}
-        renderItem={renderChatItem}
+        // renderItem={
+        //   <VStack className="flex-1">
+        //     <ChatItem chat={chat} switchRole={switchRole} />
+        //   </VStack>
+        // }
+        renderItem={({ item }) => (
+            <ChatItem chat={item} switchRole={switchRole} />
+
+        )}
         keyExtractor={(item) => item._id}
         // onRefresh={fetchChats}
         // refreshing={chatLoading}
-        ListEmptyComponent={() =>
-          chatLoading ? (
-            <Spinner
-              size="large"
-              className="flex-1 justify-center items-center"
-            />
-          ) : (
-            <NoActiveChat />
-          )
-        }
-        stickyHeaderIndices={[0]}
-        initialNumToRender={8}
-        maxToRenderPerBatch={8}
-        windowSize={10}
+        // ListEmptyComponent={() =>
+        //   chatLoading ? (
+        //     <Spinner
+        //       size="large"
+        //       className="flex-1 justify-center items-center"
+        //     />
+        //   ) : (
+        //     <NoActiveChat />
+        //   )
+        // }
+        // stickyHeaderIndices={[0]}
+        // initialNumToRender={8}
+        // maxToRenderPerBatch={8}
+        // windowSize={10}
         // removeClippedSubviews
       />
     </VStack>

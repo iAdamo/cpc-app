@@ -61,35 +61,41 @@ export enum ChatEvents {
  */
 
 export enum PresenceEvents {
-  UPDATE_STATUS = 'presence:update_status',
-  SUBSCRIBE = 'presence:subscribe',
-  UNSUBSCRIBE = 'presence:unsubscribe',
-  GET_SUBSCRIPTIONS = 'presence:get_subscriptions',
-  HEARTBEAT = 'presence:heartbeat',
-  USER_ACTIVITY = 'presence:user_activity',
-  GET_STATUS = 'presence:get_status',
-  GET_BATCH_STATUS = 'presence:get_batch_status',
-  STATUS_UPDATED = 'presence:status_updated',
-  STATUS_CHANGE = 'presence:status_change', // For subscribed users
-  USER_ONLINE = 'presence:user_online',
-  USER_OFFLINE = 'presence:user_offline',
-  USER_AWAY = 'presence:user_away',
-  USER_BUSY = 'presence:user_busy',
-  SUBSCRIBED = 'presence:subscribed',
-  UNSUBSCRIBED = 'presence:unsubscribed',
-  SUBSCRIPTIONS_LIST = 'presence:subscriptions_list',
-  STATUS_RESPONSE = 'presence:status_response',
-  BATCH_STATUS_RESPONSE = 'presence:batch_status_response',
-  PRESENCE_ERROR = 'presence:error',
-  HEARTBEAT_ACK = 'presence:heartbeat_ack',
+  UPDATE_STATUS = "presence:update_status",
+  SUBSCRIBE = "presence:subscribe",
+  UNSUBSCRIBE = "presence:unsubscribe",
+  GET_SUBSCRIPTIONS = "presence:get_subscriptions",
+  HEARTBEAT = "presence:heartbeat",
+  USER_ACTIVITY = "presence:user_activity",
+  GET_STATUS = "presence:get_status",
+  GET_BATCH_STATUS = "presence:get_batch_status",
+  STATUS_UPDATED = "presence:status_updated",
+  STATUS_CHANGE = "presence:status_change", // For subscribed users
+  USER_ONLINE = "presence:user_online",
+  USER_OFFLINE = "presence:user_offline",
+  USER_AWAY = "presence:user_away",
+  USER_BUSY = "presence:user_busy",
+  SUBSCRIBED = "presence:subscribed",
+  UNSUBSCRIBED = "presence:unsubscribed",
+  SUBSCRIPTIONS_LIST = "presence:subscriptions_list",
+  STATUS_RESPONSE = "presence:status_response",
+  BATCH_STATUS_RESPONSE = "presence:batch_status_response",
+  PRESENCE_ERROR = "presence:error",
+  HEARTBEAT_ACK = "presence:heartbeat_ack",
 }
 
-
+export enum PRESENCE_STATUS {
+  ONLINE = "online",
+  OFFLINE = "offline",
+  AWAY = "away",
+  BUSY = "busy",
+  DO_NOT_DISTURB = "dnd",
+}
 const SOCKET_URL = Constants.expoConfig?.extra?.socketUrl || "";
 
 class SocketService {
   private socket: ReturnType<typeof io> | null = null;
-  private isConnected: boolean = false;
+  public isConnected: boolean = false;
   private emitQueue: Array<{ event: string; envelope: EventEnvelope }> = [];
   private static instance: SocketService;
   private constructor() {}
@@ -121,7 +127,7 @@ class SocketService {
 
     this.socket = io(SOCKET_URL, {
       auth: { token: token || undefined },
-      transports: ["websocket","polling"],
+      transports: ["websocket", "polling"],
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
@@ -137,31 +143,30 @@ class SocketService {
   private setupEventListeners(): void {
     if (!this.socket) return;
 
-    this.socket.on(
-      "connection",
-      (callback: { status: string; socketId: string; timestamp: Date }) => {
-        //  status: 'connected',
-        //   socketId: client.id,
-        //   timestamp: Date.now(),
+    this.socket.on("connect", () => {
+      console.log("🟢 socket connected", this.socket?.id);
+      this.isConnected = true;
 
-        this.isConnected = callback.status === "connected";
-
-        // send queued envelopes
-        while (this.emitQueue.length && this.socket) {
-          const { event, envelope } = this.emitQueue.shift()!;
-          this.socket.emit(event, envelope);
-        }
+      while (this.emitQueue.length && this.socket) {
+        const { event, envelope } = this.emitQueue.shift()!;
+        this.socket.emit(event, envelope);
       }
-    );
+    });
 
-    this.socket.on("disconnect", () => {
+    this.socket.on("disconnect", (reason: any) => {
+      console.log("🔴 socket disconnected:", reason);
       this.isConnected = false;
     });
 
     this.socket.on("connect_error", (err: any) => {
-      console.error("Socket connect error:", err);
+      console.error("Socket error:", err.message);
+      this.isConnected = false;
     });
   }
+
+  // async isSocketConnected(): boolean {
+
+  // }
 
   // ----------------------------------
   // EMIT with envelope
@@ -232,11 +237,14 @@ class SocketService {
   }
 
   disconnect(): void {
-    if (this.socket) {
-      this.socket.disconnect();
+    if (!this.socket) return;
+
+    this.socket.disconnect();
+    this.isConnected = false;
+
+    setTimeout(() => {
       this.socket = null;
-      this.isConnected = false;
-    }
+    }, 0);
   }
 
   getConnectionStatus(): boolean {

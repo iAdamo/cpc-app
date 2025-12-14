@@ -23,9 +23,9 @@ const UserProfile = () => {
   } = useGlobalStore();
   if (!searchResults) return <EmptyState header="" text="" />;
   const [isEditable, setIsEditable] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [provider, setProvider] = useState<ProviderData>();
   const [isSticky, setIsSticky] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   const [editingFields, setEditingFields] = useState<
     Partial<Record<EditableFields, string>>
@@ -88,12 +88,38 @@ const UserProfile = () => {
     }
   }, [otherUser, isEditable]);
 
-  if (loading) {
+  if (loading || isLoading) {
     return (
       <Spinner size="large" className="flex-1 justify-center items-center" />
     );
-  }
-  if (!provider) {
+  } else if (provider?._id) {
+    return (
+      <VStack className="flex-1 bg-white">
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          onScroll={handleScroll}
+          stickyHeaderIndices={[1]}
+        >
+          <ImageHeader provider={provider} />
+          {/* Profile Info Section */}
+          <ProfileInfo
+            provider={provider}
+            isSticky={isSticky}
+            isEditable={isEditable}
+            editingFields={editingFields}
+            handleSave={handleSave}
+            handleEditStart={handleEditStart}
+            handleCancelEdit={handleCancelEdit}
+            onLayout={(e: any) => {
+              stickyHeaderY.current = e.nativeEvent.layout.y;
+            }}
+          />
+          <Highlights provider={provider} />
+          <MoreInfo provider={provider} isEditable={isEditable} />
+        </ScrollView>
+      </VStack>
+    );
+  } else {
     return (
       <EmptyState
         header="No Profile Found"
@@ -101,33 +127,6 @@ const UserProfile = () => {
       />
     );
   }
-
-  return (
-    <VStack className="flex-1 bg-white">
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        onScroll={handleScroll}
-        stickyHeaderIndices={[1]}
-      >
-        <ImageHeader provider={provider} />
-        {/* Profile Info Section */}
-        <ProfileInfo
-          provider={provider}
-          isSticky={isSticky}
-          isEditable={isEditable}
-          editingFields={editingFields}
-          handleSave={handleSave}
-          handleEditStart={handleEditStart}
-          handleCancelEdit={handleCancelEdit}
-          onLayout={(e: any) => {
-            stickyHeaderY.current = e.nativeEvent.layout.y;
-          }}
-        />
-        <Highlights provider={provider} />
-        <MoreInfo provider={provider} isEditable={isEditable} />
-      </ScrollView>
-    </VStack>
-  );
 };
 
 export default UserProfile;

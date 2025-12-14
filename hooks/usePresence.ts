@@ -21,10 +21,8 @@ export function usePresence(userId: string | undefined) {
   const [lastSeen, setLastSeen] = useState<string>("");
   const [isOnline, setIsOnline] = useState<boolean>(false);
   const [isTyping, setIsTyping] = useState<boolean>(false);
-  const {
-    selectedChat,
-    loadMessages,
-  } = useGlobalStore();
+  const { loadMessages, currentView, switchRole, selectedChat } =
+    useGlobalStore();
 
   useEffect(() => {
     if (!userId) return;
@@ -86,7 +84,7 @@ export function usePresence(userId: string | undefined) {
 
     // Set up event listeners
     chatService.onNewMessage((envelope) => {
-      const message = envelope.payload.message;
+      const message = envelope.payload;
       handleNewMessage({ message });
     });
     chatService.onUserTyping((envelop) => {
@@ -95,77 +93,73 @@ export function usePresence(userId: string | undefined) {
     });
     chatService.onMessageError(handleMessageError);
 
-    // Request current presence
-    socketService.emitEvent(PresenceEvents.GET_STATUS, {
-      targetId: userId,
-    });
+    // // Request current presence
+    // socketService.emitEvent(PresenceEvents.GET_STATUS, {
+    //   targetId: userId,
+    // });
 
-    // When presence changes
-    const handleStatusChange = (envelope: EventEnvelope) => {
-      // console.log("change", { envelope });
+    // // When presence changes
+    // const handleStatusChange = (envelope: EventEnvelope) => {
+    //   // console.log("change", { envelope });
 
-      const data = envelope.payload;
-      if (data.userId !== userId) return;
-      console.log(envelope.payload);
+    //   const data = envelope.payload;
+    //   if (data.userId !== userId) return;
+    //   // console.log(envelope.payload);
 
-      setStatus(data.status);
-      setLastSeen(data.lastSeen);
-      setIsOnline(data.status === "online");
-    };
+    //   setStatus(data.status);
+    //   setLastSeen(data.lastSeen);
+    //   setIsOnline(data.status === "online");
+    // };
 
     // 4️⃣ Initial response for get_status
-    const handleStatusResponse = (envelope: ResEventEnvelope) => {
-      const data = envelope.payload;
+    // const handleStatusResponse = (envelope: ResEventEnvelope) => {
+    //   const data = envelope.payload;
 
-      if (envelope.targetId !== userId || !envelope.payload) return;
+    //   if (envelope.targetId !== userId || !envelope.payload) return;
 
-      setStatus(data.status);
-      setLastSeen(data.lastSeen);
-      setIsOnline(data.status === "online");
-    };
+    //   setStatus(data.status);
+    //   setLastSeen(data.lastSeen);
+    //   setIsOnline(data.status === "online");
+    // };
 
-    socketService.onEvent(PresenceEvents.STATUS_CHANGE, handleStatusChange);
-    socketService.onEvent(PresenceEvents.STATUS_RESPONSE, handleStatusResponse);
+    // socketService.onEvent(PresenceEvents.STATUS_CHANGE, handleStatusChange);
+    // socketService.onEvent(PresenceEvents.STATUS_RESPONSE, handleStatusResponse);
 
     // Heartbeat every 30 seconds
-    const interval = setInterval(() => {
-      socketService.emitEvent(PresenceEvents.HEARTBEAT, {
-        timestamp: Date.now(),
-      });
-    }, 25000);
+    // const interval = setInterval(() => {
+    //   socketService.emitEvent(PresenceEvents.HEARTBEAT, {
+    //     timestamp: Date.now(),
+    //   });
+    // }, 25000);
 
-    // AppState activity detection
-    let lastActivity = 0;
+    // // AppState activity detection
+    // let lastActivity = 0;
 
-    const handleAppStateChange = (nextState: string) => {
-      const now = Date.now();
-      if (now - lastActivity < 2000) return; // ignore spam
-      lastActivity = now;
+    // const handleAppStateChange = (nextState: string) => {
+    //   const now = Date.now();
+    //   if (now - lastActivity < 2000) return; // ignore spam
+    //   lastActivity = now;
 
-      socketService.emitEvent(PresenceEvents.USER_ACTIVITY, {
-        state: nextState,
-        timestamp: now,
-      });
-    };
+    //   socketService.emitEvent(PresenceEvents.USER_ACTIVITY, {
+    //     state: nextState,
+    //     timestamp: now,
+    //   });
+    // };
 
-    const subscription = AppState.addEventListener(
-      "change",
-      handleAppStateChange
-    );
+    // const subscription = AppState.addEventListener(
+    //   "change",
+    //   handleAppStateChange
+    // );
 
     return () => {
-      socketService.offEvent(PresenceEvents.STATUS_CHANGE, handleStatusChange);
-      socketService.offEvent(
-        PresenceEvents.STATUS_RESPONSE,
-        handleStatusResponse
-      );
+      // socketService.offEvent(PresenceEvents.STATUS_CHANGE, handleStatusChange);
+      // socketService.offEvent(
+      //   PresenceEvents.STATUS_RESPONSE,
+      //   handleStatusResponse
+      // );
 
-      clearInterval(interval);
-      subscription.remove();
-
-      socketService.emitEvent(PresenceEvents.UNSUBSCRIBE, {
-        userIds: [userId],
-      });
+      // clearInterval(interval);
+      // subscription.remove();
 
       console.log("Cleaning up chat...");
       chatService.leaveCurrentChat();
@@ -176,7 +170,7 @@ export function usePresence(userId: string | undefined) {
       });
       socketService.offEvent(SocketEvents.ERROR, handleMessageError);
     };
-  }, [userId, selectedChat]);
+  }, [userId, selectedChat, currentView, switchRole]);
 
   // Update my own status
   const updateStatus = useCallback(

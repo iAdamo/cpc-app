@@ -7,13 +7,22 @@ import { Heading } from "@/components/ui/heading";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Link, LinkText } from "@/components/ui/link";
 import { MessageSquareTextIcon, PhoneIcon } from "lucide-react-native";
-import { ProviderData, EditableFields, Presence } from "@/types";
+import {
+  ProviderData,
+  EditableFields,
+  EventEnvelope,
+  ResEventEnvelope,
+  PresenceResponse,
+  Presence,
+} from "@/types";
 import useGlobalStore from "@/store/globalStore";
 import { Badge, BadgeText } from "@/components/ui/badge";
 import { router } from "expo-router";
 import { getLastSeen } from "@/services/axios/chat";
 import DateFormatter from "@/utils/DateFormat";
 import PresenceBadge from "@/components/PresenceBadge";
+import { socketService } from "@/services/socketService";
+import { PresenceEvents } from "@/services/socketService";
 
 const ProfileInfo = ({
   provider,
@@ -29,7 +38,6 @@ const ProfileInfo = ({
   handleCancelEdit: () => void;
   onLayout: any;
 }) => {
-  const [presence, setPresence] = useState<Presence>();
   const {
     user,
     switchRole,
@@ -37,26 +45,12 @@ const ProfileInfo = ({
     createChat,
     selectedChat,
     setCurrentView,
+    otherAvailability,
+    setOtherAvailability,
+    currentView,
   } = useGlobalStore();
+
   // console.log({ provider });
-
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const presence = await getLastSeen(provider.owner);
-        if (!mounted) return;
-        if (presence) setPresence(presence);
-      } catch (error) {
-        console.error("Failed to fetch last seen:", error);
-      }
-    })();
-
-    return () => {
-      mounted = false;
-    };
-  }, [provider.owner]);
-
   const handleJoinChat = async () => {
     await createChat(provider.owner);
     setCurrentView("Chat");
@@ -67,6 +61,53 @@ const ProfileInfo = ({
       params: { id: selectedChat._id },
     });
   };
+
+  useEffect(() => {
+    if (user?._id === provider.owner) return;
+    // Request current presence
+    socketService.emitEvent(PresenceEvents.GET_STATUS, {
+      targetId: provider.owner,
+    });
+    const handleStatusResponse = (envelope: ResEventEnvelope) => {
+      let data: PresenceResponse;
+      data = envelope.payload;
+      console.log({ data });
+
+      if (envelope.targetId === user?._id || data.userId !== envelope.targetId)
+        return;
+
+      setOtherAvailability({
+        lastSeen: data.lastSeen,
+        status: data.customStatus || data?.status,
+        isOnline: data.isOnline,
+      });
+    };
+
+    // When presence changes
+    const handleStatusChange = (envelope: EventEnvelope) => {
+      console.log("change", { envelope });
+
+      const data = envelope.payload;
+      if (data.userId !== user?._id) return;
+      // console.log(envelope.payload);
+
+      setOtherAvailability({
+        lastSeen: data.lastSeen,
+        status: data.status,
+        isOnline: data.isOnline,
+      });
+    };
+
+    socketService.onEvent(PresenceEvents.STATUS_CHANGE, handleStatusChange);
+    socketService.onEvent(PresenceEvents.STATUS_RESPONSE, handleStatusResponse);
+    return () => {
+      socketService.offEvent(PresenceEvents.STATUS_CHANGE, handleStatusChange);
+      socketService.offEvent(
+        PresenceEvents.STATUS_RESPONSE,
+        handleStatusResponse
+      );
+    };
+  }, []);
 
   return (
     <VStack
@@ -107,12 +148,13 @@ const ProfileInfo = ({
           </Card>
           <Card className="gap-2 items-end flex-1">
             {/** Presence badge */}
-            <PresenceBadge presence={presence} className="" iconSize={12} />
+            <PresenceBadge
+              presence={otherAvailability}
+              className=""
+              iconSize={12}
+            />
             {switchRole === "Client" && user?._id !== provider.owner && (
               <VStack className="items-end gap-2">
-                {!presence?.isOnline && (
-                  <Text>{DateFormatter.toRelative(presence?.lastSeen!)}</Text>
-                )}
                 <HStack className="gap-2">
                   <Button
                     size="sm"
