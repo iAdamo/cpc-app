@@ -173,7 +173,6 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       paramsFrom: null,
       selectedChat: null,
       messages: [],
-      groupedMessages: [],
       hasMoreMessages: true,
       chats: [],
     });

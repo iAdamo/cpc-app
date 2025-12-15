@@ -39,7 +39,7 @@ export interface Message {
   content?: MessageContent;
   status: MessageStatus;
   replyTo?: Message;
-  createdAt: string;
+  createdAt: Date | string;
   updatedAt: string;
   isOptimistic?: boolean;
 }

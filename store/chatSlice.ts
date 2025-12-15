@@ -1,6 +1,5 @@
-import { LastMessage } from "./../types/chat.d";
 import { StateCreator } from "zustand";
-import { GlobalStore, ChatState, Message, UserData, Chat } from "@/types";
+import { GlobalStore, ChatState, Message, Chat } from "@/types";
 import chatService from "@/services/chatService";
 import { uploadChatMedia } from "@/services/axios/chat";
 import appendFormData from "@/utils/AppendFormData";
@@ -14,19 +13,15 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
   selectedChat: null,
   currentPage: 1,
   messages: [],
-  groupedMessages: [],
   chatLoading: false,
   chatError: null,
   typingUsers: [],
   hasMoreMessages: true,
+  nextCursor: null,
+
   setFilteredChats: (chats: Chat[]) => set({ filteredChats: chats }),
   setChats: (chats: Chat[]) => set({ chats: chats }),
-  //  set((state) => ({
-  //       availability: {
-  //         ...state.availability,
-  //         ...data,
-  //       },
-  //     }));
+
   createChat: async (
     participantIds: string,
     isGroup: boolean = false,
@@ -34,23 +29,11 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
   ) => {
     try {
       set({ chatLoading: true, chatError: null });
-      // console.log(participantIds);
       const newChat = await chatService.createDirectChat(participantIds);
-      console.log("Created chat:", newChat);
       set({ selectedChat: newChat });
-
-      // set((state) => {
-      //   const chatsMap = new Map(state.chats.map((c) => [c._id, c]));
-      //   chatsMap.set(newChat._id, newChat);
-
-      //   return {
-      //     chats: Array.from(chatsMap.values()),
-      //     chatLoading: false,
-      //   };
-      // });
     } catch (error: any) {
       set({
-        error:
+        chatError:
           error?.response?.data?.message ||
           error?.message ||
           "Failed to create chat",
@@ -63,7 +46,6 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
     set({ chatLoading: true, chatError: null });
     try {
       const userChats = await chatService.getUserChats();
-      // console.log("Fetched chats:", userChats);
       set({ chats: userChats, chatLoading: false });
     } catch (error: any) {
       set({
@@ -73,28 +55,57 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
       });
     }
   },
+
   sendTextMessage: async (text: string, replyTo?: string) => {
     const { selectedChat } = get();
     if (!selectedChat) throw new Error("No chat selected");
+
     try {
       const senderId = get().user?._id;
       if (!senderId) throw new Error("User not authenticated");
+
+      // Create optimistic message with temp ID
+      const tempId = `temp-${Date.now()}`;
+      const optimisticMessage: any = {
+        _id: tempId,
+        content: { text },
+        senderId: get().user!,
+        chatId: selectedChat._id,
+        createdAt: new Date().toISOString(),
+        type: "text",
+        isOptimistic: true,
+        replyTo: replyTo ? ({ _id: replyTo } as any) : undefined,
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Add optimistic message to the beginning of messages array
+      // (for inverted FlatList, newest should be at index 0)
+      set((state) => ({
+        messages: [optimisticMessage, ...state.messages],
+      }));
+
+      // Send actual message
       await chatService.sendTextMessage(selectedChat._id, text, replyTo);
-      // if selectedChatId is not part of chat, then append it to it. NOTE: avoid duplicating
+
+      // Update chats list
       set((state) => {
         const chatsMap = new Map(state.chats.map((c) => [c._id, c]));
         chatsMap.set(selectedChat._id, selectedChat);
-
         return {
           chats: Array.from(chatsMap.values()),
-          chatLoading: false,
         };
       });
     } catch (error) {
       console.error("Failed to send text message:", error);
+      // Remove optimistic message on error
+      const tempId = `temp-${Date.now()}`;
+      set((state) => ({
+        messages: state.messages.filter((msg) => msg._id !== tempId),
+      }));
       throw error;
     }
   },
+
   sendMediaMessage: async (
     type: Message["type"],
     file: any,
@@ -103,12 +114,32 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
   ) => {
     const { selectedChat } = get();
     if (!selectedChat) throw new Error("No chat selected");
+
     try {
-      // console.log(file);
+      // Create optimistic message for media
+      const tempId = `temp-${Date.now()}`;
+      const optimisticMessage: any = {
+        _id: tempId,
+        content: { ...options },
+        senderId: get().user!,
+        chatId: selectedChat._id,
+        createdAt: new Date().toISOString(),
+        type,
+        isOptimistic: true,
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Add optimistic message
+      set((state) => ({
+        messages: [optimisticMessage, ...state.messages],
+      }));
+
+      // Upload media
       const formData = new FormData();
       appendFormData(formData, file, "file");
       const mediaUrl = await uploadChatMedia(formData, onProgress);
-      // console.log({ mediaUrl });
+
+      // Send media message
       await chatService.sendMediaMessage(
         selectedChat._id,
         mediaUrl.file,
@@ -117,76 +148,153 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
       );
     } catch (error) {
       console.error("Failed to send media message:", error);
+      // Remove optimistic message on error
+      const tempId = `temp-${Date.now()}`;
+      set((state) => ({
+        messages: state.messages.filter((msg) => msg._id !== tempId),
+      }));
       throw error;
     }
   },
 
-  loadMessages: async (page: number = 1) => {
-    const { selectedChat } = get();
+  loadMessages: async (cursor?: Date) => {
+    const { selectedChat, messages } = get();
     if (!selectedChat) return;
 
     try {
       set({ chatLoading: true });
-      const chatMessages = await chatService.getChatMessages(
+
+      // Call updated backend service that returns simple array
+      const response = await chatService.getChatMessages(
         selectedChat._id,
-        page
+        cursor
       );
 
-      // set groupedMessages from chatMessages
-      set((state) => ({
-        groupedMessages:
-          page === 1
-            ? [...chatMessages]
-            : [...chatMessages, ...state.groupedMessages],
-        hasMoreMessages: chatMessages.length === 100,
+      console.log(
+        "Loaded messages:",
+        response.messages?.length,
+        "cursor:",
+        cursor,
+        "hasMore:",
+        response.hasMore
+      );
+
+      // Ensure we have valid arrays
+      const newMessages = response.messages || [];
+      const currentMessages = messages || [];
+
+      set({
+        // For initial load (no cursor), replace all messages
+        // For loading older messages (cursor exists), prepend to the beginning
+        // Messages are in chronological order (oldest first) from backend
+        messages: cursor
+          ? [...newMessages, ...currentMessages] // Older messages prepended
+          : newMessages, // Initial load
+        nextCursor: response.nextCursor,
+        hasMoreMessages: response.hasMore,
         chatLoading: false,
-        currentPage: page,
-      }));
-
-      // console.log("Loaded messages:", chatMessages[0]);
-
-      // set((state) => ({
-      //   messages:
-      //     page === 1 ? [...chatMessages] : [...chatMessages, ...state.messages],
-      //   hasMoreMessages: chatMessages.length === 100,
-      //   chatLoading: false,
-      //   currentPage: page,
-      // }));
+      });
     } catch (error) {
       console.error("Failed to load messages:", error);
-      set({ chatLoading: false });
-      throw error;
+      set({
+        chatLoading: false,
+        chatError:
+          error instanceof Error ? error.message : "Failed to load messages",
+      });
     }
   },
 
   loadMoreMessages: async () => {
-    const { selectedChat, hasMoreMessages, chatLoading, currentPage } = get();
+    const { hasMoreMessages, chatLoading, nextCursor } = get();
 
-    if (!selectedChat || !hasMoreMessages || chatLoading) return;
+    console.log("loadMoreMessages called:", {
+      hasMoreMessages,
+      chatLoading,
+      nextCursor,
+      nextCursorISO: nextCursor?.toISOString(),
+    });
 
-    set({ chatLoading: true });
-    const nextPage = (currentPage || 1) + 1;
-    await get().loadMessages(nextPage);
-    // console.log("Loaded more messages:", moreMessages);
+    if (chatLoading) {
+      console.log("Already loading, skipping");
+      return;
+    }
+
+    if (!hasMoreMessages) {
+      console.log("No more messages to load");
+      return;
+    }
+
+    if (!nextCursor) {
+      console.log("No cursor available");
+      return;
+    }
+
+    await get().loadMessages(nextCursor);
   },
+
+  addNewMessage: (message: Message) => {
+    // Add new message to the beginning (for inverted FlatList)
+    // Check if message already exists to avoid duplicates
+    set((state) => {
+      const exists = state.messages.some((msg) => msg._id === message._id);
+      if (exists) {
+        console.log("Message already exists, skipping:", message._id);
+        return state;
+      }
+      return {
+        messages: [message, ...state.messages],
+      };
+    });
+  },
+
+  replaceTempMessage: (tempId: string, realMessage: Message) => {
+    // Replace optimistic message with real one
+    set((state) => ({
+      messages: state.messages.map((msg) =>
+        msg._id === tempId ? { ...realMessage, _id: msg._id } : msg
+      ),
+    }));
+  },
+
   markAsDelivered: async () => {
     const { selectedChat } = get();
     if (!selectedChat) return;
     try {
-      chatService.markMessagesAsDelivered(selectedChat._id);
+      await chatService.markMessagesAsDelivered(selectedChat._id);
     } catch (error) {
       console.error("Failed to mark messages as delivered:", error);
       throw error;
     }
   },
+
   startTyping: () => {
     const { selectedChat } = get();
     if (!selectedChat) return;
     chatService.startTyping(selectedChat._id, true);
   },
+
   stopTyping: () => {
     const { selectedChat } = get();
     if (!selectedChat) return;
     chatService.startTyping(selectedChat._id, false);
+  },
+
+  clearMessages: () => {
+    // Clear messages when leaving chat
+    set({
+      messages: [],
+      hasMoreMessages: true,
+      nextCursor: null,
+      chatError: null,
+    });
+  },
+
+  // Optional: Add a method to update a specific message
+  updateMessage: (messageId: string, updates: Partial<Message>) => {
+    set((state) => ({
+      messages: state.messages.map((msg) =>
+        msg._id === messageId ? { ...msg, ...updates } : msg
+      ),
+    }));
   },
 });

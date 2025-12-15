@@ -44,13 +44,24 @@ class ChatService {
 
   async getChatMessages(
     chatId: string,
-    page: number = 1,
-    limit: number = 100
-  ): Promise<MessageSection[]> {
+    cursor?: Date,
+    limit: number = 50
+  ): Promise<{
+    messages: Message[];
+    hasMore: boolean;
+    nextCursor: Date | null;
+  }> {
+    // console.log({ cursor });
     const response = await this.axiosInstance.get(`/chat/${chatId}/messages`, {
-      params: { page, limit },
+      params: { cursor, limit },
     });
-    return response.data;
+    return {
+      messages: response.data.messages,
+      hasMore: response.data.hasMore,
+      nextCursor: response.data.nextCursor
+        ? new Date(response.data.nextCursor)
+        : null,
+    };
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

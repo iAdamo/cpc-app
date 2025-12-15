@@ -13,6 +13,94 @@ export default class DateFormatter {
   }
 
   /**
+   * Checks if a date is today.
+   * @param dateInput - The date value to check.
+   * @returns True if the date is today, false otherwise.
+   */
+  static isToday(dateInput: string | number | Date): boolean {
+    const date = new Date(dateInput);
+    if (!DateFormatter.isValid(date)) return false;
+
+    const today = new Date();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  }
+
+  /**
+   * Checks if a date is yesterday.
+   * @param dateInput - The date value to check.
+   * @returns True if the date is yesterday, false otherwise.
+   */
+  static isYesterday(dateInput: string | number | Date): boolean {
+    const date = new Date(dateInput);
+    if (!DateFormatter.isValid(date)) return false;
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    return (
+      date.getDate() === yesterday.getDate() &&
+      date.getMonth() === yesterday.getMonth() &&
+      date.getFullYear() === yesterday.getFullYear()
+    );
+  }
+
+  /**
+   * Generic date formatting using Intl.DateTimeFormat.
+   * @param dateInput - The date value to format.
+   * @param format - The format string (e.g., 'MMM d, yyyy', 'yyyy-MM-dd', etc.).
+   * @param locale - The locale to use (default: 'en-US').
+   * @returns The formatted date string.
+   */
+  static format(
+    dateInput: string | number | Date,
+    format: string,
+    locale: string = "en-US"
+  ): string {
+    const date = new Date(dateInput);
+    if (!DateFormatter.isValid(date)) return "";
+
+    // Map format tokens to Intl.DateTimeFormat options
+    const options: Intl.DateTimeFormatOptions = {};
+
+    if (format.includes("yyyy")) options.year = "numeric";
+    if (format.includes("yy")) options.year = "2-digit";
+    if (format.includes("MMMM")) options.month = "long";
+    if (format.includes("MMM")) options.month = "short";
+    if (format.includes("MM")) options.month = "2-digit";
+    if (format.includes("M")) options.month = "numeric";
+    if (format.includes("dd")) options.day = "2-digit";
+    if (format.includes("d")) options.day = "numeric";
+    if (format.includes("EEEE")) options.weekday = "long";
+    if (format.includes("EEE")) options.weekday = "short";
+    if (format.includes("HH")) options.hour = "2-digit";
+    if (format.includes("H")) options.hour = "numeric";
+    if (format.includes("hh")) {
+      options.hour = "2-digit";
+      options.hour12 = true;
+    }
+    if (format.includes("h")) {
+      options.hour = "numeric";
+      options.hour12 = true;
+    }
+    if (format.includes("mm")) options.minute = "2-digit";
+    if (format.includes("m")) options.minute = "numeric";
+    if (format.includes("ss")) options.second = "2-digit";
+    if (format.includes("s")) options.second = "numeric";
+    if (format.includes("a")) options.hour12 = true;
+
+    try {
+      return new Intl.DateTimeFormat(locale, options).format(date);
+    } catch (error) {
+      console.error("Date formatting error:", error);
+      return "";
+    }
+  }
+
+  /**
    * Converts a date to a short readable format (e.g., "Jan 18, 2025").
    * @param dateInput - The date value to format.
    * @returns The formatted date string.
@@ -146,5 +234,31 @@ export default class DateFormatter {
     }
 
     return `${diffSec} ${diffSec === 1 ? "second" : "seconds"}`;
+  }
+
+  /**
+   * Get the start of the day (00:00:00) for a given date.
+   */
+  static startOfDay(dateInput: string | number | Date): Date {
+    const date = new Date(dateInput);
+    date.setHours(0, 0, 0, 0);
+    return date;
+  }
+
+  /**
+   * Get the end of the day (23:59:59) for a given date.
+   */
+  static endOfDay(dateInput: string | number | Date): Date {
+    const date = new Date(dateInput);
+    date.setHours(23, 59, 59, 999);
+    return date;
+  }
+
+  /**
+   * Get the difference in days between two dates.
+   */
+  static diffInDays(date1: Date, date2: Date): number {
+    const diffTime = Math.abs(date2.getTime() - date1.getTime());
+    return Math.floor(diffTime / (1000 * 60 * 60 * 24));
   }
 }

@@ -211,11 +211,10 @@ export interface ChatState {
   filteredChats: Chat[];
   selectedChat: Chat | null;
   messages: Message[];
-  groupedMessages: MessageSection[];
   currentPage: number;
+  nextCursor: Date | null;
   chatLoading: boolean;
   chatError: string | null;
-  setChats: (chats: Chats[]) => void;
   createChat: (
     participantIds: string,
     isGroup?: boolean,
@@ -229,11 +228,12 @@ export interface ChatState {
     options?: any,
     onProgress?: (progress: number) => void
   ) => Promise<void>;
-  loadMessages: (page?: number) => Promise<void>;
+  loadMessages: (cursor?: Date) => Promise<void>;
   loadMoreMessages: () => Promise<void>;
-  // addMessage: (message: Message) => void;
-  // updateChatLastMessage: (chatId: string, message: Message) => void;
-  // removeMessage: (messageId: string) => void;
+  addNewMessage: (message: Message) => void;
+  replaceTempMessage: (chatId: string, message: Message) => void;
+  clearMessages: () => void;
+  updateMessage: (messageId: string, updates: Partial<Message>) => void;
   markAsDelivered: () => Promise<void>;
   startTyping: () => void;
   stopTyping: () => void;

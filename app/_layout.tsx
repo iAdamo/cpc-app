@@ -11,9 +11,15 @@ import { ShareService } from "@/services/shareService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView } from "react-native-safe-area-context";
 import "../global.css";
-import { socketService, PRESENCE_STATUS } from "@/services/socketService";
+import {
+  socketService,
+  PRESENCE_STATUS,
+  SocketEvents,
+} from "@/services/socketService";
 import { PresenceEvents } from "@/services/socketService";
 import { AppState } from "react-native";
+import chatService from "@/services/chatService";
+import { replaceTempMessage } from "@/utils/InsertMessageIntoSections";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -86,6 +92,16 @@ function RootLayoutNav() {
       await socket.connect();
     };
     socketConnect();
+
+    chatService.onNewMessage((envelope) => {
+      console.log("from layout", envelope.payload);
+      useGlobalStore.setState((state) => ({
+        groupedMessages: replaceTempMessage(
+          state.groupedMessages,
+          envelope.payload
+        ),
+      }));
+    });
 
     // Heartbeat every 30 seconds
     const interval = setInterval(() => {

@@ -3,7 +3,6 @@ import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { Heading } from "@/components/ui/heading";
-import { Spinner } from "@/components/ui/spinner";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
 import {
   Button,
@@ -25,18 +24,14 @@ import {
   PhoneIcon,
   ThreeDotsIcon,
 } from "@/components/ui/icon";
-import { ListRenderItem, Keyboard, View } from "react-native";
+import { Keyboard, View, FlatList, ActivityIndicator } from "react-native";
 import useGlobalStore from "@/store/globalStore";
-import { MediaItem, Message, EventEnvelope } from "@/types";
+import { MediaItem, Message } from "@/types";
 import { useLocalSearchParams } from "expo-router";
 import { MicIcon, SendIcon, ChevronsDownIcon } from "lucide-react-native";
-import { Animated } from "react-native";
 import { router } from "expo-router";
-import chatService from "@/services/chatService";
 import MessageItem from "./MessageItem";
 import DateHeader from "@/components/DateHeader";
-import { SectionList } from "react-native";
-import { MessageSection } from "@/types";
 import AttactmentOptions from "./AttachmentPopover";
 import { Progress, ProgressFilledTrack } from "@/components/ui/progress";
 import { useKeyboardHandler } from "react-native-keyboard-controller";
@@ -44,83 +39,216 @@ import Anime, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
-import {
-  ChatEvents,
-  SocketEvents,
-  socketService,
-} from "@/services/socketService";
-import { usePresence } from "@/hooks/usePresence";
 import DateFormatter from "@/utils/DateFormat";
+import { useMessageEvents } from "@/hooks/useMessageEvents";
+import chatService from "@/services/chatService";
+import { SocketEvents, socketService } from "@/services/socketService";
 
 const MessageView = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const {
     user,
     selectedChat,
-    groupedMessages,
+    messages,
     hasMoreMessages,
     loadMoreMessages,
-    loadMessages,
     sendTextMessage,
     switchRole,
-    selectedFiles,
     setProgress,
     progress,
     sendMediaMessage,
     startTyping,
     stopTyping,
+    otherAvailability,
+    chatLoading,
+    loadMessages,
+    addNewMessage,
+    replaceTempMessage,
+    clearMessages,
   } = useGlobalStore();
 
   const [isSending, setIsSending] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
-  const flatListRef = useRef<SectionList<Message, MessageSection>>(null);
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [flatMessages, setFlatMessages] = useState<
+    Array<Message | { type: "date"; title: string }>
+  >([]);
+  const flatListRef = useRef<FlatList>(null);
+  const isLoadingMoreRef = useRef(false);
+  const shouldAutoScrollRef = useRef(true);
+  const isInitialMountRef = useRef(true);
 
   if (!selectedChat || selectedChat._id !== id) {
     router.back();
     return null;
   }
+
   const isClient = switchRole === "Client";
-  // const otherParticipant = selectedChat?.participants[0];
+  const otherParticipant = selectedChat?.participants[0];
+  const { status, lastSeen, isTyping } = useMessageEvents(otherParticipant._id);
 
-  // const { status, lastSeen, isOnline, isTyping } = usePresence(otherParticipant._id);
+  // Group messages by date for rendering - FIXED VERSION
+  useEffect(() => {
+    if (messages.length === 0) {
+      setFlatMessages([]);
+      return;
+    }
 
-  /** Scroll handler to toggle button visibility based on proximity to bottom */
-  // ...existing code...
+    // Group messages by date (in chronological order - oldest first)
+    const groupedByDate: Map<string, Message[]> = new Map();
+
+    messages.forEach((message) => {
+      const date = new Date(message.createdAt);
+      let title: string;
+
+      if (DateFormatter.isToday(date)) {
+        title = "Today";
+      } else if (DateFormatter.isYesterday(date)) {
+        title = "Yesterday";
+      } else {
+        title = DateFormatter.format(date, "MMM d, yyyy");
+      }
+
+      if (!groupedByDate.has(title)) {
+        groupedByDate.set(title, []);
+      }
+      groupedByDate.get(title)!.push(message);
+    });
+
+    // Convert to flat array with date headers
+    const flatArray: Array<Message | { type: "date"; title: string }> = [];
+
+    // Sort dates in REVERSE chronological order (newest first)
+    const sortedDates = Array.from(groupedByDate.entries()).sort((a, b) => {
+      const parseDate = (title: string) => {
+        if (title === "Today") return new Date();
+        if (title === "Yesterday")
+          return new Date(Date.now() - 24 * 60 * 60 * 1000);
+        return new Date(title);
+      };
+      return parseDate(b[0]).getTime() - parseDate(a[0]).getTime(); // Newest first
+    });
+
+    // Build flat array
+    sortedDates.forEach(([title, sectionMessages]) => {
+      flatArray.push({ type: "date", title });
+
+      // Messages within each section should be in chronological order (oldest first)
+      const sortedMessages = [...sectionMessages].sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+      flatArray.push(...sortedMessages);
+    });
+
+    setFlatMessages(flatArray);
+
+    // Auto-scroll to bottom on initial load (shows newest messages)
+    if (isInitialMountRef.current && flatArray.length > 0) {
+      isInitialMountRef.current = false;
+
+      // Small delay to ensure layout is ready
+      setTimeout(() => {
+        if (flatListRef.current) {
+          flatListRef.current.scrollToEnd({ animated: false });
+        }
+      }, 300);
+    }
+
+    // Auto-scroll to bottom on new messages if user is at bottom
+    if (shouldAutoScrollRef.current && flatArray.length > 0) {
+      setTimeout(() => {
+        if (flatListRef.current) {
+          flatListRef.current.scrollToEnd({ animated: true });
+        }
+      }, 100);
+    }
+  }, [messages]);
+
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      clearMessages();
+    };
+  }, []);
+
+  const scrollToBottom = (animated = true) => {
+    if (!flatListRef.current || flatMessages.length === 0) return;
+    flatListRef.current.scrollToEnd({ animated });
+  };
+
   const handleScroll = useCallback(
     (event: any) => {
-      const { contentOffset } = event?.nativeEvent ?? {};
-      if (!contentOffset) return;
+      const { contentOffset, contentSize, layoutMeasurement } =
+        event.nativeEvent;
+      const offsetY = contentOffset.y;
+      const contentHeight = contentSize.height;
+      const viewportHeight = layoutMeasurement.height;
 
-      // For inverted lists, y=0 is bottom (latest), y increases as you scroll up
-      if (contentOffset.y > 100 && !showScrollButton) {
-        setShowScrollButton(true);
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }).start();
-      } else if (contentOffset.y <= 100 && showScrollButton) {
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }).start(() => setShowScrollButton(false));
+      // Distance from bottom (regular list, not inverted)
+      const distanceFromBottom = contentHeight - (offsetY + viewportHeight);
+
+      // Show/hide scroll button based on distance from bottom
+      const isNearBottom = distanceFromBottom < 100;
+      setShowScrollButton(!isNearBottom);
+
+      // Load more messages when reaching top
+      if (
+        offsetY < 100 &&
+        hasMoreMessages &&
+        !chatLoading &&
+        !isLoadingMoreRef.current
+      ) {
+        console.log("Loading older messages from top...");
+        isLoadingMoreRef.current = true;
+        loadMoreMessages().finally(() => {
+          isLoadingMoreRef.current = false;
+        });
       }
+
+      // Track if user is near bottom to auto-scroll on new messages
+      shouldAutoScrollRef.current = isNearBottom;
     },
-    [showScrollButton, fadeAnim]
+    [hasMoreMessages, chatLoading, loadMoreMessages]
   );
 
-  const scrollToBottom = () => {
-    if (!flatListRef.current || !groupedMessages.length) return;
-    // For inverted SectionList, scroll to the first section's first item (index 0, 0)
-    flatListRef.current.scrollToLocation({
-      sectionIndex: 0,
-      itemIndex: 0,
-      animated: true,
-      viewPosition: 0, // 0 = bottom when inverted
-    });
-  };
+  const renderItem = useCallback(
+    ({ item, index }: { item: any; index: number }) => {
+      if (item.type === "date") {
+        return <DateHeader title={item.title} />;
+      }
+
+      return <MessageItem key={item._id} message={item} user={user!} />;
+    },
+    [user]
+  );
+
+  const keyExtractor = useCallback((item: any, index: number) => {
+    if (item.type === "date") {
+      return `date-${item.title}-${index}`;
+    }
+    return item._id || `message-${index}`;
+  }, []);
+
+  // Fix TypeScript error for getItemLayout
+  const getItemLayout = useCallback(
+    (data: ArrayLike<any> | null | undefined, index: number) => {
+      let offset = 0;
+      if (data) {
+        for (let i = 0; i < index; i++) {
+          const item = data[i];
+          if (item) {
+            offset += item.type === "date" ? 40 : 80;
+          }
+        }
+      }
+      return {
+        length: data && data[index]?.type === "date" ? 40 : 80,
+        offset,
+        index,
+      };
+    },
+    []
+  );
 
   const Headerbar = () => {
     const otherParticipant = selectedChat?.participants[0];
@@ -140,7 +268,7 @@ const MessageView = () => {
               <ButtonIcon as={ArrowLeftIcon} />
             </Button>
             <HStack className="items-center gap-2">
-              {/* <Avatar size="md">
+              <Avatar size="md">
                 <AvatarFallbackText>
                   {isClient
                     ? otherParticipant?.activeRoleId?.providerName
@@ -154,14 +282,16 @@ const MessageView = () => {
                       ? (
                           otherParticipant.activeRoleId
                             ?.providerLogo as MediaItem
-                        ).thumbnail
+                        )?.thumbnail
                       : (otherParticipant.profilePicture as MediaItem)
-                          .thumbnail,
+                          ?.thumbnail,
                   }}
-                /> */}
-                {/* <AvatarBadge
+                />
+                <AvatarBadge
                   size="lg"
-                  className={`${isOnline ? "bg-green-500" : "bg-gray-400"}`}
+                  className={`${
+                    otherAvailability?.isOnline ? "bg-green-500" : "bg-gray-400"
+                  }`}
                 />
               </Avatar>
               <VStack className="flex-1">
@@ -173,16 +303,10 @@ const MessageView = () => {
                       (otherParticipant?.lastName || "")}
                 </Heading>
 
-                {isOnline ? (
-                  <Text size="sm" className="text-typography-500">
-                    {status}
-                  </Text>
-                ) : (
-                  <Text size="sm" className="text-typography-500">
-                    {status} {DateFormatter.toRelative(lastSeen)}
-                  </Text>
-                )} */}
-              {/* </VStack> */}
+                <Text size="sm" className="text-typography-500">
+                  {status} {DateFormatter.toRelative(lastSeen)}
+                </Text>
+              </VStack>
             </HStack>
           </HStack>
           <HStack>
@@ -218,70 +342,19 @@ const MessageView = () => {
       setInputMessage("");
       setIsSending(true);
 
-      const optimisticMessage: Partial<MessageSection> = {
-        title: "Today",
-        data: [
-          {
-            _id: `temp-${Date.now()}`,
-            content: { text: messageText },
-            senderId: user!,
-            chatId: selectedChat._id,
-            createdAt: new Date().toISOString(),
-            type: "text",
-            isOptimistic: true,
-          },
-        ],
-      };
-
       try {
-        useGlobalStore.setState((state) => {
-          const todayTitle = "Today";
-          const existingSection = state.groupedMessages.find(
-            (section: MessageSection) => section.title === todayTitle
-          );
-
-          if (existingSection) {
-            return {
-              groupedMessages: state.groupedMessages.map(
-                (section: MessageSection) =>
-                  section.title === todayTitle
-                    ? {
-                        ...section,
-                        data: [optimisticMessage.data?.[0], ...section.data],
-                      }
-                    : section
-              ),
-            };
-          } else {
-            return {
-              groupedMessages: [
-                { title: todayTitle, data: [optimisticMessage.data?.[0]] },
-                ...state.groupedMessages,
-              ],
-            };
-          }
-        });
-
-        // scrollToBottom();
         await sendTextMessage(messageText);
       } catch (error) {
         console.error("Failed to send message:", error);
       } finally {
         setIsSending(false);
+        // Auto-scroll to bottom after sending
         setTimeout(() => {
-          scrollToBottom();
-        }, 100);
+          scrollToBottom(true);
+        }, 50);
       }
-    }, [
-      inputMessage,
-      isSending,
-      user,
-      selectedChat,
-      sendTextMessage,
-      scrollToBottom,
-    ]);
+    }, [inputMessage, isSending, sendTextMessage]);
 
-    // Helper to map MIME type to allowed message type
     const mapMimeTypeToMessageType = (
       mimeType: string
     ): "text" | "image" | "video" | "audio" | "file" | "system" => {
@@ -304,7 +377,6 @@ const MessageView = () => {
       return "file";
     };
 
-    // Handle sending media files from AttachmentPopover
     const handleSendMedia = useCallback(async (files: any[]) => {
       for (const file of files) {
         if (file.type) {
@@ -321,7 +393,41 @@ const MessageView = () => {
       }
     }, []);
 
-    // Typing indicator logic
+    // Handle incoming real-time messages
+    useEffect(() => {
+      const handleNewMessage = (envelope: any) => {
+        const message = envelope.payload;
+
+        if (message.chatId === selectedChat?._id) {
+          // Check if this is replacing a temp message
+          const existingTemp = messages.find(
+            (m) =>
+              m.isOptimistic &&
+              m.senderId._id === message.senderId._id &&
+              Math.abs(
+                new Date(m.createdAt).getTime() -
+                  new Date(message.createdAt).getTime()
+              ) < 5000
+          );
+
+          if (existingTemp) {
+            replaceTempMessage(existingTemp._id, message);
+          } else {
+            addNewMessage(message);
+          }
+        }
+      };
+
+      chatService.onNewMessage(handleNewMessage);
+
+      return () => {
+        socketService.offEvent(
+          SocketEvents.CHAT_MESSAGE_SENT,
+          handleNewMessage
+        );
+      };
+    }, [selectedChat?._id, messages, addNewMessage, replaceTempMessage]);
+
     const handleInputChange = (text: string) => {
       setInputMessage(text);
       if (typingTimeout.current) clearTimeout(typingTimeout.current);
@@ -342,7 +448,6 @@ const MessageView = () => {
             space="sm"
             className="bg-white pr-4 flex-1 rounded-full items-center"
           >
-            {/* paperclip options */}
             <AttactmentOptions onSendMedia={handleSendMedia} />
 
             <Textarea className="flex-1 h-14 rounded-xl border-0 bg-typography-50 data-[focus=true]:border-brand-primary/30 focus:bg-white">
@@ -353,7 +458,6 @@ const MessageView = () => {
                 className="bg-white text-lg rounded-xl "
                 multiline
                 textAlignVertical="center"
-                // onSubmitEditing={handleSendMessage}
                 editable={!isSending}
               />
             </Textarea>
@@ -388,32 +492,8 @@ const MessageView = () => {
     );
   };
 
-  const renderSectionHeader = useCallback(
-    ({ section }: { section: MessageSection }) => {
-      return <DateHeader title={section.title} />;
-    },
-    []
-  );
-
-  const renderMessage: ListRenderItem<Message> = useCallback(
-    ({ item: message }) => (
-      <MessageItem key={message._id} message={message} user={user!} />
-    ),
-    []
-  );
-
-  const renderItem = useCallback(
-    ({ item }: { item: Message }) => {
-      return <MessageItem key={item._id} message={item} user={user!} />;
-    },
-    [user]
-  );
-
-  const keyExtractor = useCallback((item: Message) => item._id, []);
-
   const useGradualAnimation = () => {
     const height = useSharedValue(0);
-
     useKeyboardHandler(
       {
         onMove: (event) => {
@@ -427,65 +507,86 @@ const MessageView = () => {
   };
   const { height } = useGradualAnimation();
 
-  const fakeView = useAnimatedStyle(() => {
-    return {
+  const fakeView = useAnimatedStyle(
+    () => ({
       height: Math.abs(height.value),
-    };
-  }, []);
+    }),
+    []
+  );
 
   return (
     <>
       <View style={{ flex: 1 }}>
         <Headerbar />
-        <SectionList
+        <FlatList
           ref={flatListRef}
-          sections={groupedMessages}
+          data={flatMessages}
+          renderItem={renderItem}
           keyExtractor={keyExtractor}
-          renderSectionFooter={renderSectionHeader}
-          renderItem={renderMessage}
+          getItemLayout={getItemLayout}
           onScroll={handleScroll}
           scrollEventThrottle={16}
-          inverted
-          onEndReached={hasMoreMessages ? loadMoreMessages : undefined}
-          onEndReachedThreshold={0.1}
-          style={{ flex: 1 }}
-          contentContainerStyle={{
-            flexGrow: 1,
-            paddingHorizontal: 12,
-            paddingVertical: 8,
-          }}
-          showsVerticalScrollIndicator={false}
-          maintainVisibleContentPosition={{
-            minIndexForVisible: 0,
-            autoscrollToTopThreshold: 10,
-          }}
+          // REMOVED: inverted={true} - Using regular scrolling now
           initialNumToRender={20}
           maxToRenderPerBatch={10}
           windowSize={21}
+          removeClippedSubviews={false}
+          style={{ flex: 1 }}
+          contentContainerStyle={{
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+            // For short chats: push content to bottom, for long chats: let it grow
+            flexGrow: flatMessages.length < 10 ? 1 : 0,
+          }}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+            chatLoading && hasMoreMessages ? (
+              <View style={{ padding: 20, alignItems: "center" }}>
+                <ActivityIndicator size="small" />
+                <Text className="text-typography-500 mt-2">
+                  Loading older messages...
+                </Text>
+              </View>
+            ) : null
+          }
+          ListEmptyComponent={
+            !chatLoading ? (
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  minHeight: 200,
+                }}
+              >
+                <Text className="text-typography-500">No messages yet</Text>
+              </View>
+            ) : null
+          }
+          // Remove maintainVisibleContentPosition if it causes issues
         />
 
-        {/* Typing indicator */}
-        {/* {isTyping && (
+        {isTyping && (
           <VStack className="w-full items-start px-6 pb-2">
             <Text className="text-xs text-gray-500">Is typing...</Text>
           </VStack>
-        )} */}
+        )}
 
-        {progress > 0 && progress < 100 ? (
+        {progress > 0 && progress < 100 && (
           <Progress
             value={progress}
-            className=" h-1 rounded-full w-3/4 mx-auto mb-2"
+            className="h-1 rounded-full w-3/4 mx-auto mb-2"
           >
             <ProgressFilledTrack className="bg-brand-secondary" />
           </Progress>
-        ) : null}
-        {/* ↓ Floating scroll-to-bottom button */}
+        )}
+
         {showScrollButton && (
           <Fab
             placement="bottom center"
             accessibilityLabel="Scroll to bottom"
             className="bg-gray-100 shadow-lg mb-16 data-[active=true]:bg-gray-200"
-            onPress={scrollToBottom}
+            onPress={() => scrollToBottom(true)}
           >
             <FabIcon as={ChevronsDownIcon} className="text-brand-primary" />
           </Fab>
