@@ -60,16 +60,18 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
     const { selectedChat } = get();
     if (!selectedChat) throw new Error("No chat selected");
 
+    // Create temp ID once at the beginning
+    const tempId = `temp-${Date.now()}`;
+
     try {
       const senderId = get().user?._id;
       if (!senderId) throw new Error("User not authenticated");
 
-      // Create optimistic message with temp ID
-      const tempId = `temp-${Date.now()}`;
+      // Create optimistic message
       const optimisticMessage: any = {
         _id: tempId,
         content: { text },
-        senderId: get().user!,
+        senderId: get().user?._id,
         chatId: selectedChat._id,
         createdAt: new Date().toISOString(),
         type: "text",
@@ -78,8 +80,9 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
         updatedAt: new Date().toISOString(),
       };
 
+      console.log("Adding optimistic message:", tempId);
+
       // Add optimistic message to the beginning of messages array
-      // (for inverted FlatList, newest should be at index 0)
       set((state) => ({
         messages: [optimisticMessage, ...state.messages],
       }));
@@ -97,8 +100,8 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
       });
     } catch (error) {
       console.error("Failed to send text message:", error);
-      // Remove optimistic message on error
-      const tempId = `temp-${Date.now()}`;
+      // Remove optimistic message on error using the SAME tempId
+      console.log("Removing optimistic message on error:", tempId);
       set((state) => ({
         messages: state.messages.filter((msg) => msg._id !== tempId),
       }));
@@ -172,7 +175,7 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
 
       console.log(
         "Loaded messages:",
-        response.messages?.length,
+        response.messages,
         "cursor:",
         cursor,
         "hasMore:",
@@ -251,7 +254,7 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
     // Replace optimistic message with real one
     set((state) => ({
       messages: state.messages.map((msg) =>
-        msg._id === tempId ? { ...realMessage, _id: msg._id } : msg
+        msg._id === tempId ? realMessage : msg
       ),
     }));
   },

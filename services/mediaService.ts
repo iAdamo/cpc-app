@@ -66,7 +66,7 @@ class MediaService implements MediaServiceInterface {
           // In a real-world scenario, consider using FileSystem.getInfoAsync(asset.uri)
           let fileInfo: FileSystem.FileInfo | null = null;
           try {
-            fileInfo = await FileSystem.getInfoAsync(asset.uri, { size: true });
+            // fileInfo = await FileSystem.getInfoAsync(asset.uri, { size: true });
             console.log("File info:", fileInfo);
           } catch (e) {
             console.warn("Failed to get file info:", e);

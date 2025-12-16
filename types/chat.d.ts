@@ -34,7 +34,7 @@ export interface GroupInfo {
 export interface Message {
   _id: string;
   chatId: string;
-  senderId: UserData;
+  senderId: string;
   type: "text" | "image" | "video" | "audio" | "file" | "system";
   content?: MessageContent;
   status: MessageStatus;

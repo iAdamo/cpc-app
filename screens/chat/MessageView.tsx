@@ -87,82 +87,58 @@ const MessageView = () => {
   const { status, lastSeen, isTyping } = useMessageEvents(otherParticipant._id);
 
   // Group messages by date for rendering - FIXED VERSION
-  useEffect(() => {
-    if (messages.length === 0) {
-      setFlatMessages([]);
-      return;
-    }
+  // Group messages by date for rendering - HANDLE OPTIMISTIC MESSAGES
+ useEffect(() => {
+   if (!messages.length) {
+     setFlatMessages([]);
+     return;
+   }
 
-    // Group messages by date (in chronological order - oldest first)
-    const groupedByDate: Map<string, Message[]> = new Map();
+   // 1️⃣ Sort ALL messages oldest → newest
+   const sortedMessages = [...messages].sort(
+     (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+   );
 
-    messages.forEach((message) => {
-      const date = new Date(message.createdAt);
-      let title: string;
+   // 2️⃣ Group messages by date (in natural order)
+   const groupedByDate = new Map<string, Message[]>();
 
-      if (DateFormatter.isToday(date)) {
-        title = "Today";
-      } else if (DateFormatter.isYesterday(date)) {
-        title = "Yesterday";
-      } else {
-        title = DateFormatter.format(date, "MMM d, yyyy");
-      }
+   sortedMessages.forEach((message) => {
+     const date = new Date(message.createdAt);
+     let title: string;
 
-      if (!groupedByDate.has(title)) {
-        groupedByDate.set(title, []);
-      }
-      groupedByDate.get(title)!.push(message);
-    });
+     if (DateFormatter.isToday(date)) {
+       title = "Today";
+     } else if (DateFormatter.isYesterday(date)) {
+       title = "Yesterday";
+     } else {
+       title = DateFormatter.format(date, "MMM d, yyyy");
+     }
 
-    // Convert to flat array with date headers
-    const flatArray: Array<Message | { type: "date"; title: string }> = [];
+     if (!groupedByDate.has(title)) {
+       groupedByDate.set(title, []);
+     }
 
-    // Sort dates in REVERSE chronological order (newest first)
-    const sortedDates = Array.from(groupedByDate.entries()).sort((a, b) => {
-      const parseDate = (title: string) => {
-        if (title === "Today") return new Date();
-        if (title === "Yesterday")
-          return new Date(Date.now() - 24 * 60 * 60 * 1000);
-        return new Date(title);
-      };
-      return parseDate(b[0]).getTime() - parseDate(a[0]).getTime(); // Newest first
-    });
+     groupedByDate.get(title)!.push(message);
+   });
 
-    // Build flat array
-    sortedDates.forEach(([title, sectionMessages]) => {
-      flatArray.push({ type: "date", title });
+   // 3️⃣ Flatten into FlatList data
+   const flatArray: Array<Message | { type: "date"; title: string }> = [];
 
-      // Messages within each section should be in chronological order (oldest first)
-      const sortedMessages = [...sectionMessages].sort(
-        (a, b) =>
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      );
-      flatArray.push(...sortedMessages);
-    });
+   groupedByDate.forEach((sectionMessages, title) => {
+     flatArray.push({ type: "date", title });
+     flatArray.push(...sectionMessages);
+   });
 
-    setFlatMessages(flatArray);
+   setFlatMessages(flatArray);
 
-    // Auto-scroll to bottom on initial load (shows newest messages)
-    if (isInitialMountRef.current && flatArray.length > 0) {
-      isInitialMountRef.current = false;
+   // 4️⃣ Auto-scroll logic
+   if (shouldAutoScrollRef.current) {
+     requestAnimationFrame(() => {
+       flatListRef.current?.scrollToEnd({ animated: true });
+     });
+   }
+ }, [messages]);
 
-      // Small delay to ensure layout is ready
-      setTimeout(() => {
-        if (flatListRef.current) {
-          flatListRef.current.scrollToEnd({ animated: false });
-        }
-      }, 300);
-    }
-
-    // Auto-scroll to bottom on new messages if user is at bottom
-    if (shouldAutoScrollRef.current && flatArray.length > 0) {
-      setTimeout(() => {
-        if (flatListRef.current) {
-          flatListRef.current.scrollToEnd({ animated: true });
-        }
-      }, 100);
-    }
-  }, [messages]);
 
   // Clean up on unmount
   useEffect(() => {
@@ -396,25 +372,26 @@ const MessageView = () => {
     // Handle incoming real-time messages
     useEffect(() => {
       const handleNewMessage = (envelope: any) => {
-        const message = envelope.payload;
+        const message: Message = envelope.payload;
 
         if (message.chatId === selectedChat?._id) {
           // Check if this is replacing a temp message
-          const existingTemp = messages.find(
-            (m) =>
-              m.isOptimistic &&
-              m.senderId._id === message.senderId._id &&
-              Math.abs(
-                new Date(m.createdAt).getTime() -
-                  new Date(message.createdAt).getTime()
-              ) < 5000
-          );
 
-          if (existingTemp) {
-            replaceTempMessage(existingTemp._id, message);
-          } else {
-            addNewMessage(message);
-          }
+          useGlobalStore.setState((state) => {
+            const filteredMessages = state.messages.filter(
+              (msg) => !msg.isOptimistic
+            );
+
+            const exists = filteredMessages.some(
+              (msg) => msg._id === message._id
+            );
+
+            if (exists) {
+              return { messages: filteredMessages };
+            }
+
+            return { messages: [...filteredMessages, message] };
+          });
         }
       };
 

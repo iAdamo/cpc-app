@@ -93,15 +93,7 @@ function RootLayoutNav() {
     };
     socketConnect();
 
-    chatService.onNewMessage((envelope) => {
-      console.log("from layout", envelope.payload);
-      useGlobalStore.setState((state) => ({
-        groupedMessages: replaceTempMessage(
-          state.groupedMessages,
-          envelope.payload
-        ),
-      }));
-    });
+
 
     // Heartbeat every 30 seconds
     const interval = setInterval(() => {

@@ -21,7 +21,9 @@ export const getLastSeen = async (userId: string): Promise<Presence> => {
 };
 
 export const updateAvailability = async (status: string): Promise<Presence> => {
-  const response = await axiosInstance.post("/notif/presence/status", { status });
+  const response = await axiosInstance.post("/notif/presence/status", {
+    status,
+  });
   return response.data;
 };
 
@@ -29,6 +31,7 @@ export const uploadChatMedia = async (
   file: FormData,
   onProgress?: (progress: number) => void
 ) => {
+  console.log(Array.from(file.entries()));
   try {
     return await ApiClientSingleton.instance.uploadFile(
       "chat/upload",
