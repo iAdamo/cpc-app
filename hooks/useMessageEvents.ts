@@ -35,29 +35,29 @@ export function useMessageEvents(userId: string | undefined) {
     chatService.joinChat(selectedChat);
 
     // Handle incoming messages
-    const handleNewMessage = (envelope: any) => {
-      const message = envelope.payload as Message;
+    // const handleNewMessage = (envelope: any) => {
+    //   const message = envelope.payload as Message;
 
-      if (message.chatId === selectedChat._id) {
-        // Check if this is replacing a temp message
-        const { messages } = useGlobalStore.getState();
-        const existingTemp = messages.find(
-          (m) =>
-            m.isOptimistic &&
-            m.senderId._id === message.senderId._id &&
-            Math.abs(
-              new Date(m.createdAt).getTime() -
-                new Date(message.createdAt).getTime()
-            ) < 5000
-        );
+    //   if (message.chatId === selectedChat._id) {
+    //     // Check if this is replacing a temp message
+    //     const { messages } = useGlobalStore.getState();
+    //     const existingTemp = messages.find(
+    //       (m) =>
+    //         m.isOptimistic &&
+    //         m.senderId._id === message.senderId._id &&
+    //         Math.abs(
+    //           new Date(m.createdAt).getTime() -
+    //             new Date(message.createdAt).getTime()
+    //         ) < 5000
+    //     );
 
-        if (existingTemp) {
-          replaceTempMessage(existingTemp._id, message);
-        } else {
-          addNewMessage(message);
-        }
-      }
-    };
+    //     if (existingTemp) {
+    //       replaceTempMessage(existingTemp._id, message);
+    //     } else {
+    //       addNewMessage(message);
+    //     }
+    //   }
+    // };
 
     // Handle typing indicators
     const handleTyping = (envelope: any) => {
@@ -67,7 +67,7 @@ export function useMessageEvents(userId: string | undefined) {
       }
     };
 
-    chatService.onNewMessage(handleNewMessage);
+    // chatService.onNewMessage(handleNewMessage);
     chatService.onUserTyping(handleTyping);
 
     // Request current presence
@@ -80,6 +80,7 @@ export function useMessageEvents(userId: string | undefined) {
 
       if (envelope.targetId !== userId || data.userId !== envelope.targetId)
         return;
+      console.log({ data });
 
       setIsOnline(data.isOnline ? data.isOnline : false);
       setLastSeen(
@@ -93,6 +94,8 @@ export function useMessageEvents(userId: string | undefined) {
     // When presence changes
     const handleStatusChange = (envelope: EventEnvelope) => {
       const data = envelope.payload;
+
+      console.log({ data });
 
       setIsOnline(data.isOnline ? data.isOnline : false);
       setLastSeen(data.lastSeen ? data.lastSeen.toString() : "");
@@ -112,7 +115,7 @@ export function useMessageEvents(userId: string | undefined) {
       // Clear chat service listeners
       chatService.leaveCurrentChat();
       socketService.offEvent(ChatEvents.TYPING_INDICATOR, handleTyping);
-      socketService.offEvent(SocketEvents.CHAT_MESSAGE_SENT, handleNewMessage);
+      // socketService.offEvent(SocketEvents.CHAT_MESSAGE_SENT, handleNewMessage);
     };
   }, [selectedChat, userId, addNewMessage, replaceTempMessage]);
 

@@ -266,7 +266,7 @@ const MessageView = () => {
                 <AvatarBadge
                   size="lg"
                   className={`${
-                    otherAvailability?.isOnline ? "bg-green-500" : "bg-gray-400"
+                    status === "online" ? "bg-green-500" : "bg-gray-400"
                   }`}
                 />
               </Avatar>

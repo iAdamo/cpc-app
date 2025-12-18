@@ -9,7 +9,7 @@ import { Icon, ChevronRightIcon } from "@/components/ui/icon";
 import { LogOutIcon } from "lucide-react-native";
 import { router } from "expo-router";
 import ChangePassword from "./ChangePassword";
-import LogoutActionSheet from "@/components/LogoutActionSheet";
+import LogoutActionSheet from "@/components/overlays/LogoutActionSheet";
 
 const AccountSettings = () => {
   const [showChangePassword, setShowChangePassword] = useState(false);

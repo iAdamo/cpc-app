@@ -14,6 +14,8 @@ import { ProviderData } from "./provider";
 import { ServiceCategory, Subcategory, ServiceData, JobData } from "./service";
 import { FileType, MediaSource, MediaPickerOptions } from "./media";
 import { Chat, Message, LastMessage } from "./chat";
+import { InternalAxiosRequestConfig } from "axios";
+
 
 export type PersistedAppState = {
   state: {
@@ -23,6 +25,14 @@ export type PersistedAppState = {
 };
 
 export type ActiveRole = "Client" | "Provider";
+
+interface FailedRequest {
+  config: InternalAxiosRequestConfig;
+  resolve: (value: any) => void;
+  reject: (reason?: any) => void;
+  timestamp: number;
+}
+
 
 export interface GlobalState {
   currentView: ProviderView;
@@ -44,6 +54,11 @@ export interface GlobalState {
   clearError: () => void;
   progress: number;
   setProgress: (progress: number) => void;
+  networkError: boolean;
+  failedRequests: FailedRequest[];
+  setNetworkError: (status: boolean) => void;
+  addFailedRequest: (request: FailedRequest) => void;
+  clearFailedRequests: () => void;
 }
 
 export interface AuthState {

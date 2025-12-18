@@ -173,14 +173,14 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
         cursor
       );
 
-      console.log(
-        "Loaded messages:",
-        response.messages,
-        "cursor:",
-        cursor,
-        "hasMore:",
-        response.hasMore
-      );
+      // console.log(
+      //   "Loaded messages:",
+      //   response.messages.length,
+      //   "cursor:",
+      //   cursor,
+      //   "hasMore:",
+      //   response.hasMore
+      // );
 
       // Ensure we have valid arrays
       const newMessages = response.messages || [];

@@ -33,6 +33,7 @@ import RatingSection from "@/components/RatingFunction";
 import EmptyState from "@/components/EmptyState";
 import useGlobalStore from "@/store/globalStore";
 import DateFormatter from "@/utils/DateFormat";
+import ReviewModal from "@/components/overlays/GiveReviewModal";
 
 const ReviewAndRating = () => {
   const [reviews, setReviews] = useState<ReviewData[]>();
@@ -60,9 +61,9 @@ const ReviewAndRating = () => {
     <VStack className="flex-1 bg-white">
       <VStack className="">
         {!id && switchRole === "Client" && (
-          <Card className="mx-4 border p-2 border-brand-secondary flex-row gap-4 items-center bg-brand-secondary/40">
+          <Card className="mx-4 border p-2 border-brand-secondary flex-row gap-4 items-center bg-brand-secondary/20">
             <Icon as={MegaphoneIcon} className="text-brand-secondary w-7 h-7" />
-            <Text className="flex-1 text-brand-secondary">
+            <Text className="flex-1 text-brand-secondary font-bold">
               You can edit your reviews within 24 hours of giving that review.
               Reviews can also be deleted permanently
             </Text>
@@ -75,61 +76,74 @@ const ReviewAndRating = () => {
         >
           <VStack space="md">
             <Card variant="filled">
-              <VStack space="md" className="mb-4">
-                <Heading>Review Status</Heading>
-                {!id && switchRole === "Client" ? (
-                  <Text className="text-typography-600">
-                    Reviews and ratings given by you will appear here
-                  </Text>
-                ) : (
-                  <Text className="text-typography-600">
-                    Reviews and ratings given to you will appear here
-                  </Text>
+              <HStack className="justify-between items-start">
+                <VStack space="md" className="mb-4">
+                  <Heading>Review Status</Heading>
+                  {!id && switchRole === "Client" ? (
+                    <Text className="text-typography-600">
+                      Reviews and ratings given by you will appear here
+                    </Text>
+                  ) : (
+                    <Text className="text-typography-600">
+                      Reviews and ratings given to you will appear here
+                    </Text>
+                  )}
+                </VStack>
+                {switchRole === "Client" && (
+                  <Button size="sm">
+                    <ButtonText>Give A Review</ButtonText>
+                  </Button>
                 )}
-              </VStack>
-              <HStack className="justify-between">
-                <VStack
-                  space="xl"
-                  className="w-1/3 justify-center items-center"
-                >
-                  <Heading size="5xl" className="text-brand-primary">
-                    {reviews?.length || 0}
-                  </Heading>
-                  <Text className="p-2 px-4 bg-brand-primary/40 text-brand-primary rounded-full">
-                    {switchRole === "Client" ? "Provider" : "Client"}
-                    {reviews?.length === 1 ? "" : "s"}
-                  </Text>
-                </VStack>
-                <VStack className="w-3/5">
-                  {[5, 4, 3, 2, 1].map((star) => {
-                    const count =
-                      reviews?.filter((review) => review.rating === star)
-                        .length || 0;
-                    const percent =
-                      reviews && reviews.length > 0
-                        ? (count / reviews.length) * 100
-                        : 0;
-                    return (
-                      <HStack key={star} className="items-center gap-3 mb-2">
-                        <Progress
-                          value={percent}
-                          className="flex-1 bg-brand-secondary/20"
-                        >
-                          <ProgressFilledTrack className="bg-brand-primary/80" />
-                        </Progress>
-                        <HStack space="xs" className="items-center">
-                          <Text className="">{star}</Text>
-                          <Icon
-                            as={Star}
-                            className="fill-yellow-500 text-yellow-500"
-                          />
-                          <Text className="">({count})</Text>
-                        </HStack>
-                      </HStack>
-                    );
-                  })}
-                </VStack>
               </HStack>
+              {switchRole === "Provider" ||
+                (id && (
+                  <HStack className="justify-between">
+                    <VStack
+                      space="xl"
+                      className="w-1/3 justify-center items-center"
+                    >
+                      <Heading size="5xl" className="text-brand-primary">
+                        {reviews?.length || 0}
+                      </Heading>
+                      <Text className="p-2 px-4 bg-brand-primary/40 text-brand-primary rounded-full">
+                        {switchRole === "Client" ? "Provider" : "Client"}
+                        {reviews?.length === 1 ? "" : "s"}
+                      </Text>
+                    </VStack>
+                    <VStack className="w-3/5">
+                      {[5, 4, 3, 2, 1].map((star) => {
+                        const count =
+                          reviews?.filter((review) => review.rating === star)
+                            .length || 0;
+                        const percent =
+                          reviews && reviews.length > 0
+                            ? (count / reviews.length) * 100
+                            : 0;
+                        return (
+                          <HStack
+                            key={star}
+                            className="items-center gap-3 mb-2"
+                          >
+                            <Progress
+                              value={percent}
+                              className="flex-1 bg-brand-secondary/20"
+                            >
+                              <ProgressFilledTrack className="bg-brand-primary/80" />
+                            </Progress>
+                            <HStack space="xs" className="items-center">
+                              <Text className="">{star}</Text>
+                              <Icon
+                                as={Star}
+                                className="fill-yellow-500 text-yellow-500"
+                              />
+                              <Text className="">({count})</Text>
+                            </HStack>
+                          </HStack>
+                        );
+                      })}
+                    </VStack>
+                  </HStack>
+                ))}
             </Card>
             <Accordion
               variant="filled"

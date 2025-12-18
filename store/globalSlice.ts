@@ -11,13 +11,26 @@ export const globalSlice: StateCreator<GlobalStore, [], [], GlobalState> = (
   error: null,
   success: null,
   info: null,
+  networkError: false,
+  failedRequests: [],
   setSuccess: (success) => set({ success }),
   setInfo: (info) => set({ info }),
   clearInfo: () => set({ info: null }),
   clearSuccess: () => set({ success: null }),
   clearError: () => set({ error: null }),
   setLoading: (loading) => set({ isLoading: loading }),
-  setError: (error) => set({ error }),
+  setError: (error) =>
+    set({
+      error,
+      networkError: error === "Network Error" || error === "Network Error",
+    }),
+  setNetworkError: (status) => set({ networkError: status }),
+  addFailedRequest: (request) =>
+    set((state) => ({
+      failedRequests: [...state.failedRequests, request],
+    })),
+
+  clearFailedRequests: () => set({ failedRequests: [] }),
   switchRole: get()?.user?.activeRole!,
   setSwitchRole: async (role) => {
     const formData = new FormData();

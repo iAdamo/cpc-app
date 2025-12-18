@@ -74,7 +74,7 @@ const ImageHeader = ({ provider }: { provider: ProviderData }) => {
       isFollowing: boolean;
       followedBy: string[];
     }) => {
-      // console.debug({ data });
+      console.debug({ data });
       if (!data.providerId || data.providerId !== provider._id) return;
       setSubData(data);
       useGlobalStore.setState((state) => {

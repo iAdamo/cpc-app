@@ -7,7 +7,7 @@ import {
   ActionsheetDragIndicatorWrapper,
   ActionsheetBackdrop,
 } from "@/components/ui/actionsheet";
-import { Heading } from "./ui/heading";
+import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import useGlobalStore from "@/store/globalStore";
 import { router } from "expo-router";

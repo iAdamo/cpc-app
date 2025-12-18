@@ -1,7 +1,7 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { Slot } from "expo-router";
 import { StatusBar, Platform } from "react-native";
@@ -18,9 +18,9 @@ import {
 } from "@/services/socketService";
 import { PresenceEvents } from "@/services/socketService";
 import { AppState } from "react-native";
-import chatService from "@/services/chatService";
-import { replaceTempMessage } from "@/utils/InsertMessageIntoSections";
-
+import NetworkErrorModal from "@/components/overlays/NetworkErrorModal";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { useHeartbeat } from "@/hooks/useHeartbeat";
 export { ErrorBoundary } from "expo-router";
 
 SplashScreen.preventAutoHideAsync();
@@ -85,55 +85,10 @@ function RootLayoutNav() {
     currentView,
     switchRole,
   } = useGlobalStore();
-  useEffect(() => {
-    console.log("from layout");
-    const socketConnect = async () => {
-      const socket = socketService;
-      await socket.connect();
-    };
-    socketConnect();
 
+  useNetworkStatus();
+  useHeartbeat();
 
-
-    // Heartbeat every 30 seconds
-    const interval = setInterval(() => {
-      socketService.emitEvent(PresenceEvents.HEARTBEAT, {
-        status: PRESENCE_STATUS.ONLINE,
-        customStatus:
-          useGlobalStore.getState().availability?.customStatus ||
-          PRESENCE_STATUS.ONLINE,
-        lastSeen: Date.now(),
-      });
-    }, 25000);
-
-    // AppState activity detection
-    let lastActivity = 0;
-
-    const handleAppStateChange = (nextState: string) => {
-      const now = Date.now();
-      if (now - lastActivity < 2000) return; // ignore spam
-      lastActivity = now;
-
-      socketService.emitEvent(PresenceEvents.USER_ACTIVITY, {
-        state: nextState,
-        lastSeen: now,
-      });
-    };
-
-    const subscription = AppState.addEventListener(
-      "change",
-      handleAppStateChange
-    );
-
-    return () => {
-      clearInterval(interval);
-      subscription.remove();
-
-      // socketService.offEvent(SocketEvents.CHAT_MESSAGE_SENT, handleNewMessage);
-
-      // socketService.offEvent(SocketEvents.ERROR, handleMessageError);
-    };
-  }, [currentView, switchRole]);
   useEffect(() => {
     if (error) {
       Toast.show({
@@ -178,6 +133,7 @@ function RootLayoutNav() {
         style={{ flex: 1, backgroundColor: "white", paddingTop: -50 }}
       >
         <Slot />
+        <NetworkErrorModal />
         <Toast position="bottom" />
       </SafeAreaView>
     </GluestackUIProvider>

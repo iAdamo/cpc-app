@@ -9,7 +9,7 @@ export const STATUS_MAP: Record<
     label: string;
   }
 > = {
-  available: {
+  online: {
     action: "success",
     colorClass: "text-green-600",
     label: "Available",

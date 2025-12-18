@@ -126,8 +126,9 @@ class SocketService {
     }
 
     this.socket = io(SOCKET_URL, {
+      path: "/sanuxsocket/socket.io",
       auth: { token: token || undefined },
-      transports: ["websocket", "polling"],
+      transports: ["websocket"],
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
