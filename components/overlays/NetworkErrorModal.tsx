@@ -29,6 +29,8 @@ const NetworkErrorModal = () => {
       setIsRetrying(true);
       await apiClient.manualRetry();
 
+      console.log("All pending requests have been retried.");
+
       // Wait a moment to show retry animation
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -42,6 +44,8 @@ const NetworkErrorModal = () => {
 
   const handleDismiss = useCallback(() => {
     apiClient.clearAllPendingRequests();
+    console.log("All pending requests have been cleared.");
+
     clearError();
   }, [clearError]);
 
@@ -99,11 +103,12 @@ const ModalContent = ({
     <Text style={styles.title}>No Internet Connection</Text>
 
     <Text style={styles.message}>
-      {retryCount > 0
+      {/* {retryCount > 0
         ? `${retryCount} request${
             retryCount > 1 ? "s" : ""
           } pending due to network issues.`
-        : "Unable to connect to the server. Please check your internet connection."}
+        : "Unable to connect to the server. Please check your internet connection."} */}
+      Unable to connect. Please check your internet connection.
     </Text>
 
     {isRetrying ? (

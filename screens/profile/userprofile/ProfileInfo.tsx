@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
@@ -7,22 +6,12 @@ import { Heading } from "@/components/ui/heading";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Link, LinkText } from "@/components/ui/link";
 import { MessageSquareTextIcon, PhoneIcon } from "lucide-react-native";
-import {
-  ProviderData,
-  EditableFields,
-  EventEnvelope,
-  ResEventEnvelope,
-  PresenceResponse,
-  Presence,
-} from "@/types";
+import { ProviderData, EditableFields } from "@/types";
 import useGlobalStore from "@/store/globalStore";
 import { Badge, BadgeText } from "@/components/ui/badge";
 import { router } from "expo-router";
-import { getLastSeen } from "@/services/axios/chat";
-import DateFormatter from "@/utils/DateFormat";
 import PresenceBadge from "@/components/PresenceBadge";
-import { socketService } from "@/services/socketService";
-import { PresenceEvents } from "@/services/socketService";
+import { useProfilePresence } from "@/hooks/useProfilePresence";
 
 const ProfileInfo = ({
   provider,
@@ -38,17 +27,7 @@ const ProfileInfo = ({
   handleCancelEdit: () => void;
   onLayout: any;
 }) => {
-  const {
-    user,
-    switchRole,
-    updateUserProfile,
-    createChat,
-    selectedChat,
-    setCurrentView,
-    otherAvailability,
-    setOtherAvailability,
-    currentView,
-  } = useGlobalStore();
+  const { user, switchRole, createChat, setCurrentView } = useGlobalStore();
 
   // console.log({ provider });
   const handleJoinChat = async () => {
@@ -62,52 +41,7 @@ const ProfileInfo = ({
     });
   };
 
-  useEffect(() => {
-    if (user?._id === provider.owner) return;
-    // Request current presence
-    socketService.emitEvent(PresenceEvents.GET_STATUS, {
-      targetId: provider.owner,
-    });
-    const handleStatusResponse = (envelope: ResEventEnvelope) => {
-      let data: PresenceResponse;
-      data = envelope.payload;
-      console.log({ data });
-
-      if (envelope.targetId === user?._id || data.userId !== envelope.targetId)
-        return;
-
-      setOtherAvailability({
-        lastSeen: data.lastSeen,
-        status: data.customStatus || data?.status,
-        isOnline: data.isOnline,
-      });
-    };
-
-    // When presence changes
-    const handleStatusChange = (envelope: EventEnvelope) => {
-      console.log("change", { envelope });
-
-      const data = envelope.payload;
-      if (data.userId !== user?._id) return;
-      // console.log(envelope.payload);
-
-      setOtherAvailability({
-        lastSeen: data.lastSeen,
-        status: data.status,
-        isOnline: data.isOnline,
-      });
-    };
-
-    socketService.onEvent(PresenceEvents.STATUS_CHANGE, handleStatusChange);
-    socketService.onEvent(PresenceEvents.STATUS_RESPONSE, handleStatusResponse);
-    return () => {
-      socketService.offEvent(PresenceEvents.STATUS_CHANGE, handleStatusChange);
-      socketService.offEvent(
-        PresenceEvents.STATUS_RESPONSE,
-        handleStatusResponse
-      );
-    };
-  }, []);
+  const { otherAvailability } = useProfilePresence(provider);
 
   return (
     <VStack
@@ -115,9 +49,9 @@ const ProfileInfo = ({
       className={`bg-white ${isSticky ? "pt-8" : ""}`}
     >
       {/* Profile Info Section */}
-      <VStack className="">
+      <VStack className="rounded-lg shadow-lg p-4 m-4 bg-white">
         <HStack className="">
-          <Card className="w-1/2 gap-2 items-start">
+          <Card className="w-1/2 gap-2 p-0 items-start rounded-none">
             <HStack space="xs">
               <Heading size="xl" className="flex-1">
                 {provider?.providerName || "Alejandro De'Armas"}
@@ -146,7 +80,7 @@ const ProfileInfo = ({
               </LinkText>
             </Link>
           </Card>
-          <Card className="gap-2 items-end flex-1">
+          <Card className="gap-2 items-end flex-1 rounded-none p-0">
             {/** Presence badge */}
             <PresenceBadge
               presence={otherAvailability}
@@ -184,10 +118,6 @@ const ProfileInfo = ({
             )}
           </Card>
         </HStack>
-        {/* <SocialMediaDetails
-          provider={provider}
-          isEditable={isEditable}
-        /> */}
       </VStack>
     </VStack>
   );

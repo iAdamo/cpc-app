@@ -38,7 +38,7 @@ import { getJobById } from "@/services/axios/service";
 import { router } from "expo-router";
 import useGlobalStore from "@/store/globalStore";
 import DateFormatter from "@/utils/DateFormat";
-import { getDistanceWithUnit } from "@/utils/GetDistance";
+import { locationService } from "@/utils/GetDistance";
 import { Image } from "expo-image";
 import MediaView from "@/components/media/MediaView";
 import {
@@ -208,7 +208,7 @@ const JobView = () => {
             <Text className="text-typography-600 font-medium">
               {job.location} (
               {
-                getDistanceWithUnit(
+                locationService.getDistanceFromCurrentLocationWithUnit(
                   job?.coordinates?.[1] ?? 0,
                   job?.coordinates?.[0] ?? 0
                 )?.text
@@ -342,6 +342,7 @@ const JobView = () => {
           isOpen={viewingPhoto !== null}
           onClose={() => setViewingPhoto("")}
           url={viewingPhoto}
+          mediaList={job.media as MediaItem[]}
         />
       )}
       {proposalModalOpen && (

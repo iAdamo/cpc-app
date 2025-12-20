@@ -88,45 +88,39 @@ const UserProfile = () => {
     }
   }, [otherUser, isEditable]);
 
-  if (loading || isLoading) {
-    return (
-      <Spinner size="large" className="flex-1 justify-center items-center" />
-    );
-  } else if (provider?._id) {
-    return (
-      <VStack className="flex-1 bg-white">
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          onScroll={handleScroll}
-          stickyHeaderIndices={[1]}
-        >
-          <ImageHeader provider={provider} />
-          {/* Profile Info Section */}
-          <ProfileInfo
-            provider={provider}
-            isSticky={isSticky}
-            isEditable={isEditable}
-            editingFields={editingFields}
-            handleSave={handleSave}
-            handleEditStart={handleEditStart}
-            handleCancelEdit={handleCancelEdit}
-            onLayout={(e: any) => {
-              stickyHeaderY.current = e.nativeEvent.layout.y;
-            }}
-          />
-          <Highlights provider={provider} />
-          <MoreInfo provider={provider} isEditable={isEditable} />
-        </ScrollView>
-      </VStack>
-    );
-  } else {
-    return (
-      <EmptyState
-        header="No Profile Found"
-        text="The profile you are looking for does not exist."
-      />
-    );
-  }
+  return provider && provider?._id ? (
+    <VStack className="flex-1 bg-white">
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        stickyHeaderIndices={[1]}
+      >
+        <ImageHeader provider={provider} />
+        {/* Profile Info Section */}
+        <ProfileInfo
+          provider={provider}
+          isSticky={isSticky}
+          isEditable={isEditable}
+          editingFields={editingFields}
+          handleSave={handleSave}
+          handleEditStart={handleEditStart}
+          handleCancelEdit={handleCancelEdit}
+          onLayout={(e: any) => {
+            stickyHeaderY.current = e.nativeEvent.layout.y;
+          }}
+        />
+        <Highlights provider={provider} />
+        <MoreInfo provider={provider} isEditable={isEditable} />
+      </ScrollView>
+    </VStack>
+  ) : loading || isLoading ? (
+    <Spinner size="large" className="flex-1 justify-center items-center" />
+  ) : (
+    <EmptyState
+      header="No Profile Found"
+      text="The profile you are looking for does not exist."
+    />
+  );
 };
 
 export default UserProfile;

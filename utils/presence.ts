@@ -35,8 +35,12 @@ export const STATUS_MAP: Record<
  * Convert raw presence response to UI-ready normalized data
  */
 export function normalizePresence(presence?: PresenceResponse) {
-  const rawStatus =
-    presence?.customStatus ?? (presence?.isOnline ? "available" : "offline");
+  // const rawStatus =
+  //   presence?.customStatus ?? (presence?.isOnline ? "available" : "offline");
+
+  const rawStatus = presence?.isOnline
+    ? presence.customStatus
+    : presence?.status;
 
   const status = String(rawStatus).toLowerCase();
 

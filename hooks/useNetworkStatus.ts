@@ -3,7 +3,7 @@ import * as Network from "expo-network";
 import useGlobalStore from "@/store/globalStore";
 
 export const useNetworkStatus = () => {
-  const [isConnected, setIsConnected] = useState<boolean | null>(true);
+  const [isConnected, setIsConnected] = useState<boolean | null>(false);
   const { setNetworkError } = useGlobalStore();
 
   useEffect(() => {

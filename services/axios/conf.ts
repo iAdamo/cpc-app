@@ -26,10 +26,9 @@ const createClient = () => {
     headers: {
       "Content-Type": "application/json",
     },
-    timeout: 10000, // 10 second timeout
+    timeout: 10000,
   });
 
-  // Request interceptor
   apiClient.interceptors.request.use(
     async (config: InternalAxiosRequestConfig) => {
       try {
@@ -59,39 +58,69 @@ const createClient = () => {
 };
 
 export class ApiClientSingleton {
-  public axiosInstance: ReturnType<typeof createClient>;
-  private pendingRequests: PendingRequest[] = [];
-  private isRetrying = false;
-  private retryTimeout: ReturnType<typeof setTimeout> | null = null;
-  public static instance: ApiClientSingleton;
+  private _axiosInstance: ReturnType<typeof createClient>;
+  private _pendingRequests: PendingRequest[] = [];
+  private _isRetrying = false;
+  private _retryTimeout: ReturnType<typeof setTimeout> | null = null;
+  private static _instance: ApiClientSingleton | null = null;
 
   private constructor() {
-    this.axiosInstance = createClient();
+    this._axiosInstance = createClient();
     this.setupResponseInterceptor();
+  }
+
+  // Use getter methods instead of public properties
+  public get axiosInstance() {
+    return this._axiosInstance;
+  }
+
+  private get pendingRequests() {
+    return this._pendingRequests;
+  }
+
+  private set pendingRequests(requests: PendingRequest[]) {
+    this._pendingRequests = requests;
+  }
+
+  private get isRetrying() {
+    return this._isRetrying;
+  }
+
+  private set isRetrying(value: boolean) {
+    this._isRetrying = value;
+  }
+
+  private get retryTimeout() {
+    return this._retryTimeout;
+  }
+
+  private set retryTimeout(value: ReturnType<typeof setTimeout> | null) {
+    if (this._retryTimeout) {
+      clearTimeout(this._retryTimeout);
+    }
+    this._retryTimeout = value;
   }
 
   private setupResponseInterceptor() {
     this.axiosInstance.interceptors.response.use(
       (response: AxiosResponse) => response,
       async (error: AxiosError) => {
+        console.log("Error", error?.response?.data);
         const { logout, setNetworkError, addFailedRequest } =
           useGlobalStore.getState();
         const originalRequest = error.config as InternalAxiosRequestConfig & {
           _retry?: boolean;
         };
 
-        // Handle authentication errors
         if (error.response?.status === 403 || error.response?.status === 401) {
           await logout();
           return Promise.reject(error);
         }
 
-        // Handle network errors
         if (error.message === "Network Error" || !error.response) {
           console.error("Network Error detected:", error.message);
           setNetworkError(true);
 
-          // Store failed request for retry if it's not a retry attempt already
           if (!originalRequest?._retry) {
             return new Promise((resolve, reject) => {
               const pendingRequest: PendingRequest = {
@@ -111,9 +140,8 @@ export class ApiClientSingleton {
                 timestamp: Date.now(),
               });
 
-              this.pendingRequests.push(pendingRequest);
+              this.pendingRequests = [...this.pendingRequests, pendingRequest];
 
-              // Auto-retry after delay if not already retrying
               if (!this.isRetrying) {
                 this.scheduleRetry();
               }
@@ -127,10 +155,6 @@ export class ApiClientSingleton {
   }
 
   private scheduleRetry() {
-    if (this.retryTimeout) {
-      clearTimeout(this.retryTimeout);
-    }
-
     this.retryTimeout = setTimeout(() => {
       this.retryPendingRequests();
     }, RETRY_DELAY_MS);
@@ -152,7 +176,6 @@ export class ApiClientSingleton {
         if (request.retryCount < request.maxRetries) {
           request.retryCount++;
 
-          // Mark request as retry to avoid infinite loops
           const retryConfig = {
             ...request.config,
             _retry: true,
@@ -172,13 +195,12 @@ export class ApiClientSingleton {
           );
         }
       } catch (error) {
-        // If still network error, add back to pending requests
         if (
           axios.isAxiosError(error) &&
           (error.message === "Network Error" || !error.response)
         ) {
           if (request.retryCount < request.maxRetries) {
-            this.pendingRequests.push(request);
+            this.pendingRequests = [...this.pendingRequests, request];
           } else {
             request.reject(error);
           }
@@ -190,7 +212,6 @@ export class ApiClientSingleton {
 
     this.isRetrying = false;
 
-    // Schedule next retry if there are still pending requests
     if (this.pendingRequests.length > 0) {
       this.scheduleRetry();
     } else {
@@ -207,7 +228,6 @@ export class ApiClientSingleton {
       await this.retryPendingRequests();
     }
 
-    // Also clear the network error state
     const { setNetworkError } = useGlobalStore.getState();
     setNetworkError(false);
   }
@@ -221,24 +241,24 @@ export class ApiClientSingleton {
       request.reject(new Error("Request cancelled due to network error"));
     });
     this.pendingRequests = [];
-
-    if (this.retryTimeout) {
-      clearTimeout(this.retryTimeout);
-      this.retryTimeout = null;
-    }
+    this.retryTimeout = null;
   }
 
-  // Singleton pattern
+  // Singleton pattern without freezing
   public static getInstance(): ApiClientSingleton {
-    if (!ApiClientSingleton.instance) {
-      ApiClientSingleton.instance = new ApiClientSingleton();
-      Object.freeze(ApiClientSingleton.instance);
+    if (!ApiClientSingleton._instance) {
+      ApiClientSingleton._instance = new ApiClientSingleton();
+      // REMOVED: Object.freeze(ApiClientSingleton.instance);
     }
-    return ApiClientSingleton.instance;
+    return ApiClientSingleton._instance;
   }
 
-  public getAxiosInstance() {
-    return this.axiosInstance;
+  // Alternative: reset instance (useful for testing)
+  public static resetInstance() {
+    if (ApiClientSingleton._instance) {
+      ApiClientSingleton._instance.clearAllPendingRequests();
+      ApiClientSingleton._instance = null;
+    }
   }
 
   public async uploadFile(
@@ -259,7 +279,7 @@ export class ApiClientSingleton {
           onProgress(Math.round(progress));
         }
       },
-      timeout: 30000, // 30 seconds for file uploads
+      timeout: 30000,
     });
 
     return response.data;

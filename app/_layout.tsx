@@ -1,7 +1,7 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import React, { use, useEffect, useState } from "react";
+import React, { use, useEffect } from "react";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { Slot } from "expo-router";
 import { StatusBar, Platform } from "react-native";
@@ -11,13 +11,6 @@ import { ShareService } from "@/services/shareService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView } from "react-native-safe-area-context";
 import "../global.css";
-import {
-  socketService,
-  PRESENCE_STATUS,
-  SocketEvents,
-} from "@/services/socketService";
-import { PresenceEvents } from "@/services/socketService";
-import { AppState } from "react-native";
 import NetworkErrorModal from "@/components/overlays/NetworkErrorModal";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { useHeartbeat } from "@/hooks/useHeartbeat";
@@ -82,8 +75,6 @@ function RootLayoutNav() {
     clearSuccess,
     info,
     clearInfo,
-    currentView,
-    switchRole,
   } = useGlobalStore();
 
   useNetworkStatus();

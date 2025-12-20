@@ -26,7 +26,7 @@ const Screen = () => {
       ) : null}
       <VStack className="flex-1">
         {currentView === "Home" &&
-          (switchRole === "Client" ? <HomeView /> : <Text>Provider Home</Text>)}
+          (switchRole === "Client" ? <HomeView /> : <Text>Coming Soon...</Text>)}
         {currentView === "Updates" &&
           (switchRole === "Client" ? <Update /> : <ClientsUpdates />)}
         {currentView === "Chat" && <Chat />}

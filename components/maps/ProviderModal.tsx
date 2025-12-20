@@ -26,7 +26,7 @@ import useGlobalStore from "@/store/globalStore";
 import { router } from "expo-router";
 import { Image } from "expo-image";
 import MediaView from "../media/MediaView";
-import { getLastSeen } from "@/services/axios/chat";
+import { useProfilePresence } from "@/hooks/useProfilePresence";
 
 interface ProviderModalProps {
   provider: ProviderData;
@@ -51,22 +51,7 @@ const ProviderModal: React.FC<ProviderModalProps> = ({
   const providerLat = provider.location?.primary?.coordinates?.[0];
   const providerLon = provider.location?.primary?.coordinates?.[1];
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const presence = await getLastSeen(provider.owner);
-        if (!mounted) return;
-        if (presence) setPresence(presence);
-      } catch (error) {
-        console.error("Failed to fetch last seen:", error);
-      }
-    })();
-
-    return () => {
-      mounted = false;
-    };
-  }, [provider.owner]);
+  const { otherAvailability } = useProfilePresence(provider);
 
   const distance =
     userLocation && providerLat != null && providerLon != null
@@ -133,7 +118,7 @@ const ProviderModal: React.FC<ProviderModalProps> = ({
         </ActionsheetDragIndicatorWrapper>
 
         {/* Header */}
-        <VStack className="w-full p-4  border-b border-gray-200">
+        <VStack className="w-full p-4 border-b border-gray-200">
           <ProfileAvatar provider={provider} />
         </VStack>
         <ActionsheetScrollView className="px-2">
@@ -170,10 +155,14 @@ const ProviderModal: React.FC<ProviderModalProps> = ({
             <HStack className="items-center">
               <VStack
                 className="w-3 h-3 rounded-full mr-2"
-                style={{ backgroundColor: getAvailabilityColor(presence?.availability) }}
+                style={{
+                  backgroundColor: getAvailabilityColor(
+                    otherAvailability?.customStatus
+                  ),
+                }}
               />
               <Text className="text-typography-500 font-medium">
-                {presence?.availability || "Available"}
+                {otherAvailability?.customStatus || "Available"}
               </Text>
             </HStack>
           </ActionsheetItem>

@@ -7,9 +7,10 @@ import {
   Dimensions,
 } from "react-native";
 import VideoPlayer from "@/components/media/VideoPlayer";
-import { Image } from "../ui/image";
+import { Image } from "expo-image";
 import { useVideoPlayer } from "expo-video";
 import { Icon, ArrowLeftIcon } from "../ui/icon";
+import { MediaItem } from "@/types";
 
 const getMediaType = (url: string): "image" | "video" | "doc" => {
   const imageExt = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg"];
@@ -31,31 +32,56 @@ const getMediaType = (url: string): "image" | "video" | "doc" => {
   return "doc";
 };
 
+interface MediaViewProps {
+  isOpen: boolean;
+  onClose: () => void;
+  url?: string;
+  mediaList?: MediaItem[];
+  initialIndex?: number;
+}
+
 const MediaView = ({
   isOpen,
   onClose,
   url,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  url: string;
-}) => {
-  const mediaType = getMediaType(url);
+  mediaList,
+  initialIndex = 0,
+}: MediaViewProps) => {
+  const [currentIndex, setCurrentIndex] = React.useState(initialIndex);
+
+  // Use either the single URL or get from mediaList
+  const currentUrl = url || (mediaList && mediaList[currentIndex]?.url) || "";
+
+  const mediaType = getMediaType(currentUrl);
   const isImage = mediaType === "image";
   const isVideo = mediaType === "video";
   const isDoc = mediaType === "doc";
 
-  const player = useVideoPlayer(url, (player) => {
+  const player = useVideoPlayer(currentUrl, (player) => {
     player.loop = false;
     player.play();
   });
+
   const close = () => {
     try {
       player.release();
     } catch (e) {
       // ignore
     }
+    setCurrentIndex(0);
     onClose();
+  };
+
+  const goToNext = () => {
+    if (mediaList && currentIndex < mediaList.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    }
+  };
+
+  const goToPrev = () => {
+    if (mediaList && currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
   };
 
   return (
@@ -78,21 +104,52 @@ const MediaView = ({
         <View style={styles.mediaWrapper}>
           {isImage && (
             <Image
-              source={url}
-              className="w-full h-full object-cover bg-black"
-              resizeMode="contain"
-              alt={url}
+              source={currentUrl}
+              style={{
+                width: "100%",
+                height: "100%",
+                borderRadius: 0,
+                backgroundColor: "#000",
+              }}
+              contentFit="contain"
+              alt={currentUrl}
             />
           )}
           {isVideo && (
             <VideoPlayer
-              uri={url}
+              uri={currentUrl}
               autoPlay={true}
               showControls={false}
               player={player}
             />
           )}
         </View>
+
+        {/* Navigation buttons for media list */}
+        {mediaList && mediaList.length > 1 && (
+          <>
+            {currentIndex > 0 && (
+              <TouchableOpacity
+                style={[styles.navButton, styles.prevButton]}
+                onPress={goToPrev}
+              >
+                <Icon as={ArrowLeftIcon} className="text-white w-6 h-6" />
+              </TouchableOpacity>
+            )}
+            {currentIndex < mediaList.length - 1 && (
+              <TouchableOpacity
+                style={[styles.navButton, styles.nextButton]}
+                onPress={goToNext}
+              >
+                <Icon
+                  as={ArrowLeftIcon}
+                  className="text-white w-6 h-6"
+                  style={{ transform: [{ rotate: "180deg" }] }}
+                />
+              </TouchableOpacity>
+            )}
+          </>
+        )}
       </View>
     </Modal>
   );
@@ -121,6 +178,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     marginBottom: 8,
     padding: 8,
+    zIndex: 10,
   },
   mediaWrapper: {
     width: "100%",
@@ -128,5 +186,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#000",
+  },
+  navButton: {
+    position: "absolute",
+    top: "50%",
+    transform: [{ translateY: -20 }],
+    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: 25,
+    padding: 12,
+    zIndex: 10,
+  },
+  prevButton: {
+    left: 20,
+  },
+  nextButton: {
+    right: 20,
   },
 });

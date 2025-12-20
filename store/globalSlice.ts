@@ -17,7 +17,7 @@ export const globalSlice: StateCreator<GlobalStore, [], [], GlobalState> = (
   setInfo: (info) => set({ info }),
   clearInfo: () => set({ info: null }),
   clearSuccess: () => set({ success: null }),
-  clearError: () => set({ error: null }),
+  clearError: () => set({ error: null, networkError: false }),
   setLoading: (loading) => set({ isLoading: loading }),
   setError: (error) =>
     set({

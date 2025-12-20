@@ -5,9 +5,9 @@ const { axiosInstance } = ApiClientSingleton.getInstance();
 
 export const createReview = async (
   id: string,
-  review: FormData
+  data: FormData
 ): Promise<ReviewData> => {
-  const response = await axiosInstance.post(`reviews/${id}`, review, {
+  const response = await axiosInstance.post(`reviews/${id}`, data, {
     headers: {
       "Content-Type": "multipart/form-data",
     },

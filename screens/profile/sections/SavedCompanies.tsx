@@ -1,10 +1,7 @@
 import { VStack } from "@/components/ui/vstack";
-import { ChevronLeftIcon, Icon } from "@/components/ui/icon";
-import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
 import SearchBar from "@/components/SearchEngine";
 import { ScrollView } from "react-native";
 import ProviderCard from "@/components/ProviderCard";
-import { router } from "expo-router";
 import useGlobalStore from "@/store/globalStore";
 import EmptyState from "@/components/EmptyState";
 

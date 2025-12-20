@@ -5,14 +5,14 @@ export interface ReviewData {
   _id: string;
   description: string;
   rating: number;
-  images: string[];
+  images: MediaItem[];
   status: "pending" | "approved" | "rejected";
   helpfulVotes: string[];
   providerReply?: string;
   tags: string[];
   isDeleted: boolean;
-  user: UserData;
-  provider: CompanyData;
+  creator: UserData;
+  recipient: UserData;
   service: string;
   createdAt: string;
 }

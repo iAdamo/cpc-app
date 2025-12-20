@@ -179,7 +179,7 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
 
   return (
     <Card className="p-0">
-      <VStack space="xs" className="px-4">
+      <VStack space="xs" className="p-4 rounded-lg m-4 shadow-lg bg-white">
         <HStack className="items-center">
           <Heading size="md" className="text-typography-700">
             Description
@@ -212,7 +212,7 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
             />
           </Textarea>
         ) : (
-          <Text className="text-justify break-words line-clamp-[9]">
+          <Text className="text-justify font-semibold break-words line-clamp-[9]">
             {desc || "No description provided yet."}
           </Text>
         )}

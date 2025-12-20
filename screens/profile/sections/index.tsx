@@ -50,13 +50,13 @@ const SectionPage = () => {
             size="xl"
             variant="link"
             onPress={handleBack}
-            className="w-48"
+            className=""
           >
             <ButtonIcon
               as={ChevronLeftIcon}
               className="w-7 h-7 text-typography-700"
             />
-            <ButtonText className="text-typography-700 data-[active=true]:no-underline">
+            <ButtonText className="text-typography-700 data-[active=true]:no-underline flex-1">
               {buttonText}
             </ButtonText>
           </Button>
