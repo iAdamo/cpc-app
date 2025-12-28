@@ -28,12 +28,12 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
     groupInfo?: Partial<Chat["groupInfo"]>
   ) => {
     try {
-      set({ chatLoading: true, chatError: null });
+      set({ chatLoading: true, error: null });
       const newChat = await chatService.createDirectChat(participantIds);
       set({ selectedChat: newChat });
     } catch (error: any) {
       set({
-        chatError:
+        error:
           error?.response?.data?.message ||
           error?.message ||
           "Failed to create chat",

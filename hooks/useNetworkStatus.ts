@@ -4,7 +4,7 @@ import useGlobalStore from "@/store/globalStore";
 
 export const useNetworkStatus = () => {
   const [isConnected, setIsConnected] = useState<boolean | null>(false);
-  const { setNetworkError } = useGlobalStore();
+  const { setNetworkError, currentView } = useGlobalStore();
 
   useEffect(() => {
     const checkAndUpdateNetwork = (
@@ -31,7 +31,7 @@ export const useNetworkStatus = () => {
     );
 
     return () => subscription.remove();
-  }, [setNetworkError]);
+  }, [currentView, setNetworkError]);
 
-  return isConnected;
+  return { isConnected };
 };

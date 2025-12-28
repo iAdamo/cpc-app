@@ -11,6 +11,7 @@ export interface Chat {
   participants: UserData[];
   type: "direct" | "group";
   lastMessage?: LastMessage;
+  unreadCounts?: Record<string, number>;
   groupInfo?: GroupInfo;
   createdAt: string;
   updatedAt: string;
@@ -19,7 +20,7 @@ export interface Chat {
 export interface LastMessage {
   messageId: string;
   text: string;
-  sender: UserData;
+  sender: string;
   createdAt: string;
 }
 

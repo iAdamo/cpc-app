@@ -89,7 +89,7 @@ const MediaView = ({
       visible={isOpen}
       animationType="fade"
       onRequestClose={close}
-      style={{ flex: 1, backgroundColor: "black" }}
+      style={{ flex: 1, backgroundColor: "red" }}
     >
       <TouchableOpacity
         style={styles.backdrop}

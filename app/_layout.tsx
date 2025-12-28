@@ -68,16 +68,10 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const {
-    error,
-    success,
-    clearError,
-    clearSuccess,
-    info,
-    clearInfo,
-  } = useGlobalStore();
+  const { error, success, clearError, clearSuccess, info, clearInfo } =
+    useGlobalStore();
 
-  useNetworkStatus();
+  const { isConnected } = useNetworkStatus();
   useHeartbeat();
 
   useEffect(() => {
@@ -85,7 +79,7 @@ function RootLayoutNav() {
       Toast.show({
         type: "error",
         text1: error,
-        visibilityTime: 3000,
+        visibilityTime: 2000,
         onHide: clearError,
       });
     }
@@ -96,7 +90,7 @@ function RootLayoutNav() {
       Toast.show({
         type: "success",
         text1: success,
-        visibilityTime: 3000,
+        visibilityTime: 2000,
         onHide: clearSuccess,
       });
     }
@@ -107,7 +101,7 @@ function RootLayoutNav() {
       Toast.show({
         type: "info",
         text1: info,
-        visibilityTime: 3000,
+        visibilityTime: 2000,
         onHide: clearInfo,
       });
     }
@@ -124,7 +118,7 @@ function RootLayoutNav() {
         style={{ flex: 1, backgroundColor: "white", paddingTop: -50 }}
       >
         <Slot />
-        <NetworkErrorModal />
+        {!isConnected && <NetworkErrorModal />}
         <Toast position="bottom" />
       </SafeAreaView>
     </GluestackUIProvider>

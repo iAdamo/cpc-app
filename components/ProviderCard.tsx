@@ -37,7 +37,7 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
   isSavedPro && displayStyle === "Grid" && setDisplayStyle("List");
   const isGrid = displayStyle === "Grid";
 
-  const savedProviderIds = savedProviders.map((p) => p._id);
+  const savedProviderIds = savedProviders.map((provider) => provider._id);
   const isSaved = savedProviderIds.includes(provider._id);
 
   const handleSaveToggle = async () => {
@@ -48,9 +48,7 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
 
   return (
     <Card
-      className={`rounded-lg p-0 ${
-        isGrid ? "w-[49%] mb-4 h-72" : "w-full mb-4 h-40"
-      }`}
+      className={`rounded-lg p-0  ${isGrid ? "mb-4 h-72" : "w-full mb-4 h-40"}`}
     >
       {isGrid ? (
         <Pressable
@@ -64,7 +62,7 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
             })
           }
         >
-          <VStack className="flex-1">
+          <VStack className="flex-1 w-full">
             <Box className="relative w-full h-[55%] mb-2">
               <Image
                 source={
@@ -127,7 +125,10 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
                       }
                     />
                   </Avatar>
-                  <Heading size="md" className="break-words text-brand-primary">
+                  <Heading
+                    size="md"
+                    className="flex-1 line-clamp-1 text-brand-primary"
+                  >
                     {provider.providerName}
                   </Heading>
                 </HStack>
@@ -225,7 +226,7 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
                     </Avatar>
                     <Heading
                       size="md"
-                      className="break-words text-brand-primary"
+                      className="flex-1 line-clamp-1 text-brand-primary"
                     >
                       {provider.providerName}
                     </Heading>

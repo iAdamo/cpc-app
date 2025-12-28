@@ -96,8 +96,12 @@ const SearchBar = ({
   useEffect(() => {
     const q = filterQuery.trim().toLowerCase();
 
-    if (providers) {
-      console.log("Filtering providers with query:", q, providers[0].providerName);
+    if (providers && providers.length > 0) {
+      console.log(
+        "Filtering providers with query:",
+        q,
+        providers[0].providerName
+      );
       if (q.length > 0) {
         setFilteredProviders(
           providers.filter((p) => p.providerName?.toLowerCase().includes(q))
@@ -106,8 +110,8 @@ const SearchBar = ({
         setFilteredProviders([]);
       }
     }
-
     if (chats) {
+      console.log("Filtering chats with query:", q);
       if (q.length > 0) {
         const filtered = chats.filter((c) => {
           const participantMatch = c.participants?.some((u) =>

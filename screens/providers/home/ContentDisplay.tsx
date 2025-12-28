@@ -27,6 +27,7 @@ const ContentDisplay = ({
       keyExtractor={(item) => item._id}
       key={isGrid ? "grid" : "list"}
       numColumns={isGrid ? 2 : 1}
+      columnWrapperStyle={isGrid ? { gap: "8" } : undefined}
       renderItem={({ item }) => (
         <View style={{ flex: 1 }}>
           <ProviderCard provider={item} />

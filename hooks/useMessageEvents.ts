@@ -1,15 +1,16 @@
-import { PresenceEvents } from "./../services/socketService";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
   socketService,
   SocketEvents,
   ChatEvents,
+  PresenceEvents,
 } from "@/services/socketService";
 import { EventEnvelope, ResEventEnvelope } from "@/types";
 import useGlobalStore from "@/store/globalStore";
 import chatService from "@/services/chatService";
 import { Message } from "@/types";
 import { PresenceResponse } from "@/types";
+import { AppState } from "react-native";
 
 interface PresenceStatus {
   status: "online" | "offline" | "away" | string;
@@ -21,8 +22,8 @@ export function useMessageEvents(userId: string | undefined) {
   const [lastSeen, setLastSeen] = useState<string>("");
   const [isOnline, setIsOnline] = useState<boolean>(false);
   const [isTyping, setIsTyping] = useState<boolean>(false);
-  const { loadMessages, selectedChat, addNewMessage, replaceTempMessage } =
-    useGlobalStore();
+  const { loadMessages, selectedChat, messages, user } = useGlobalStore();
+  const appState = useRef(AppState.currentState);
 
   useEffect(() => {
     if (!selectedChat) return;
@@ -33,31 +34,6 @@ export function useMessageEvents(userId: string | undefined) {
 
     // Join chat room via WebSocket
     chatService.joinChat(selectedChat);
-
-    // Handle incoming messages
-    // const handleNewMessage = (envelope: any) => {
-    //   const message = envelope.payload as Message;
-
-    //   if (message.chatId === selectedChat._id) {
-    //     // Check if this is replacing a temp message
-    //     const { messages } = useGlobalStore.getState();
-    //     const existingTemp = messages.find(
-    //       (m) =>
-    //         m.isOptimistic &&
-    //         m.senderId._id === message.senderId._id &&
-    //         Math.abs(
-    //           new Date(m.createdAt).getTime() -
-    //             new Date(message.createdAt).getTime()
-    //         ) < 5000
-    //     );
-
-    //     if (existingTemp) {
-    //       replaceTempMessage(existingTemp._id, message);
-    //     } else {
-    //       addNewMessage(message);
-    //     }
-    //   }
-    // };
 
     // Handle typing indicators
     const handleTyping = (envelope: any) => {
@@ -74,6 +50,18 @@ export function useMessageEvents(userId: string | undefined) {
     socketService.emitEvent(PresenceEvents.GET_STATUS, {
       targetId: userId,
     });
+
+    const unreadMessages = messages.filter(
+      (message) => !message.status.read.includes(user?.id!)
+    );
+
+    const messageIds = unreadMessages.map((unreadMessage) => unreadMessage._id);
+
+    if (messageIds.length > 0)
+      socketService.emitEvent(ChatEvents.MARK_AS_READ, {
+        chatId: selectedChat?._id,
+        messageIds,
+      });
 
     const handleStatusResponse = (envelope: ResEventEnvelope) => {
       const data: PresenceResponse = envelope.payload;
@@ -105,6 +93,11 @@ export function useMessageEvents(userId: string | undefined) {
     socketService.onEvent(PresenceEvents.STATUS_CHANGE, handleStatusChange);
     socketService.onEvent(PresenceEvents.STATUS_RESPONSE, handleStatusResponse);
 
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange
+    );
+
     return () => {
       socketService.offEvent(PresenceEvents.STATUS_CHANGE, handleStatusChange);
       socketService.offEvent(
@@ -117,7 +110,23 @@ export function useMessageEvents(userId: string | undefined) {
       socketService.offEvent(ChatEvents.TYPING_INDICATOR, handleTyping);
       // socketService.offEvent(SocketEvents.CHAT_MESSAGE_SENT, handleNewMessage);
     };
-  }, [selectedChat, userId, addNewMessage, replaceTempMessage]);
+  }, [selectedChat, userId]);
+
+  const handleAppStateChange = useCallback((nextAppState: string) => {
+    if (
+      appState.current.match(/inactive|background/) &&
+      nextAppState === "active"
+    ) {
+      const unreadMessageIds = messages
+        .filter((message) => message.status.read.includes(user?.id!))
+        .map((message) => message._id);
+
+      socketService.emitEvent(ChatEvents.MARK_AS_READ, {
+        chatId: selectedChat?._id,
+        messageIds: unreadMessageIds,
+      });
+    }
+  }, []);
 
   // Update my own status
   const updateStatus = useCallback(

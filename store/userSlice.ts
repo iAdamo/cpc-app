@@ -1,24 +1,13 @@
 import { UserData, ActiveRole, PresenceResponse } from "@/types";
 import {
   updateUserProfile,
-  setUserFavourites,
   updateProviderProfile,
   createProviderProfile,
   getUserProfile,
-  toggleFollowProvider,
 } from "@/services/axios/user";
 import { StateCreator } from "zustand";
-import {
-  GlobalStore,
-  AuthState,
-  SignUpData,
-  LoginData,
-  UserState,
-  Status,
-} from "@/types";
+import { GlobalStore, UserState } from "@/types";
 import appendFormData from "@/utils/AppendFormData";
-import chatService from "@/services/chatService";
-import { updateAvailability } from "@/services/axios/chat";
 import { socketService, PresenceEvents } from "@/services/socketService";
 
 export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
@@ -78,7 +67,10 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
           } else {
             appendFormData(formData, user?.activeRoleId);
             // for deugging only
-            // console.debug("Submitting formData:", Array.from(formData.entries()));
+            // console.debug(
+            //   "Submitting formData:",
+            //   Array.from(formData.entries())
+            // );
             response = await createProviderProfile(formData);
           }
         }
@@ -129,6 +121,7 @@ export const userSlice: StateCreator<GlobalStore, [], [], UserState> = (
       });
     }
   },
+
   toggleFollow: async (providerId: string) => {
     set({ error: null });
     try {

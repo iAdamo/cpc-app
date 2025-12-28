@@ -32,9 +32,9 @@ const ProfileInfo = ({
   // console.log({ provider });
   const handleJoinChat = async () => {
     await createChat(provider.owner);
-    setCurrentView("Chat");
     const selectedChat = useGlobalStore.getState().selectedChat;
     if (!selectedChat) return;
+    setCurrentView("Chat");
     router.push({
       pathname: "/chat/[id]",
       params: { id: selectedChat._id },
@@ -49,11 +49,11 @@ const ProfileInfo = ({
       className={`bg-white ${isSticky ? "pt-8" : ""}`}
     >
       {/* Profile Info Section */}
-      <VStack className="rounded-lg shadow-lg p-4 m-4 bg-white">
+      <VStack className="m-4 bg-white">
         <HStack className="">
           <Card className="w-1/2 gap-2 p-0 items-start rounded-none">
             <HStack space="xs">
-              <Heading size="xl" className="flex-1">
+              <Heading size="lg" className="flex-1">
                 {provider?.providerName || "Alejandro De'Armas"}
               </Heading>
               <Badge
@@ -66,7 +66,7 @@ const ProfileInfo = ({
               </Badge>
             </HStack>
 
-            <Text size="lg" className="font-bold">
+            <Text size="md" className="font-bold">
               {provider.subcategories[0].name || "Tree Felling"}
             </Text>
             <Link

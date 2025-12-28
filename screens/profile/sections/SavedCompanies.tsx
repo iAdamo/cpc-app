@@ -26,7 +26,7 @@ const SavedCompanies = () => {
       ) : (
         <EmptyState
           header="No saved companies found."
-          text=" You haven't saved any companies yet. Browse and save companies tocsee them here."
+          text={`You haven't saved any companies yet.\nBrowse and save companies to see them here.`}
         />
       )}
     </VStack>

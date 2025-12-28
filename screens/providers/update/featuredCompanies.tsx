@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, use } from "react";
 import { FlatList, ListRenderItemInfo } from "react-native";
 import { Box } from "@/components/ui/box";
 import { VStack } from "@/components/ui/vstack";
@@ -8,6 +8,8 @@ import { Text } from "@/components/ui/text";
 import { Button, ButtonIcon } from "@/components/ui/button";
 import { ThreeDotsIcon } from "@/components/ui/icon";
 import { Icon, AddIcon, CloseIcon, ShareIcon } from "@/components/ui/icon";
+import { Pressable } from "@/components/ui/pressable";
+import { Badge, BadgeIcon, BadgeText } from "@/components/ui/badge";
 import {
   FlagIcon,
   UserRoundPlusIcon,
@@ -34,6 +36,9 @@ import MediaScroll from "./MediaScroll";
 import { Dimensions, View, StyleSheet, Image } from "react-native";
 import { MediaItem, ProviderData } from "@/types";
 import { ShareService } from "@/services/shareService";
+import { getFeaturedProviders } from "@/services/axios/user";
+import { router } from "expo-router";
+import RatingSection from "@/components/RatingFunction";
 
 const { width } = Dimensions.get("window");
 
@@ -140,23 +145,55 @@ function FeaturedCompanyItem({ provider }: { provider: ProviderData }) {
 
   return (
     <VStack className="justify-center h-72 bg-white">
-      <HStack space="lg" className="items-center p-4 w-full">
-        <Avatar size="md">
-          <AvatarFallbackText>{provider.providerName}</AvatarFallbackText>
-          <AvatarImage
-            source={{
-              uri:
-                typeof (provider.providerLogo as MediaItem).thumbnail ===
-                "string"
-                  ? (provider.providerLogo as MediaItem).thumbnail
-                  : undefined,
-            }}
-          />
-        </Avatar>
-        <VStack className="justify-between">
-          <Heading>{provider.providerName}</Heading>
-          <Text>{provider.subcategories}</Text>
-        </VStack>
+      <HStack space="lg" className="items-center w-full px-4">
+        <Pressable
+          onPress={() => {
+            router.push({
+              pathname: "/profile/[id]",
+              params: { id: provider.owner },
+            });
+          }}
+          className="flex flex-row gap-4 mt-4 items-start"
+        >
+          <Avatar size="md">
+            <AvatarFallbackText>{provider.providerName}</AvatarFallbackText>
+            <AvatarImage
+              source={{
+                uri:
+                  typeof (provider.providerLogo as MediaItem).thumbnail ===
+                  "string"
+                    ? (provider.providerLogo as MediaItem).thumbnail
+                    : undefined,
+              }}
+            />
+          </Avatar>
+          <VStack className="items-start my-2">
+            <HStack space="sm" className="items-center">
+              <Heading className="">{provider.providerName}</Heading>
+              <Badge
+                // action={!provider?.isVerified ? "success" : "muted"}
+                action="success"
+                className=""
+              >
+                <BadgeText>
+                  {/* {!provider?.isVerified ? "Verified" : "Unverified"} */}
+                  Verified
+                </BadgeText>
+              </Badge>
+            </HStack>
+            <HStack space="md" className="items-end">
+              <Text size="sm" className="font-medium">
+                {provider.subcategories[0].categoryId.name}
+                {"\n"}
+                {provider.subcategories[0].name}
+              </Text>
+              <RatingSection
+                rating={provider.averageRating}
+                reviewCount={provider.reviewCount}
+              />
+            </HStack>
+          </VStack>
+        </Pressable>
         <Button
           size="sm"
           className="ml-auto rotate-90 bg-black/40 border-0 w-10 h-9"
@@ -184,7 +221,18 @@ function FeaturedCompanyItem({ provider }: { provider: ProviderData }) {
 }
 
 export default function FeaturedCompanies() {
-  const { savedProviders, filteredProviders } = useGlobalStore();
+  const [featuredProviders, setFeaturedProviders] = useState<ProviderData[]>(
+    []
+  );
+
+  useEffect(() => {
+    const getFeatured = async () => {
+      const providers = await getFeaturedProviders();
+      setFeaturedProviders(providers);
+    };
+    getFeatured();
+  }, []);
+
   const renderItem = useCallback(
     ({ item }: ListRenderItemInfo<ProviderData>) => {
       return (
@@ -198,7 +246,7 @@ export default function FeaturedCompanies() {
 
   return (
     <FlatList
-      data={filteredProviders.length > 0 ? filteredProviders : savedProviders}
+      data={featuredProviders.length > 0 ? featuredProviders : []}
       keyExtractor={(item) => item._id}
       renderItem={renderItem}
       contentContainerStyle={{ paddingBottom: 20 }}

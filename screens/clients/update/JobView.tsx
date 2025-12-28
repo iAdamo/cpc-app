@@ -159,7 +159,7 @@ const JobView = () => {
             {hasApplied && (
               <Heading
                 size="xs"
-                className="py-0.5 px-2 bg-green-500 h-5 rounded-lg text-white text-center"
+                className="px-2 bg-green-500 h-5 rounded-lg text-white text-center"
               >
                 Applied
               </Heading>
@@ -209,8 +209,8 @@ const JobView = () => {
               {job.location} (
               {
                 locationService.getDistanceFromCurrentLocationWithUnit(
-                  job?.coordinates?.[1] ?? 0,
-                  job?.coordinates?.[0] ?? 0
+                  job?.coordinates?.[0] ?? 0,
+                  job?.coordinates?.[1] ?? 0
                 )?.text
               }{" "}
               away){" "}
@@ -225,13 +225,13 @@ const JobView = () => {
         </Card>
         <Card className="gap-4">
           <VStack>
-            <Heading size="lg" className="font-medium mb-2">
+            <Heading size="md" className="font-medium mb-2">
               Job Description
             </Heading>
             <Text className="text-typography-600">{job?.description}</Text>
           </VStack>
           <VStack>
-            <Heading size="lg" className="font-medium mb-2">
+            <Heading size="md" className="font-medium mb-2">
               Attachments
             </Heading>
             {job.media && job.media.length > 0 ? (
@@ -258,83 +258,92 @@ const JobView = () => {
             )}
           </VStack>
         </Card>
-        <Card className="gap-8">
-          <HStack className="gap-4 items-center">
-            <Avatar size="md">
-              <AvatarFallbackText>
-                {`${job.userId?.firstName ?? ""} ${
-                  job.userId?.lastName ?? ""
-                }`.trim()}
-              </AvatarFallbackText>
-              <AvatarImage
-                source={{
-                  uri: job.userId?.profilePicture?.thumbnail,
-                }}
-              />
-            </Avatar>
-
-            <VStack>
-              <Heading className="text-brand-primary">
-                {job.anonymous
-                  ? "Anonymous"
-                  : `${job.userId?.firstName ?? ""} ${
-                      job.userId?.lastName ?? ""
-                    }`.trim()}
-              </Heading>
-              <RatingSection
-                rating={job.userId?.averageRating}
-                reviewCount={job.userId?.reviewCount}
-              />
-            </VStack>
-            <Text
-              size="sm"
-              className="self-end text-typography-600 font-medium flex-1"
-            >
-              Member since {DateFormatter.toShortDate(job.userId.createdAt)}
-            </Text>
-          </HStack>
-
-          <Button
-            size="xl"
-            isDisabled={hasApplied}
-            onPress={() => setProposalModalOpen(job)}
-            className="bg-brand-primary mx-4 data-[active=true]:bg-brand-primary/60 rounded-xl"
+        <Card className="gap-4 flex-row items-center border-b border-gray-200 pb-4">
+          <Avatar size="md">
+            <AvatarFallbackText>
+              {`${job.userId?.firstName ?? ""} ${
+                job.userId?.lastName ?? ""
+              }`.trim()}
+            </AvatarFallbackText>
+            <AvatarImage
+              source={{
+                uri: job.userId?.profilePicture?.thumbnail,
+              }}
+            />
+          </Avatar>
+          <VStack>
+            <Heading className="text-brand-primary">
+              {job.anonymous
+                ? "Anonymous"
+                : `${job.userId?.firstName ?? ""} ${
+                    job.userId?.lastName ?? ""
+                  }`.trim()}
+            </Heading>
+            <RatingSection
+              rating={job.userId?.averageRating}
+              reviewCount={job.userId?.reviewCount}
+            />
+          </VStack>
+          <Text
+            size="sm"
+            className="self-end text-typography-600 font-medium flex-1"
           >
-            <ButtonText>{hasApplied ? "Applied" : "Send Proposal"}</ButtonText>
-          </Button>
+            Member since {DateFormatter.toShortDate(job.userId.createdAt)}
+          </Text>
         </Card>
+        <Button
+          size="md"
+          variant="outline"
+          isDisabled={hasApplied}
+          onPress={() => setProposalModalOpen(job)}
+          className="self-end mr-4 data-[active=true]:bg-brand-primary/60 rounded-xl"
+        >
+          <ButtonText className="text-brand-primary">
+            {hasApplied ? "Applied" : "Send Proposal"}
+          </ButtonText>
+        </Button>
         {myProposal && (
-          <Accordion variant="unfilled">
-            <AccordionItem value="a">
-              <AccordionHeader>
-                <AccordionTrigger>
-                  {({ isExpanded }: { isExpanded: any }) => {
-                    return (
-                      <>
-                        <AccordionTitleText className="text-typography-600">
-                          My Proposal
-                        </AccordionTitleText>
-                        {isExpanded ? (
-                          <AccordionIcon
-                            as={ChevronUpIcon}
-                            className="ml-3 text-typography-600"
-                          />
-                        ) : (
-                          <AccordionIcon
-                            as={ChevronDownIcon}
-                            className="ml-3 text-typography-600"
-                          />
-                        )}
-                      </>
-                    );
-                  }}
-                </AccordionTrigger>
-              </AccordionHeader>
-              <AccordionContent>
-                <Text>{myProposal?.message}</Text>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+          <Card className="gap-4">
+            <Heading size="md" className="font-medium">
+              My Proposal
+            </Heading>
+            <VStack className="gap-2">
+              <HStack className="justify-between items-center">
+                <Text className="text-typography-600">
+                  Proposed Budget: $
+                  {myProposal.proposedPrice || "Not specified"}
+                </Text>
+                <Text className="text-typography-600">
+                  Estimated Duration:{" "}
+                  {myProposal.estimatedDuration || "Not specified"} days
+                </Text>
+              </HStack>
+              <Text className="text-typography-600">{myProposal.message}</Text>
+            </VStack>
+            {myProposal.attachments && myProposal.attachments.length > 0 && (
+              <VStack className="gap-2">
+                <Heading size="sm" className="font-medium">
+                  Proposal Attachments
+                </Heading>
+                <HStack space="sm" className="flex-wrap ">
+                  {myProposal.attachments.map((mediaItem) => (
+                    <Pressable
+                      key={(mediaItem as MediaItem).index}
+                      onPress={() =>
+                        setViewingPhoto((mediaItem as MediaItem).url)
+                      }
+                    >
+                      <Image
+                        source={{ uri: (mediaItem as MediaItem).thumbnail }}
+                        style={{ width: 100, height: 100, borderRadius: 8 }}
+                        contentFit="cover"
+                      />
+                    </Pressable>
+                  ))}
+                </HStack>
+              </VStack>
+            )}
+          </Card>
         )}
       </ScrollView>
       {viewingPhoto && (

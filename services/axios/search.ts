@@ -3,18 +3,29 @@ import { ProviderData, ServiceData, JobData } from "@/types";
 
 const { axiosInstance } = ApiClientSingleton.getInstance();
 
-export const globalSearch = async (
-  model: "providers" | "services" | "jobs",
-  page: number,
-  limit: number,
-  engine: boolean,
-  searchInput?: string,
-  lat?: string,
-  long?: string,
-  address?: string,
-  sortBy?: string,
-  categories?: string[]
-): Promise<{
+export const globalSearch = async ({
+  model,
+  page,
+  limit,
+  engine,
+  searchInput,
+  lat,
+  long,
+  address,
+  sortBy,
+  categories,
+}: {
+  model: "providers" | "services" | "jobs";
+  page: number;
+  limit: number;
+  engine: boolean;
+  searchInput?: string;
+  lat?: string;
+  long?: string;
+  address?: string;
+  sortBy?: string;
+  categories?: string[];
+}): Promise<{
   providers: ProviderData[];
   services?: ServiceData[];
   jobs?: JobData[];

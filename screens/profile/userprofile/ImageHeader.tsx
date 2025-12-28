@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/icon";
 import { router } from "expo-router";
 import { Divider } from "@/components/ui/divider";
-import { ProviderData } from "@/types";
+import { MediaItem, ProviderData } from "@/types";
 import useGlobalStore from "@/store/globalStore";
 import {
   Actionsheet,
@@ -113,9 +113,8 @@ const ImageHeader = ({ provider }: { provider: ProviderData }) => {
       <ImageBackground
         source={{
           uri:
-            typeof provider.providerImages[0] === "string"
-              ? provider.providerImages[0]
-              : "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+            (provider.providerLogo as MediaItem).thumbnail ||
+            "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
         }}
         style={styles.header}
       >
@@ -138,7 +137,7 @@ const ImageHeader = ({ provider }: { provider: ProviderData }) => {
             />
           </Button>
         </HStack>
-        <HStack className="w-full bg-white/20 backdrop-blur-3xl px-4 py-2 justify-between items-center">
+        <HStack className="w-full bg-brand-primary/20 backdrop-blur-3xl px-4 py-2 justify-between items-center">
           <HStack>
             <VStack>
               <Heading className="text-white">{provider.reviewCount}</Heading>

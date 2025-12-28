@@ -11,26 +11,49 @@ import EmptyState from "@/components/EmptyState";
 import { ScrollView } from "@/components/ui/scroll-view";
 import { ProviderData, EditableFields } from "@/types";
 import appendFormData from "@/utils/AppendFormData";
+import { getUserProfile } from "@/services/axios/user";
 
 const UserProfile = () => {
-  const {
-    searchResults,
-    user,
-    fetchUserProfile,
-    otherUser,
-    isLoading,
-    updateUserProfile,
-  } = useGlobalStore();
+  const { searchResults, user, updateUserProfile } = useGlobalStore();
   if (!searchResults) return <EmptyState header="" text="" />;
   const [isEditable, setIsEditable] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [provider, setProvider] = useState<ProviderData>();
   const [isSticky, setIsSticky] = useState(false);
+
+  const { id } = useLocalSearchParams<{ id: string }>();
+
+  useEffect(() => {
+    try {
+      setLoading(true);
+      if (typeof id !== "string") return;
+      const fetchProfile = async () => {
+        const response = await getUserProfile(id);
+        setProvider(response.activeRoleId as ProviderData);
+      };
+      console.log(
+        "Checking editability for user ID:",
+        id,
+        user?._id,
+        user?.activeRoleId?._id
+      );
+      if (typeof user?.activeRoleId?._id === "string" && user._id === id) {
+        setIsEditable(true);
+        setProvider(user.activeRoleId as ProviderData);
+      } else {
+        setIsEditable(false);
+        fetchProfile();
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [id, user]);
 
   const [editingFields, setEditingFields] = useState<
     Partial<Record<EditableFields, string>>
   >({});
-
   const handleEditStart = (fields: Partial<Record<EditableFields, string>>) => {
     setEditingFields(fields);
   };
@@ -50,7 +73,6 @@ const UserProfile = () => {
     }
   };
   const stickyHeaderY = useRef(0);
-  const { id } = useLocalSearchParams<{ id: string }>();
 
   const handleScroll = (event: any) => {
     const yOffset = event.nativeEvent.contentOffset.y;
@@ -61,32 +83,15 @@ const UserProfile = () => {
     }
   };
 
-  useEffect(() => {
-    setLoading(true);
-    if (typeof id !== "string") return;
-    if (
-      user?.activeRoleId &&
-      typeof user.activeRoleId._id === "string" &&
-      user._id === id
-    ) {
-      setIsEditable(true);
-      setProvider(user.activeRoleId as ProviderData);
-    } else {
-      setIsEditable(false);
-      fetchUserProfile(id);
-    }
-    setLoading(false);
-  }, [id, user]);
-
-  useEffect(() => {
-    if (
-      !isEditable &&
-      otherUser?.activeRoleId &&
-      typeof otherUser.activeRoleId._id === "string"
-    ) {
-      setProvider(otherUser.activeRoleId as ProviderData);
-    }
-  }, [otherUser, isEditable]);
+  // useEffect(() => {
+  //   if (
+  //     !isEditable &&
+  //     otherUser?.activeRoleId &&
+  //     typeof otherUser.activeRoleId._id === "string"
+  //   ) {
+  //     setProvider(otherUser.activeRoleId as ProviderData);
+  //   }
+  // }, [otherUser, isEditable]);
 
   return provider && provider?._id ? (
     <VStack className="flex-1 bg-white">
@@ -113,7 +118,7 @@ const UserProfile = () => {
         <MoreInfo provider={provider} isEditable={isEditable} />
       </ScrollView>
     </VStack>
-  ) : loading || isLoading ? (
+  ) : !loading ? (
     <Spinner size="large" className="flex-1 justify-center items-center" />
   ) : (
     <EmptyState

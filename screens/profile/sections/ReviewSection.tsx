@@ -110,7 +110,7 @@ const ReviewAndRating: React.FC<{ providerName?: string }> = ({
           <VStack space="md">
             <Card variant="filled">
               <HStack className="justify-between items-start">
-                <VStack space="md" className="mb-4">
+                <VStack space="md" className="mb-4 flex-1">
                   <Heading>Review Status</Heading>
                   {!id && switchRole === "Client" ? (
                     <Text className="text-typography-600">
@@ -123,7 +123,7 @@ const ReviewAndRating: React.FC<{ providerName?: string }> = ({
                   )}
                 </VStack>
                 {id && switchRole === "Client" && (
-                  <Button size="sm" onPress={handleOpenReviewSheet}>
+                  <Button size="sm" className="" onPress={handleOpenReviewSheet}>
                     <ButtonText>Give A Review</ButtonText>
                   </Button>
                 )}

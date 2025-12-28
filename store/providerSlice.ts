@@ -39,10 +39,10 @@ export const providerViewSlice: StateCreator<
   setSavedProviders: async (providerId) => {
     try {
       const data = await setUserFavourites(providerId);
-      if (data) {
-        if (data.favoritedBy.includes(get().user?._id || "")) {
+      if (data.provider._id) {
+        if (data.provider.favoritedBy.includes(get().user?._id || "")) {
           set({
-            savedProviders: [...get().savedProviders, data],
+            savedProviders: [...get().savedProviders, data.provider],
             success: "Added to Saved Companies",
           });
         } else {
@@ -100,18 +100,18 @@ export const providerViewSlice: StateCreator<
         categories,
       } = params;
       console.log("Executing search with params:", params);
-      const response = await globalSearch(
+      const response = await globalSearch({
         model,
         page,
         limit,
         engine,
         searchInput,
-        lat?.toString(),
-        long?.toString(),
+        lat: lat?.toString(),
+        long: long?.toString(),
         address,
         sortBy,
-        categories
-      );
+        categories,
+      });
       if (model === "providers") {
         set({
           searchResults: {

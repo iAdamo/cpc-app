@@ -18,6 +18,8 @@ import DateFormatter from "@/utils/DateFormat";
 function ChatItem({ chat, switchRole }: { chat: Chat; switchRole: string }) {
   const otherParticipant = chat.participants[0];
   const isClient = switchRole === "Client";
+  const { user, messages } = useGlobalStore();
+  const userId = user?._id ?? "";
 
   return (
     <Pressable
@@ -63,16 +65,19 @@ function ChatItem({ chat, switchRole }: { chat: Chat; switchRole: string }) {
           </Text>
         </VStack>
         <VStack className="items-end h-full justify-between">
-          <Text size="sm" className="text-typography-500 items-start">
+          <Text size="sm" className="text-typography-500 items-start flex-1">
             {chat?.lastMessage
               ? DateFormatter.toRelative(chat.lastMessage.createdAt)
               : ""}
           </Text>
-          <Center className="bg-brand-primary h-6 w-6 px-1 rounded-full">
-            <Text size="md" className="text-brand-secondary font-medium">
-              {(chat as any).unreadCount || 1}
+          {chat.unreadCounts && chat.unreadCounts[userId] > 0 && (
+            <Text
+              size="md"
+              className="w-7 h-7 text-center py-1 bg-red-600 rounded-full text-white font-medium self-center"
+            >
+              {chat.unreadCounts[userId]}
             </Text>
-          </Center>
+          )}
         </VStack>
       </HStack>
     </Pressable>

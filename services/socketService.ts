@@ -41,7 +41,7 @@ export enum ChatEvents {
   // Outgoing events
   MESSAGE_SENT = SocketEvents.CHAT_MESSAGE_SENT,
   MESSAGE_DELIVERED = SocketEvents.CHAT_MESSAGE_DELIVERED,
-  MESSAGE_READ = SocketEvents.CHAT_MESSAGE_READ,
+  UNREAD_COUNT_UPDATED = "chat:unread_count_updated",
   TYPING_START = SocketEvents.CHAT_TYPING_START,
   TYPING_STOP = SocketEvents.CHAT_TYPING_STOP,
   USER_JOINED = "chat:user_joined",
@@ -160,7 +160,7 @@ class SocketService {
     });
 
     this.socket.on("connect_error", (err: any) => {
-      console.error("Socket error:", err.message);
+      // console.error("Socket error:", err.message);
       this.isConnected = false;
     });
   }

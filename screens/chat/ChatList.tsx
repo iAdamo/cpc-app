@@ -8,6 +8,7 @@ import { Spinner } from "@/components/ui/spinner";
 import NoActiveChat from "./NoActiveChat";
 import ChatItem from "./ChatItem";
 import ChatNavbar from "./ChatNavbar";
+import { useChat } from "@/hooks/useChat";
 
 export const ChatList: React.FC = () => {
   const { fetchChats, chatLoading, switchRole, user, filteredChats, chats } =
@@ -20,6 +21,8 @@ export const ChatList: React.FC = () => {
       chatService.leaveCurrentChat();
     };
   }, [fetchChats]);
+
+  useChat();
 
   // Remember to return participants data from the BE
   // console.log("Chats in ChatList:",chats[0], chats[0].participants);

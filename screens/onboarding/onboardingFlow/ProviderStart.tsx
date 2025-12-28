@@ -31,7 +31,7 @@ const WelcomeScreen = () => {
         className="bg-brand-secondary mt-6"
         onPress={() => setCurrentStep(currentStep + 1)}
       >
-        <ButtonText>Let's Get Started</ButtonText>
+        <ButtonText className="">Let's Get Started</ButtonText>
       </Button>
     </VStack>
   );

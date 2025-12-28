@@ -83,7 +83,7 @@ export interface JobData {
   anonymous: boolean;
   userId: UserData;
   providerId: ProviderData;
-  status: "active" | "in_progress" | "completed" | "cancelled" | "expired";
+  status: "Active" | "In Progress" | "Completed" | "Cancelled" | "Expired";
   createdAt: Date;
 }
 

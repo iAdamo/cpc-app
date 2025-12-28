@@ -90,8 +90,8 @@ const JobCard = ({ item: job }: { item: JobData }) => {
                     {job.location} (
                     {
                       locationService.getDistanceFromCurrentLocationWithUnit(
-                        job?.coordinates?.[1] ?? 0,
-                        job?.coordinates?.[0] ?? 0
+                        job?.coordinates?.[0] ?? 0,
+                        job?.coordinates?.[1] ?? 0
                       )?.text
                     }{" "}
                     away)

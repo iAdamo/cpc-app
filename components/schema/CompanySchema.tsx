@@ -5,7 +5,7 @@ const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
 const MAX_LOGO_SIZE_MB = 40;
 const MAX_LOGO_SIZE_BYTES = MAX_LOGO_SIZE_MB * 1024 * 1024;
 
-const coordinatesSchema = z.tuple([
+export const coordinatesSchema = z.tuple([
   z.number().optional(),
   z.number().optional(),
 ]);
@@ -18,7 +18,7 @@ const addressSchema = z.object({
   address: z.string().optional(),
 });
 
-const locationSchema = z.object({
+export const locationSchema = z.object({
   coordinates: coordinatesSchema.optional(),
   address: addressSchema,
 });

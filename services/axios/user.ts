@@ -43,7 +43,11 @@ export const getUserProfile = async (userId?: string): Promise<UserData> => {
 
 export const setUserFavourites = async (
   providerId: string
-): Promise<ProviderData> => {
+): Promise<{
+  provider: ProviderData;
+  isFavorited: boolean;
+  favoriteCount: number;
+}> => {
   const response = await axiosInstance.patch(`provider/${providerId}/favorite`);
   return response.data;
 };
@@ -58,5 +62,10 @@ export const toggleFollowProvider = async (
 export const removeFile = async (fileUrls: string[]): Promise<UserData> => {
   console.log("Removing files:", fileUrls);
   const response = await axiosInstance.post("users/delete-files", { fileUrls });
+  return response.data;
+};
+
+export const getFeaturedProviders = async (): Promise<ProviderData[]> => {
+  const response = await axiosInstance.get("provider/featured");
   return response.data;
 };

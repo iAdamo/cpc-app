@@ -1,5 +1,31 @@
 import { Time } from "@expo/html-elements";
 import { z } from "zod";
+import { coordinatesSchema } from "./CompanySchema";
+
+
+// const coordinatesSchema = z.tuple([
+//   z.number().optional(),
+//   z.number().optional(),
+// ]);
+
+// const addressSchema = z.object({
+//   zip: z.string().optional(),
+//   city: z.string().optional(),
+//   state: z.string().optional(),
+//   country: z.string().optional(),
+//   address: z.string().optional(),
+// });
+
+// const locationSchema = z.object({
+//   coordinates: coordinatesSchema.optional(),
+//   address: addressSchema,
+// });
+
+// export const fullLocationSchema = z.object({
+//   primary: locationSchema,
+//   secondary: locationSchema.optional(),
+//   tertiary: locationSchema.optional(),
+// });
 
 const MAX_IMAGE_SIZE_MB = 10;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
@@ -34,12 +60,13 @@ export const JobFormSchema = z.object({
     .min(1, "Deadline must be at least 1 day")
     .max(365, "Deadline must be at most 365 days"),
   location: z.string().min(1, "Location is required"),
-  coordinates: z
-    .object({
-      lat: z.number().min(-90).max(90),
-      long: z.number().min(-180).max(180),
-    })
-    .optional(),
+  // coordinates: z
+  //   .object({
+  //     lat: z.number().min(-90).max(90),
+  //     long: z.number().min(-180).max(180),
+  //   })
+  //   .optional(),
+  coordinates: coordinatesSchema.optional(),
   urgency: z.string().optional(),
   negotiable: z.boolean().optional(),
   visibility: z.string().optional(),
@@ -64,8 +91,43 @@ export const JobFormSchema = z.object({
         message: `Each image must be ≤ ${MAX_IMAGE_SIZE_MB}MB`,
       }
     )
-   
+
     .optional(),
 });
 
 export type JobFormSchemaType = z.infer<typeof JobFormSchema>;
+
+
+export type ProposalSchemaType = z.infer<typeof ProposalSchema>;
+
+export const ProposalSchema = z.object({
+  message: z
+    .string()
+    .min(10, "Please enter a brief cover message (min 10 chars)"),
+  proposedPrice: z.number().min(0, "Proposed price must be >= 0"),
+  estimatedDuration: z.number().min(1, "Delivery time must be at least 1 day"),
+  additionalNote: z.string().optional(),
+  // media: z.array(z.any()).optional(),
+  // media must be images only, each <= 20MB and must not exceed 3 files
+  media: z
+    .array(mediaFileSchema)
+    .max(3, "You can upload up to 3 images")
+    .refine(
+      (files) =>
+        files.every((file) => !file.type || file.type.startsWith("image")),
+      { message: "All files must be images" }
+    )
+    .refine(
+      (files) =>
+        files.every(
+          (file) =>
+            !file.type ||
+            (file.type.startsWith("image")
+              ? !file.size || file.size <= 20 * 1024 * 1024
+              : true)
+        ),
+      {
+        message: `Each image must be ≤ 20MB`,
+      }
+    ),
+});

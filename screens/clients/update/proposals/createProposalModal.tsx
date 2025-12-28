@@ -28,25 +28,17 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@/components/ui/modal";
+import {
+  ProposalSchema,
+  ProposalSchemaType,
+} from "@/components/schema/JobSchema";
 import useGlobalStore from "@/store/globalStore";
 import { MapPinIcon } from "lucide-react-native";
 import { JobData } from "@/types";
-import { getDistanceWithUnit } from "@/utils/GetDistance";
+import { locationService } from "@/utils/GetDistance";
 import MediaPicker from "@/components/media/MediaPicker";
 import { createProposal } from "@/services/axios/service";
 import DateFormatter from "@/utils/DateFormat";
-
-type ProposalSchemaType = z.infer<typeof ProposalSchema>;
-
-const ProposalSchema = z.object({
-  message: z
-    .string()
-    .min(10, "Please enter a brief cover message (min 10 chars)"),
-  proposedPrice: z.number().min(0, "Proposed price must be >= 0"),
-  estimatedDuration: z.number().min(1, "Delivery time must be at least 1 day"),
-  additionalNote: z.string().optional(),
-  media: z.array(z.any()).optional(),
-});
 
 const CreateProposal = ({
   job,
@@ -86,7 +78,7 @@ const CreateProposal = ({
     try {
       // Build FormData for attachments
       const formData = new FormData();
-      formData.append("jobId", job._id);
+      // formData.append("jobId", job._id);
       formData.append("message", data.message);
       formData.append("proposedPrice", String(data.proposedPrice));
       formData.append("estimatedDuration", String(data.estimatedDuration));
@@ -106,8 +98,8 @@ const CreateProposal = ({
       // console.log("Proposal submit FormData: ", Array.from(formData.entries()));
 
       await createProposal(job._id, formData);
+      useGlobalStore.setState({ selectedFiles: [] });
       setSuccess("Proposal submitted successfully");
-
       reset();
       onClose();
     } catch (err) {
@@ -115,7 +107,6 @@ const CreateProposal = ({
       setError?.("Failed to submit proposal");
     } finally {
       setSubmitting(false);
-      useGlobalStore.setState({ selectedFiles: [] });
     }
   };
 
@@ -163,9 +154,9 @@ const CreateProposal = ({
               <Text className="text-typography-600 font-medium">
                 {job.location} (
                 {
-                  getDistanceWithUnit(
-                    job?.coordinates?.[1] ?? 0,
-                    job?.coordinates?.[0] ?? 0
+                  locationService.getDistanceFromCurrentLocationWithUnit(
+                    job?.coordinates?.[0] ?? 0,
+                    job?.coordinates?.[1] ?? 0
                   )?.text
                 }{" "}
                 away)
@@ -286,7 +277,7 @@ const CreateProposal = ({
                 />
               </FormControl>
 
-              <FormControl className="w-full">
+              <FormControl className="w-full" isInvalid={!!errors.media}>
                 <FormControlLabel>
                   <FormControlLabelText>
                     Attachments (optional)
@@ -298,15 +289,20 @@ const CreateProposal = ({
                   render={({ field: { onChange, value } }) => (
                     <>
                       <MediaPicker
-                        maxFiles={1}
-                        maxSize={200}
+                        maxFiles={3}
+                        maxSize={20}
                         allowedTypes={["image"]}
-                        initialFiles={value || []}
+                        initialFiles={(value || []) as any}
                         onFilesChange={(files: any[]) => onChange(files)}
                       />
                     </>
                   )}
                 />
+                <FormControlError>
+                  <FormControlErrorText>
+                    {errors.media?.message}
+                  </FormControlErrorText>
+                </FormControlError>
               </FormControl>
             </VStack>
           </Card>

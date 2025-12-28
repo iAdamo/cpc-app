@@ -78,7 +78,7 @@ import EmptyState from "@/components/EmptyState";
 import { JobData, FileType, MediaItem, ProposalData } from "@/types";
 import MediaPicker from "@/components/media/MediaPicker";
 import appendFormData from "@/utils/AppendFormData";
-import { Image } from "@/components/ui/image";
+import { Image } from "expo-image";
 import ProfileVatar from "@/components/ProfileAvatar";
 import MediaView from "@/components/media/MediaView";
 import { MapPinCheckIcon } from "lucide-react-native";
@@ -144,9 +144,10 @@ export const PostJob = ({ userId }: { userId?: string }) => {
     const formData = new FormData();
     formData.append("isActive", (!job.isActive).toString());
     try {
+      // console.log(Array.from(formData.entries()));
       const response = await updateJob(job._id, formData);
       // Update both jobs and draftjobs arrays
-      if (job.isActive) {
+      if (!response.isActive) {
         // Moving from published to drafts
         setJobs((prev) => prev.filter((s) => s._id !== job._id));
         // use setDraftJobs to merge and deduplicate. Use the server response
@@ -157,6 +158,7 @@ export const PostJob = ({ userId }: { userId?: string }) => {
         // Moving from drafts to published
         // Remove from drafts using the dedicated remover so we don't rely on merge behavior
         removeDraftJob(job._id);
+
         setJobs((prev) => [
           ...prev,
           { ...job, isActive: true, media: response.media },
@@ -412,10 +414,10 @@ export const CreatejobModal = ({
           .filter(Boolean)
           .join(" ") ||
         "",
-      coordinates: {
-        lat: job?.coordinates?.[1] || currentLocation?.coords.latitude || 0,
-        long: job?.coordinates?.[0] || currentLocation?.coords.longitude || 0,
-      },
+      coordinates: [
+        job?.coordinates?.[1] || currentLocation?.coords.latitude || 0,
+        job?.coordinates?.[0] || currentLocation?.coords.longitude || 0,
+      ],
       budget: job?.budget || 0,
       deadline: DateFormatter.remainingDays(job?.deadline as Date) || 0,
       negotiable: job?.negotiable || false,
@@ -483,33 +485,45 @@ export const CreatejobModal = ({
     // console.log({ data });
     try {
       setLoading(true);
+      // remove categoryId
+      delete (data as any).categoryId;
+      // convert duration to deadline date
+      const currentDate = new Date();
+      const deadlineDate = new Date(
+        currentDate.getTime() + data.deadline * 24 * 60 * 60 * 1000
+      );
+      (data as any).deadline = deadlineDate.toISOString();
       const formData = new FormData();
       appendFormData(formData, data);
       // console.log("Submitting formData:", Array.from(formData.entries()));
+      const draftId = job?._id?.startsWith("draft-") ? job._id : null;
+
       let created: JobData | undefined;
+
       if (job && job._id && !job._id.startsWith("draft-")) {
         formData.append("isActive", "true");
         created = await updateJob(job._id, formData);
       } else {
         created = await createJob(formData);
       }
-      // Only remove the draft after the server confirms creation
-      if (created && created._id && job && job._id) {
-        // Use the current store value to avoid referencing outer-scope draftJobs
-        const currentDrafts = useGlobalStore.getState().draftJobs;
-        setDraftJobs(currentDrafts.filter((p: JobData) => p._id !== job._id));
+
+      if (created && created._id && draftId) {
+        useGlobalStore.setState((state) => ({
+          draftJobs: state.draftJobs.filter(
+            (draftedJob) => draftedJob._id !== draftId
+          ),
+        }));
       }
 
-      // Notify parent to add to published list
-      if (created && created._id) onPublished?.(created as JobData);
+      if (created && created._id) onPublished?.(created);
 
-      setLoading(false);
+      useGlobalStore.setState({ selectedFiles: [] });
       onClose();
       reset();
-      useGlobalStore.setState({ selectedFiles: [] });
       setSuccess("job created successfully!");
     } catch (error) {
       console.error("Error submitting form:", error);
+    } finally {
       setLoading(false);
     }
   };
@@ -856,17 +870,20 @@ export const CreatejobModal = ({
             className="border-0 rounded-full w-14 h-14 bg-red-500 data-[active=true]:bg-red-500"
             isDisabled={isLoading}
             onPress={() => {
-              getCurrentLocation(),
-                setValue(
-                  "location",
-                  `${currentLocation?.subregion} ${currentLocation?.region} ${currentLocation?.country}`,
-                  { shouldDirty: true }
-                );
-              setValue("coordinates", {
-                lat: currentLocation?.coords.latitude || 0,
-                long: currentLocation?.coords.longitude || 0,
-              }),
-                { shouldDirty: true };
+              getCurrentLocation();
+              setValue(
+                "location",
+                `${currentLocation?.subregion} ${currentLocation?.region} ${currentLocation?.country}`,
+                { shouldDirty: true }
+              );
+              setValue(
+                "coordinates",
+                [
+                  currentLocation?.coords.latitude || 0,
+                  currentLocation?.coords.longitude || 0,
+                ],
+                { shouldDirty: true }
+              );
             }}
           >
             {isLoading ? (
@@ -941,44 +958,34 @@ export const CreatejobModal = ({
     return (
       <VStack className="mt-4 gap-2 bg-[#F9F9F9] pb-8 pt-4">
         <Card className="mx-4">
-          <Heading size="md" className="text-typography-600 mb-2">
-            Job Description
-          </Heading>
+          <Text className="mb-2 font-medium">Job Description</Text>
           <Text className="text-typography-600">
             {getValues("description") || job?.description}
           </Text>
         </Card>
         <Card className="mx-4">
-          <Heading size="md" className="text-typography-600 mb-2">
-            Job Service
-          </Heading>
+          <Text className="mb-2 font-medium">Job Service</Text>
           <Text className="text-typography-600 font-medium">
             {categoryName ||
               `${job?.subcategoryId.categoryId.name} | ${job?.subcategoryId.name}`}
           </Text>
         </Card>
         <Card className="mx-4">
-          <Heading size="md" className="text-typography-600 mb-2">
-            Budget
-          </Heading>
+          <Text className="mb-2 font-medium">Budget</Text>
           <Text className="text-typography-700">
-            {getValues("budget") || job?.budget} -{" "}
+            ${getValues("budget") || job?.budget} -{" "}
             {getValues("negotiable") ? "Negotiable" : "Fixed Price"}
           </Text>
         </Card>
         <Card className="mx-4">
-          <Heading size="md" className="text-typography-600 mb-2">
-            Location
-          </Heading>
+          <Text className="mb-2 font-medium">Location</Text>
           <Text className="text-typography-700">
             {getValues("location") || job?.location}
           </Text>
         </Card>
 
         <Card className="mx-4">
-          <Heading size="md" className="text-typography-600 mb-2">
-            Estimated Duration
-          </Heading>
+          <Text className="mb-2 font-medium">Estimated Duration</Text>
           <Text className="text-typography-700">
             {"On or Before "}
             {DateFormatter.toRelative(
@@ -989,9 +996,7 @@ export const CreatejobModal = ({
           </Text>
         </Card>
         <Card className="mx-4">
-          <Heading size="md" className="text-typography-600 mb-2">
-            Visibility{" "}
-          </Heading>
+          <Text className="mb-2 font-medium">Visibility </Text>
           <Text className="text-typography-700">
             {job?.visibility === "Public"
               ? "Everyone"
@@ -1023,6 +1028,7 @@ export const CreatejobModal = ({
           <MediaView
             isOpen={!!viewMedia}
             onClose={() => setViewMedia(null)}
+            mediaList={(job?.media as MediaItem[]) || []}
             url={viewMedia ?? ""}
           />
         )}
@@ -1056,17 +1062,32 @@ export const CreatejobModal = ({
         formData.append("status", "accepted");
         await updateProposal(job._id, selectedProposal._id, formData);
         formData.delete("status");
-        formData.append("status", "in_progress");
+        formData.append("status", "In_progress");
         formData.append("providerId", selectedProposal.providerId._id);
-        formData.append("proposals", selectedProposal._id);
+        // formData.append("proposals", selectedProposal._id);
         await updateJob(job._id, formData);
         await handleJoinChat();
       } catch (error) {
         console.error("Error updating proposal:", error);
       } finally {
         setIsLoading(false);
-        router.reload();
+        // Use an any cast to access asPath without TypeScript error
+        onClose();
       }
+    };
+    const getStatusButtonClass = (status?: string) => {
+      const s = (status || "").toString().toLowerCase();
+      if (s === "active")
+        return "self-end mt-2 bg-brand-primary data-[active=true]:bg-brand-primary/80 rounded-lg text-white";
+      if (s === "in_progress" || s === "in-progress" || s === "in progress")
+        return "self-end mt-2 bg-yellow-500 rounded-lg text-white";
+      if (s === "accepted" || s === "accept")
+        return "self-end mt-2 bg-green-500 rounded-lg text-white";
+      if (s === "completed" || s === "complete")
+        return "self-end mt-2 bg-gray-500 rounded-lg text-white";
+      if (s === "pending")
+        return "self-end mt-2 bg-gray-400 rounded-lg text-white";
+      return "self-end mt-2 bg-gray-300 rounded-lg text-white";
     };
     return (
       <VStack>
@@ -1101,7 +1122,7 @@ export const CreatejobModal = ({
               <Heading size="xl" className="text-brand-primary">
                 Proposals
               </Heading>
-              <Text className="px-3 py-0.5 bg-brand-primary/10 font-bold text-brand-primary/80 rounded-full">
+              <Text className="px-3 py-0.5 bg-brand-primary/10 font-medium text-brand-primary/80 rounded-full">
                 {job.proposals.length} Applications
               </Text>
             </HStack>
@@ -1144,25 +1165,33 @@ export const CreatejobModal = ({
                     <ButtonText className="">View image</ButtonText>
                   </Button>
                 </HStack>
+                <HStack className="mt-2 gap-2">
+                  {proposal.attachments.map((mediaItem) => (
+                    <Pressable
+                      key={(mediaItem as MediaItem).index}
+                      onPress={() => setViewMedia((mediaItem as MediaItem).url)}
+                    >
+                      <Image
+                        source={{ uri: (mediaItem as MediaItem).thumbnail }}
+                        style={{ width: 100, height: 100, borderRadius: 8 }}
+                        contentFit="cover"
+                      />
+                    </Pressable>
+                  ))}
+                </HStack>
                 <Button
-                  isDisabled={job.status !== "active" || isLoading}
+                  isDisabled={job.status !== "Active" || isLoading}
                   onPress={() => {
                     setSelectedProposal(proposal);
                     handleProposalUpdate();
                   }}
-                  className="self-end mt-2 bg-brand-primary data-[active=true]:bg-brand-primary/80 rounded-lg"
+                  className={getStatusButtonClass(job.status)}
                 >
                   {isLoading ? (
                     <ButtonSpinner />
                   ) : (
                     <ButtonText>
-                      {job.status === "active"
-                        ? "Accept"
-                        : job.status
-                        ? `${job.status
-                            .charAt(0)
-                            .toUpperCase()}${job.status.slice(1)}`
-                        : ""}
+                      {job.status === "Active" ? "Accept" : job.status}
                     </ButtonText>
                   )}
                 </Button>
@@ -1258,7 +1287,7 @@ export const CreatejobModal = ({
           >
             <Icon size="xl" as={ChevronLeftIcon} />
             <Heading size="lg" className="text-brand-primary">
-              {!previewMode ? "Job Post" : "Job Request Preview"}
+              {!previewMode ? "Job Post" : "Job Preview"}
             </Heading>
           </ModalCloseButton>
         </ModalHeader>
