@@ -24,7 +24,7 @@ const resolveMediaUrl = (mediaUrl: any): string => {
 const MessageItem = memo(
   ({ message, user }: { message: Message; user: UserData }) => {
     const [viewMedia, setViewMedia] = useState<string | undefined>("");
-    const isOwnMessage = message.senderId === user?._id;
+     const isOwnMessage = message.senderId === user?._id;
 
     const handlePress = () => {
       if (message.type === "image" || message.type === "video") {

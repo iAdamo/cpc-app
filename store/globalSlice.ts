@@ -33,6 +33,7 @@ export const globalSlice: StateCreator<GlobalStore, [], [], GlobalState> = (
   clearFailedRequests: () => set({ failedRequests: [] }),
   switchRole: get()?.user?.activeRole!,
   setSwitchRole: async (role) => {
+    set({ chats: [], selectedChat: null, messages: [], groupedMessages: [] });
     const formData = new FormData();
     formData.append("activeRole", role);
     get().updateUserProfile("Client", formData);

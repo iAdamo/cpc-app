@@ -31,13 +31,12 @@ const ProfileInfo = ({
 
   // console.log({ provider });
   const handleJoinChat = async () => {
-    await createChat(provider.owner);
-    const selectedChat = useGlobalStore.getState().selectedChat;
-    if (!selectedChat) return;
+    const chatId = await createChat(provider.owner);
+    if (!chatId) return;
     setCurrentView("Chat");
     router.push({
       pathname: "/chat/[id]",
-      params: { id: selectedChat._id },
+      params: { id: chatId },
     });
   };
 
@@ -49,9 +48,9 @@ const ProfileInfo = ({
       className={`bg-white ${isSticky ? "pt-8" : ""}`}
     >
       {/* Profile Info Section */}
-      <VStack className="m-4 bg-white">
-        <HStack className="">
-          <Card className="w-1/2 gap-2 p-0 items-start rounded-none">
+      <VStack className="">
+        <Card className="flex-row">
+          <VStack className="w-1/2 gap-2 items-start">
             <HStack space="xs">
               <Heading size="lg" className="flex-1">
                 {provider?.providerName || "Alejandro De'Armas"}
@@ -79,8 +78,8 @@ const ProfileInfo = ({
                   "Florida, United States"}
               </LinkText>
             </Link>
-          </Card>
-          <Card className="gap-2 items-end flex-1 rounded-none p-0">
+          </VStack>
+          <VStack className="gap-2 items-end flex-1 ">
             {/** Presence badge */}
             <PresenceBadge
               presence={otherAvailability}
@@ -116,8 +115,8 @@ const ProfileInfo = ({
                 </HStack>
               </VStack>
             )}
-          </Card>
-        </HStack>
+          </VStack>
+        </Card>
       </VStack>
     </VStack>
   );

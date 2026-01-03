@@ -13,9 +13,8 @@ import {
 import { ProviderData } from "./provider";
 import { ServiceCategory, Subcategory, ServiceData, JobData } from "./service";
 import { FileType, MediaSource, MediaPickerOptions } from "./media";
-import { Chat, Message, LastMessage } from "./chat";
+import { Chat, Message, LastMessage, ChatItem } from "./chat";
 import { InternalAxiosRequestConfig } from "axios";
-
 
 export type PersistedAppState = {
   state: {
@@ -32,7 +31,6 @@ interface FailedRequest {
   reject: (reason?: any) => void;
   timestamp: number;
 }
-
 
 export interface GlobalState {
   currentView: ProviderView;
@@ -226,6 +224,7 @@ export interface ChatState {
   filteredChats: Chat[];
   selectedChat: Chat | null;
   messages: Message[];
+  groupedMessages: ChatItem[];
   currentPage: number;
   nextCursor: Date | null;
   chatLoading: boolean;
@@ -234,7 +233,7 @@ export interface ChatState {
     participantIds: string,
     isGroup?: boolean,
     groupInfo?: Partial<Chat["groupInfo"]>
-  ) => Promise<void>;
+  ) => Promise<string>;
   fetchChats: () => Promise<void>;
   sendTextMessage: (text: string, replyTo?: string) => Promise<void>;
   sendMediaMessage: (

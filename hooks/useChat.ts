@@ -11,64 +11,49 @@ export const useChat = () => {
 
   /* ---------------- SOCKET HANDLERS ---------------- */
 
-  const handleNewMessage = useCallback(
-    (envelope: any) => {
-      if (!userId) return;
+ const handleNewMessage = useCallback(
+   (envelope: any) => {
+     if (!userId) return;
 
-      const message: Message = envelope.payload;
-      const chatId = message.chatId;
-      if (!chatId) return;
+     const message: Message = envelope.payload;
+     const chatId = message.chatId;
+     if (!chatId) return;
 
-      useGlobalStore.setState((state) => {
-        const updatedChats = [...state.chats];
-        const index = updatedChats.findIndex((c) => c._id === chatId);
+     useGlobalStore.setState((state) => {
+       const index = state.chats.findIndex((c) => c._id === chatId);
+       if (index === -1) {
+         // 🚫 DO NOT create chats here
+         // Chat must already exist (client-created)
+         return state;
+       }
 
-        // Message from self → no unread increment
-        const shouldIncrement = message.senderId !== userId;
+       const chat = state.chats[index];
+       const shouldIncrement = message.senderId !== userId;
 
-        if (index !== -1) {
-          const chat = updatedChats[index];
+       const updatedChats = [...state.chats];
+       updatedChats[index] = {
+         ...chat,
+         lastMessage: {
+           messageId: message._id,
+           text: message.content?.text ?? "",
+           sender: message.senderId,
+           createdAt: message.createdAt as string,
+         },
+         unreadCounts: {
+           ...chat.unreadCounts,
+           [userId]: shouldIncrement
+             ? (chat.unreadCounts?.[userId] ?? 0) + 1
+             : chat.unreadCounts?.[userId] ?? 0,
+         },
+         updatedAt: new Date().toISOString(),
+       };
 
-          updatedChats[index] = {
-            ...chat,
-            lastMessage: {
-              messageId: message._id,
-              text: message.content?.text ?? "",
-              sender: message.senderId,
-              createdAt: message.createdAt as string,
-            },
-            unreadCounts: {
-              ...chat.unreadCounts,
-              [userId]: shouldIncrement
-                ? (chat.unreadCounts?.[userId] ?? 0) + 1
-                : chat.unreadCounts?.[userId] ?? 0,
-            },
-          };
-        } else {
-          // New chat
-          updatedChats.push({
-            _id: chatId,
-            participants: [],
-            type: "direct",
-            lastMessage: {
-              messageId: message._id,
-              text: message.content?.text ?? "",
-              sender: message.senderId,
-              createdAt: message.createdAt as string,
-            },
-            unreadCounts: {
-              [userId]: shouldIncrement ? 1 : 0,
-            },
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          } as Chat);
-        }
+       return { chats: updatedChats };
+     });
+   },
+   [userId]
+ );
 
-        return { chats: updatedChats };
-      });
-    },
-    [userId]
-  );
 
   const handleUnreadCountUpdate = useCallback(
     (envelope: any) => {

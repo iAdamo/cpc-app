@@ -3,7 +3,7 @@ import Categories from "./Categories";
 import { ScrollView } from "react-native";
 import { VStack } from "@/components/ui/vstack";
 import { Fab, FabIcon, FabLabel } from "@/components/ui/fab";
-import { MapPinHouseIcon } from "lucide-react-native";
+import { MapPinHouseIcon, SearchXIcon } from "lucide-react-native";
 import ContentDisplay from "./ContentDisplay";
 import SortBar from "./SortBar";
 import useGlobalStore from "@/store/globalStore";
@@ -71,17 +71,16 @@ const HomeView = () => {
         handleProvidersSearch={handleProvidersSearch}
         isSearching={isSearching}
       />
-
       <Fab
         size="lg"
         className="bg-teal-500 shadow-xl data-[active=true]:bg-teal-400 mb-16"
         onPress={() => {
           setShowSearch((prev) => !prev);
-          setIsSearchFocus(false);
+          setIsSearchFocus((prev) => !prev);
           showSearch && handleProvidersSearch();
         }}
       >
-        <FabIcon as={SearchIcon} />
+        <FabIcon as={isSearchFocus ? SearchXIcon : SearchIcon} />
         {/* <FabLabel className="">Search</FabLabel> */}
       </Fab>
       {!isSearchFocus && (

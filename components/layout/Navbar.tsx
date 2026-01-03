@@ -30,7 +30,7 @@ export const BottomNavbar = () => {
   const { currentView, setCurrentView, switchRole } = useGlobalStore();
   const isProvider = switchRole === "Provider";
   const buttons = [
-    { icon: HouseIcon, label: "Home", showFor: "Both" },
+    { icon: HouseIcon, label: "Home", showFor: "Client" },
     { icon: CircleDotDashedIcon, label: "Updates", showFor: "Both" },
     { icon: AddIcon, label: "Job-Post", showFor: "Client" },
     // { icon: MapPinHouseIcon, label: "Nearby", showFor: "Client" },

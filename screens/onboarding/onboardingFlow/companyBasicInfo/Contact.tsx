@@ -109,8 +109,8 @@ const ContactInfo = () => {
       setValue("providerLocation", {
         primary: {
           coordinates: [
-            details.geometry.location.lat,
             details.geometry.location.lng,
+            details.geometry.location.lat,
           ],
           address: {
             state: parsed.state,
@@ -318,8 +318,8 @@ const ContactInfo = () => {
                   setValue("providerLocation", {
                     primary: {
                       coordinates: [
-                        currentLocation.coords.latitude,
                         currentLocation.coords.longitude,
+                        currentLocation.coords.latitude,
                       ],
                       address: {
                         address: currentLocation.formattedAddress || "",

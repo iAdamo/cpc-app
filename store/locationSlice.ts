@@ -27,7 +27,6 @@ export const locationSlice: StateCreator<GlobalStore, [], [], LocationState> = (
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Highest,
       });
-
       const prevLocation = get().currentLocation;
       if (
         prevLocation &&

@@ -6,10 +6,16 @@ import {
   PRESENCE_STATUS,
 } from "@/services/socketService";
 
+export type ChatType = "direct" | "group";
+export type ChatItem =
+  | { type: "header"; label: string }
+  | { type: "message"; id: string; message: Message };
+
 export interface Chat {
   _id: string;
-  participants: UserData[];
-  type: "direct" | "group";
+  clientUserId: UserData;
+  providerUserId: UserData;
+  type: ChatType;
   lastMessage?: LastMessage;
   unreadCounts?: Record<string, number>;
   groupInfo?: GroupInfo;
@@ -37,10 +43,10 @@ export interface Message {
   chatId: string;
   senderId: string;
   type: "text" | "image" | "video" | "audio" | "file" | "system";
-  content?: MessageContent;
+  content: MessageContent;
   status: MessageStatus;
   replyTo?: Message;
-  createdAt: Date | string;
+  createdAt: string;
   updatedAt: string;
   isOptimistic?: boolean;
 }

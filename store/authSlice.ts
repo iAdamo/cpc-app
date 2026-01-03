@@ -57,6 +57,7 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
           isAuthenticated: true,
           isLoading: false,
         });
+        get().getCurrentLocation();
       }
     } catch (error: any) {
       set({
@@ -173,8 +174,11 @@ export const authSlice: StateCreator<GlobalStore, [], [], AuthState> = (
       paramsFrom: null,
       selectedChat: null,
       messages: [],
+      groupedMessages: [],
       hasMoreMessages: true,
       chats: [],
+      chatLoading: false,
+      isLoading: false,
     });
     // socketService.emitEvent(PresenceEvents.UPDATE_STATUS, {
     //   status: "offline",

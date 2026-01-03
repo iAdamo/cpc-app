@@ -26,7 +26,7 @@ export function useMessageEvents(userId: string | undefined) {
   const appState = useRef(AppState.currentState);
 
   useEffect(() => {
-    if (!selectedChat) return;
+    if (!selectedChat || !user) return;
     console.log("Initializing chat...");
 
     // Load initial messages
@@ -51,24 +51,12 @@ export function useMessageEvents(userId: string | undefined) {
       targetId: userId,
     });
 
-    const unreadMessages = messages.filter(
-      (message) => !message.status.read.includes(user?.id!)
-    );
-
-    const messageIds = unreadMessages.map((unreadMessage) => unreadMessage._id);
-
-    if (messageIds.length > 0)
-      socketService.emitEvent(ChatEvents.MARK_AS_READ, {
-        chatId: selectedChat?._id,
-        messageIds,
-      });
-
     const handleStatusResponse = (envelope: ResEventEnvelope) => {
       const data: PresenceResponse = envelope.payload;
 
       if (envelope.targetId !== userId || data.userId !== envelope.targetId)
         return;
-      console.log({ data });
+      // console.log({ data });
 
       setIsOnline(data.isOnline ? data.isOnline : false);
       setLastSeen(
@@ -83,7 +71,7 @@ export function useMessageEvents(userId: string | undefined) {
     const handleStatusChange = (envelope: EventEnvelope) => {
       const data = envelope.payload;
 
-      console.log({ data });
+      console.log("From status chang: 74 useMessageEvent", { data });
 
       setIsOnline(data.isOnline ? data.isOnline : false);
       setLastSeen(data.lastSeen ? data.lastSeen.toString() : "");
@@ -92,11 +80,6 @@ export function useMessageEvents(userId: string | undefined) {
 
     socketService.onEvent(PresenceEvents.STATUS_CHANGE, handleStatusChange);
     socketService.onEvent(PresenceEvents.STATUS_RESPONSE, handleStatusResponse);
-
-    const subscription = AppState.addEventListener(
-      "change",
-      handleAppStateChange
-    );
 
     return () => {
       socketService.offEvent(PresenceEvents.STATUS_CHANGE, handleStatusChange);
@@ -112,13 +95,31 @@ export function useMessageEvents(userId: string | undefined) {
     };
   }, [selectedChat, userId]);
 
+  useEffect(() => {
+    const unreadMessages = messages.filter(
+      (message) => !message.status.read.includes(user?._id!)
+    );
+    const messageIds = unreadMessages.map((unreadMessage) => unreadMessage._id);
+    if (messageIds.length > 0)
+      socketService.emitEvent(ChatEvents.MARK_AS_READ, {
+        chatId: selectedChat?._id,
+        messageIds,
+      });
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange
+    );
+
+    return () => subscription.remove();
+  }, [messages]);
+
   const handleAppStateChange = useCallback((nextAppState: string) => {
     if (
       appState.current.match(/inactive|background/) &&
       nextAppState === "active"
     ) {
       const unreadMessageIds = messages
-        .filter((message) => message.status.read.includes(user?.id!))
+        .filter((message) => message.status.read.includes(user?._id!))
         .map((message) => message._id);
 
       socketService.emitEvent(ChatEvents.MARK_AS_READ, {

@@ -27,7 +27,7 @@ const MoreInfo = ({
   const [selectedTab, setSelectedTab] = useState<string>("About");
 
   return (
-    <Card className="bg-white mt-2 h-auto p-0">
+    <Card className=" mt-2 h-auto p-0">
       <HStack className="flex-1 justify-between items-center rounded-lg bg-gray-100 mx-4">
         {TABS.map((tab) => (
           <Button

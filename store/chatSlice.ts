@@ -3,6 +3,7 @@ import { GlobalStore, ChatState, Message, Chat } from "@/types";
 import chatService from "@/services/chatService";
 import { uploadChatMedia } from "@/services/axios/chat";
 import appendFormData from "@/utils/AppendFormData";
+import { groupMessages } from "@/utils/GroupedMessages";
 
 export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
   set,
@@ -13,6 +14,7 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
   selectedChat: null,
   currentPage: 1,
   messages: [],
+  groupedMessages: [],
   chatLoading: false,
   chatError: null,
   typingUsers: [],
@@ -31,6 +33,7 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
       set({ chatLoading: true, error: null });
       const newChat = await chatService.createDirectChat(participantIds);
       set({ selectedChat: newChat });
+      return newChat._id;
     } catch (error: any) {
       set({
         error:
@@ -40,12 +43,14 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
         chatLoading: false,
       });
     }
+    return "";
   },
 
   fetchChats: async () => {
     set({ chatLoading: true, chatError: null });
     try {
       const userChats = await chatService.getUserChats();
+      // console.log({ userChats });
       set({ chats: userChats, chatLoading: false });
     } catch (error: any) {
       set({
@@ -85,6 +90,9 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
       // Add optimistic message to the beginning of messages array
       set((state) => ({
         messages: [optimisticMessage, ...state.messages],
+        groupedMessages: groupMessages({
+          messages: [optimisticMessage, ...state.messages],
+        }),
       }));
 
       // Send actual message
@@ -193,6 +201,9 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
         messages: cursor
           ? [...newMessages, ...currentMessages] // Older messages prepended
           : newMessages, // Initial load
+        groupedMessages: groupMessages({
+          messages: cursor ? [...newMessages, ...currentMessages] : newMessages,
+        }),
         nextCursor: response.nextCursor,
         hasMoreMessages: response.hasMore,
         chatLoading: false,
@@ -285,6 +296,7 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
   clearMessages: () => {
     // Clear messages when leaving chat
     set({
+      groupedMessages: [],
       messages: [],
       hasMoreMessages: true,
       nextCursor: null,

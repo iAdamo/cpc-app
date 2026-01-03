@@ -45,13 +45,8 @@ const SectionPage = () => {
   return SectionComponent ? (
     <VStack className="flex-1 bg-white">
       {pathname === "/profile" && (
-        <VStack className="mt-16 mb-4">
-          <Button
-            size="xl"
-            variant="link"
-            onPress={handleBack}
-            className=""
-          >
+        <VStack className="mt-16 mb-4 ml-4">
+          <Button size="xl" variant="link" onPress={handleBack} className="">
             <ButtonIcon
               as={ChevronLeftIcon}
               className="w-7 h-7 text-typography-700"

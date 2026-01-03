@@ -179,7 +179,7 @@ const About: React.FC<AboutProps> = ({ provider, isEditable }) => {
 
   return (
     <Card className="p-0">
-      <VStack space="xs" className="m-4 bg-white">
+      <VStack space="xs" className="m-4 ">
         <HStack className="items-center">
           <Heading size="md" className="text-typography-700">
             Description

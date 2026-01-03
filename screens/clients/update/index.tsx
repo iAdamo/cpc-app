@@ -28,6 +28,7 @@ const ClientsUpdates = () => {
     sortBy,
     categories,
     isLoading,
+    getCurrentLocation,
   } = useGlobalStore();
   const { setCachedJobs } = useGlobalStore();
 

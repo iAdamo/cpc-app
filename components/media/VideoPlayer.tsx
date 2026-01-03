@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import * as VideoThumbnails from "expo-video-thumbnails";
 import { useEvent } from "expo";
 import { useVideoPlayer, VideoView, createVideoPlayer } from "expo-video";
-import { Image } from "../ui/image";
+import { Image } from "expo-image";
 import { Pressable } from "../ui/pressable";
 import { StyleSheet, View, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -12,8 +12,7 @@ interface VideoPlayerProps {
   uri: string;
   autoPlay?: boolean;
   showControls?: boolean;
-  thumbnailTime?: number;
-  loadThumbnail?: boolean;
+  thumbnail?: string;
   fullScreen?: boolean;
   player?: ReturnType<typeof createVideoPlayer>;
 }
@@ -22,12 +21,10 @@ export default function VideoPlayer({
   uri,
   autoPlay = false,
   showControls = true,
-  thumbnailTime = 1000,
-  loadThumbnail = true,
+  thumbnail = "",
   fullScreen = true,
   player: externalPlayer,
 }: VideoPlayerProps) {
-  const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showVideo, setShowVideo] = useState(autoPlay);
@@ -35,36 +32,6 @@ export default function VideoPlayer({
   const [overlayTimeout, setOverlayTimeout] = useState<ReturnType<
     typeof setTimeout
   > | null>(null);
-
-  // Generate thumbnail
-  useEffect(() => {
-    const generateThumbnail = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const { uri: thumbnailUri } = await VideoThumbnails.getThumbnailAsync(
-          uri,
-          {
-            time: thumbnailTime,
-          }
-        );
-        setThumbnail(thumbnailUri);
-      } catch (e) {
-        console.warn("Failed to generate thumbnail:", e);
-        setError("Failed to load video thumbnail");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (uri) {
-      if (!loadThumbnail) {
-        setIsLoading(false);
-        return;
-      }
-      generateThumbnail();
-    }
-  }, [uri, thumbnailTime]);
 
   // Initialize video player
   if (!externalPlayer) {
@@ -184,7 +151,8 @@ export default function VideoPlayer({
             <Image
               source={{ uri: thumbnail! }}
               alt="Video Thumbnail"
-              className="w-full h-80 rounded-lg object-cover"
+              style={{ width: "100%", height: "100%" }}
+              contentFit="cover"
             />
 
             {/* Play button overlay on thumbnail */}

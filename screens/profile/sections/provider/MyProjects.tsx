@@ -542,7 +542,7 @@ export const CreateServiceModal = ({
     "text-typography-500 font-semibold border-2 rounded border-brand-primary/30 focus:border-brand-primary focus:bg-blue-50";
 
   const renderFormField = () => (
-    <VStack className="mt-4 gap-4 items-center justify-center">
+    <VStack className="gap-4 items-center justify-center">
       {/* Title */}
       <FormControl className="w-full" isInvalid={!!errors.title}>
         <FormControlLabel>
@@ -1007,13 +1007,18 @@ export const CreateServiceModal = ({
           </ModalCloseButton>
         </ModalHeader>
         <ModalBody className="mt-8" showsVerticalScrollIndicator={false}>
+          <Text
+            size="sm"
+            className="bg-brand-primary/20 text-brand-primary font-medium rounded-lg p-2"
+          >
+            Fill in the details below to showcase your services to find the
+            right clients for you.
+          </Text>
           <Heading
             size="xl"
             className={`text-brand-primary ${!previewMode ? "" : "mx-4"}`}
           >
-            {!previewMode
-              ? "Add a new Service project"
-              : getValues("title") || project?.title}
+            {(previewMode && getValues("title")) || project?.title}
           </Heading>
 
           {!previewMode ? renderFormField() : renderPreview()}

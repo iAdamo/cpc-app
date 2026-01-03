@@ -4,13 +4,8 @@ import useGlobalStore from "@/store/globalStore";
 import { HStack } from "@/components/ui/hstack";
 import { Heading } from "@/components/ui/heading";
 import { SearchIcon } from "@/components/ui/icon";
-import {
-  BellDotIcon,
-  NavigationIcon,
-  PhoneCallIcon,
-} from "lucide-react-native";
 import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
-import FeaturedCompanies from "./FeaturedCompanies";
+import FeaturedCompanies from "./featuredCompanies";
 import { LinearGradient } from "expo-linear-gradient";
 import SearchBar from "@/components/SearchEngine";
 
@@ -56,12 +51,9 @@ const Update = () => {
         {searchOn ? (
           <SearchBar providers={savedProviders} />
         ) : (
-          <VStack>
-            <Heading size="xl" className="px-4 text-brand-primary">
-              Featured Companies
-            </Heading>
+          <>
             <FeaturedCompanies />
-          </VStack>
+          </>
         )}
       </VStack>
     </VStack>

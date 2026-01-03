@@ -85,7 +85,6 @@ import { MapPinCheckIcon } from "lucide-react-native";
 import { locationService } from "@/utils/GetDistance";
 import { MapPinIcon } from "lucide-react-native";
 import DateFormatter from "@/utils/DateFormat";
-import RatingSection from "@/components/RatingFunction";
 import { router } from "expo-router";
 
 export const PostJob = ({ userId }: { userId?: string }) => {
@@ -95,7 +94,8 @@ export const PostJob = ({ userId }: { userId?: string }) => {
   const [activeTab, setActiveTab] = useState<"published" | "drafts">(
     "published"
   );
-  const { user, setDraftJobs, draftJobs, removeDraftJob } = useGlobalStore();
+  const { user, setDraftJobs, draftJobs, removeDraftJob, getCurrentLocation } =
+    useGlobalStore();
 
   const [jobs, setJobs] = useState<JobData[]>([]);
 
@@ -106,6 +106,7 @@ export const PostJob = ({ userId }: { userId?: string }) => {
 
       if (id) {
         try {
+          getCurrentLocation();
           const response = await getJobsByUser();
           // Separate published and draft jobs
           const published = response.filter((job) => job.isActive);
@@ -282,8 +283,8 @@ export const PostJob = ({ userId }: { userId?: string }) => {
               {job.location} (
               {
                 locationService.getDistanceFromCurrentLocationWithUnit(
-                  job?.coordinates?.[1] ?? 0,
-                  job?.coordinates?.[0] ?? 0
+                  job?.coordinates?.[0] ?? 0,
+                  job?.coordinates?.[1] ?? 0
                 )?.text
               }{" "}
               away)
@@ -415,8 +416,8 @@ export const CreatejobModal = ({
           .join(" ") ||
         "",
       coordinates: [
-        job?.coordinates?.[1] || currentLocation?.coords.latitude || 0,
         job?.coordinates?.[0] || currentLocation?.coords.longitude || 0,
+        job?.coordinates?.[1] || currentLocation?.coords.latitude || 0,
       ],
       budget: job?.budget || 0,
       deadline: DateFormatter.remainingDays(job?.deadline as Date) || 0,
@@ -987,9 +988,9 @@ export const CreatejobModal = ({
         <Card className="mx-4">
           <Text className="mb-2 font-medium">Estimated Duration</Text>
           <Text className="text-typography-700">
-            {"On or Before "}
-            {DateFormatter.toRelative(
-              getValues("deadline") ?? job?.deadline ?? 0
+            {"Due in "}
+            {DateFormatter.remainingTime(
+              job?.deadline ?? getValues("deadline") ?? 0
             )}{" "}
             {"| Urgency"}
             {job?.urgency ? ` - ${String(job.urgency)}` : ""}
@@ -1017,7 +1018,8 @@ export const CreatejobModal = ({
                 source={{
                   uri: (item as any).thumbnail,
                 }}
-                className="w-full h-80 object-cover"
+                style={{ width: "100%", height: 320 }}
+                contentFit="cover"
                 alt={`job media ${index + 1}`}
               />
             </Pressable>
@@ -1028,7 +1030,7 @@ export const CreatejobModal = ({
           <MediaView
             isOpen={!!viewMedia}
             onClose={() => setViewMedia(null)}
-            mediaList={(job?.media as MediaItem[]) || []}
+            // mediaList={(job?.media as MediaItem[]) || []}
             url={viewMedia ?? ""}
           />
         )}
