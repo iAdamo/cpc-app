@@ -2,7 +2,7 @@ import { FlatList, View } from "react-native";
 import ProviderCard from "@/components/ProviderCard";
 import { ProviderData } from "@/types";
 import EmptyState from "@/components/EmptyState";
-
+import { VStack } from "@/components/ui/vstack";
 interface ContentDisplayProps {
   providers: ProviderData[];
   handleProvidersSearch: () => void;
@@ -27,15 +27,13 @@ const ContentDisplay = ({
       keyExtractor={(item) => item._id}
       key={isGrid ? "grid" : "list"}
       numColumns={isGrid ? 2 : 1}
-      columnWrapperStyle={isGrid ? { gap: "8" } : undefined}
-      renderItem={({ item }) => (
-        <View style={{ flex: 1 }}>
-          <ProviderCard provider={item} />
-        </View>
-      )}
+      columnWrapperStyle={
+        isGrid ? { gap: "6", paddingHorizontal: 6 } : undefined
+      }
+      renderItem={({ item }) => <ProviderCard provider={item} />}
       onRefresh={handleProvidersSearch}
       refreshing={isSearching}
-      contentContainerStyle={{ paddingHorizontal: 8, paddingVertical: 8 }}
+      contentContainerStyle={{ paddingRight: 6 }}
       showsVerticalScrollIndicator={false}
       ListEmptyComponent={<EmptyState header="" text="" />}
     />

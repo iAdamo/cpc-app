@@ -48,7 +48,9 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
 
   return (
     <Card
-      className={`rounded-lg p-0  ${isGrid ? "mb-4 h-72" : "w-full mb-4 h-40"}`}
+      className={`rounded-lg p-0 ${
+        isGrid ? "mb-4 h-72 w-1/2" : "mb-4 h-40 ml-2"
+      }`}
     >
       {isGrid ? (
         <Pressable
@@ -63,7 +65,7 @@ const ProviderCard = ({ provider }: { provider: ProviderData }) => {
           }
         >
           <VStack className="flex-1 w-full">
-            <Box className="relative w-full h-[55%] mb-2">
+            <Box className="relative w-full h-[50%] mb-2">
               <Image
                 source={
                   typeof (provider.providerImages[0] as MediaItem).thumbnail ===

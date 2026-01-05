@@ -20,7 +20,9 @@ export const locationSlice: StateCreator<GlobalStore, [], [], LocationState> = (
     try {
       set({ isLoading: true, locationError: null });
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
+      const servicesEnabled = await Location.hasServicesEnabledAsync();
+
+      if (status !== "granted" || !servicesEnabled) {
         set({ locationError: "Permission to access location was denied" });
         return;
       }

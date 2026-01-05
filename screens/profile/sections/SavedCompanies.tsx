@@ -14,7 +14,7 @@ const SavedCompanies = () => {
       {savedProviders && savedProviders.length > 0 ? (
         <ScrollView
           showsVerticalScrollIndicator={false}
-          style={{ padding: 16 }}
+          style={{ padding: 8 }}
         >
           {(filteredProviders && filteredProviders.length > 0
             ? filteredProviders

@@ -209,9 +209,9 @@ const SignInScreen = () => {
               <Button
                 variant="outline"
                 onPress={() => setShowForgotPasswordModal(true)}
-                className="border-0 self-end"
+                className="w-full border-0"
               >
-                <ButtonText className="text-text-secondary hover:text-brand-primary">
+                <ButtonText className="text-text-secondary">
                   Forget Password
                 </ButtonText>
               </Button>

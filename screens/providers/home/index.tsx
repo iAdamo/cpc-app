@@ -50,6 +50,7 @@ const HomeView = () => {
 
   useEffect(() => {
     // console.log(sortBy, currentLocation, categories);
+    if (!currentLocation) return;
     handleProvidersSearch();
   }, [sortBy, currentLocation, categories]);
 

@@ -14,6 +14,8 @@ import "../global.css";
 import NetworkErrorModal from "@/components/overlays/NetworkErrorModal";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { useHeartbeat } from "@/hooks/useHeartbeat";
+import { useLocation } from "@/hooks/useLocation";
+import { LocationPermission } from "@/components/LocationPermission";
 export { ErrorBoundary } from "expo-router";
 
 SplashScreen.preventAutoHideAsync();
@@ -68,9 +70,17 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const { error, success, clearError, clearSuccess, info, clearInfo } =
-    useGlobalStore();
+  const {
+    error,
+    success,
+    clearError,
+    clearSuccess,
+    info,
+    clearInfo,
+    locationError,
+  } = useGlobalStore();
 
+  useLocation();
   const { isConnected } = useNetworkStatus();
   useHeartbeat();
 
@@ -118,6 +128,7 @@ function RootLayoutNav() {
         style={{ flex: 1, backgroundColor: "white", paddingTop: -50 }}
       >
         <Slot />
+        <LocationPermission />
         {!isConnected && <NetworkErrorModal />}
         <Toast position="bottom" />
       </SafeAreaView>

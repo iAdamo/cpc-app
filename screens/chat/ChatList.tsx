@@ -46,8 +46,8 @@ export const ChatList: React.FC = () => {
         data={filteredChats.length > 0 ? filteredChats : chats}
         renderItem={renderChatItem}
         keyExtractor={(item) => item._id}
-        onRefresh={fetchChats}
-        refreshing={chatLoading}
+        // onRefresh={fetchChats}
+        // refreshing={chatLoading}
         ListEmptyComponent={() =>
           chatLoading ? (
             <Spinner

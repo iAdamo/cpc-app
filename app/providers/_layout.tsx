@@ -42,7 +42,7 @@ export default function AppLayout() {
   };
 
   return (
-    <LocationPermission>
+    <>
       <StatusBar
         barStyle="dark-content"
         translucent={true}
@@ -50,6 +50,6 @@ export default function AppLayout() {
       />
       <Stack screenOptions={{ headerShown: false }} />
       <BottomNavbar />
-    </LocationPermission>
+    </>
   );
 }

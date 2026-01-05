@@ -5,7 +5,6 @@ import { LocationObject } from "expo-location";
 
 interface UseLocationReturn {
   isTracking: boolean;
-  getCurrentLocation: () => Promise<LocationObject | undefined>;
   startLiveTracking: () => Promise<void>;
   stopLiveTracking: () => void;
 }
@@ -16,11 +15,12 @@ export const useLocation = (autoStart: boolean = false): UseLocationReturn => {
     getCurrentLocation,
     startLiveTracking,
     stopLiveTracking,
+    currentView,
+    currentLocation,
   } = useGlobalStore();
 
   useEffect(() => {
-    // Get initial location when component mounts
-    getCurrentLocation();
+    if (!currentLocation) getCurrentLocation();
 
     // Cleanup on unmount
     return () => {
@@ -28,7 +28,7 @@ export const useLocation = (autoStart: boolean = false): UseLocationReturn => {
         stopLiveTracking();
       }
     };
-  }, []);
+  }, [currentView]);
 
   useEffect(() => {
     if (autoStart && !isTracking) {
@@ -38,7 +38,6 @@ export const useLocation = (autoStart: boolean = false): UseLocationReturn => {
 
   return {
     isTracking,
-    getCurrentLocation,
     startLiveTracking,
     stopLiveTracking,
   };

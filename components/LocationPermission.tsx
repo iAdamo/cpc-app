@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Alert as Alerts } from "react-native";
-import * as Location from "expo-location";
 import useGlobalStore from "@/store/globalStore";
-import { LocationObject } from "expo-location";
-import { VStack } from "./ui/vstack";
-import { Box } from "./ui/box";
-import { Icon } from "./ui/icon";
-import { MapPinIcon } from "lucide-react-native";
+import * as IntentLauncher from "expo-intent-launcher";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -18,37 +12,57 @@ import {
 import { Button, ButtonText } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { Heading } from "@/components/ui/heading";
-import { Alert, Platform, BackHandler, Linking } from "react-native";
+import {
+  Alert,
+  Platform,
+  BackHandler,
+  Linking,
+  AppState,
+  AppStateStatus,
+} from "react-native";
 import { Image } from "./ui/image";
 
-interface LocationPermissionProps {
-  children: React.ReactNode;
-}
-
-export const LocationPermission: React.FC<LocationPermissionProps> = ({
-  children,
-}) => {
+export const LocationPermission = () => {
   const [error, setError] = useState<string | null>(null);
-  const { locationError, clearLocationError } = useGlobalStore();
+  const { locationError, clearLocationError, getCurrentLocation } =
+    useGlobalStore();
+  const [appState, setAppState] = useState(AppState.currentState);
 
+  // Handle app state changes
   useEffect(() => {
-    checkPermission();
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange
+    );
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
-  const checkPermission = async (): Promise<void> => {
-    const { status } = await Location.getForegroundPermissionsAsync();
-    if (status !== "granted") {
-      requestPermission();
+  // Check location permissions when app becomes active
+  const handleAppStateChange = async (nextAppState: AppStateStatus) => {
+    if (appState.match(/inactive|background/) && nextAppState === "active") {
+      // App has come to the foreground, re-check location permissions
+      getCurrentLocation();
     }
+    setAppState(nextAppState);
   };
-  const requestPermission = async (): Promise<void> => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    console.log("Location permission status:", status);
-    if (status !== "granted") {
-      setError("Permission to access location was denied");
-    } else {
+
+  const openLocationSettings = async () => {
+    try {
+      if (Platform.OS === "android") {
+        await IntentLauncher.startActivityAsync(
+          IntentLauncher.ActivityAction.LOCATION_SOURCE_SETTINGS
+        );
+      } else {
+        // iOS: can only open app settings
+        await Linking.openSettings();
+      }
       clearLocationError();
-      setError(null);
+    } catch (err) {
+      Linking.openSettings();
+      clearLocationError();
     }
   };
 
@@ -68,62 +82,61 @@ export const LocationPermission: React.FC<LocationPermissionProps> = ({
   };
 
   return (
-    <>
-      <AlertDialog
-        isOpen={!!error || !!locationError?.includes("location")}
-        onClose={() => {
-          !error || !locationError?.includes("location")
-            ? clearLocationError()
-            : null;
-          setError(null);
-        }}
-        closeOnOverlayClick={false}
-        isKeyboardDismissable={false}
-      >
-        <AlertDialogBackdrop />
-        <AlertDialogContent className="w-[90%] gap-4 items-center">
-          {/* <Box className="rounded-full h-12 w-12 bg-background-success items-center justify-center">
-            <Icon as={MapPinIcon} className="stroke-success-500 w-8 h-8" />
-          </Box> */}
-          <Image
-            source={require("../assets/images/locationperm.png")}
-            className="w-36 h-36"
-            alt="Location Permission"
-          />
-          <AlertDialogHeader>
-            <Heading className="text-center">
-              Allow Companies Center to use your current location.
-            </Heading>
-          </AlertDialogHeader>
-          <AlertDialogBody>
-            <Text className="text-center">
-              This app requires location access to function properly. Please
-              enable location services in your device settings.
-            </Text>
-          </AlertDialogBody>
-          <AlertDialogFooter>
-            <Button
-              size="xl"
-              variant="outline"
-              action="secondary"
-              onPress={handleClose}
-              className=""
-            >
-              <ButtonText>No, Thanks!</ButtonText>
-            </Button>
-            <Button
-              size="xl"
-              action="positive"
-              onPress={() => Linking.openSettings()}
-              className=""
-            >
-              <ButtonText>Yes, Please!</ButtonText>
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+    <AlertDialog
+      isOpen={!!locationError}
+      onClose={() => {
+        !!locationError ? clearLocationError() : null;
+        setError(null);
+      }}
+      closeOnOverlayClick={false}
+      isKeyboardDismissable={false}
+    >
+      <AlertDialogBackdrop />
+      <AlertDialogContent className="w-[90%] gap-4 items-center">
+        <Image
+          source={require("../assets/images/locationperm.png")}
+          className="w-36 h-36"
+          alt="Location Permission"
+        />
+        <AlertDialogHeader>
+          <Heading className="text-center">
+            Allow Companies Center to use your current location.
+          </Heading>
+        </AlertDialogHeader>
+        <AlertDialogBody>
+          <Text className="text-center">
+            This app requires location access to function properly. Please
+            enable location services in your device settings.
+          </Text>
 
-      {children}
-    </>
+          {/* Add a note about re-checking */}
+          {locationError && (
+            <Text className="text-center mt-4 text-sm text-gray-500">
+              For more information on how we use your data, please check our
+              privacy policy.
+            </Text>
+          )}
+        </AlertDialogBody>
+        <AlertDialogFooter>
+          <Button
+            size="md"
+            variant="outline"
+            action="secondary"
+            onPress={handleClose}
+            className="flex-1"
+          >
+            <ButtonText>Exit App</ButtonText>
+          </Button>
+
+          <Button
+            action="positive"
+            onPress={() => openLocationSettings()}
+            className="flex-1"
+          >
+            <ButtonText>Open Settings</ButtonText>
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
