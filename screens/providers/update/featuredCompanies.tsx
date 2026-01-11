@@ -40,7 +40,7 @@ import { MediaItem, ProviderData } from "@/types";
 import { ShareService } from "@/services/shareService";
 import { router } from "expo-router";
 import RatingSection from "@/components/RatingFunction";
-import { getFeaturedProviders, globalSearch } from "@/services/axios/search";
+import { globalSearch } from "@/services/axios/search";
 import { current } from "immer";
 
 const { width } = Dimensions.get("window");
@@ -283,21 +283,39 @@ export default function FeaturedCompanies() {
         setLoading(true);
       }
 
-      const result = await getFeaturedProviders({
-        page,
-        limit: 10,
-        lat: currentLocation?.coords.latitude?.toString(),
-        long: currentLocation?.coords.longitude?.toString(),
-        state: currentLocation?.region || "",
-        country: currentLocation?.country || "",
-        radius: "20000", // 20km radius for broader local results
-      });
+      // const result = await getFeaturedProviders({
+      //   page,
+      //   limit: 10,
+      //   lat: currentLocation?.coords.latitude?.toString(),
+      //   long: currentLocation?.coords.longitude?.toString(),
+      //   state: currentLocation?.region || "",
+      //   country: currentLocation?.country || "",
+      //   radius: "20000", // 20km radius for broader local results
+      // });
 
-      if (isRefresh || page === 1) {
-        setFeaturedProviders(result.providers);
-      } else {
-        setFeaturedProviders((prev) => [...prev, ...result.providers]);
-      }
+       const result = await globalSearch({
+         model: "providers",
+         page,
+         limit: 10,
+         engine: true,
+         featured: true,
+         lat: currentLocation?.coords.latitude?.toString(),
+         long: currentLocation?.coords.longitude?.toString(),
+         state: currentLocation?.region || "",
+         country: currentLocation?.country || "",
+       });
+
+       if (isRefresh || page === 1) {
+         setFeaturedProviders(result.providers);
+       } else {
+         setFeaturedProviders((prev) => [...prev, ...result.providers]);
+       }
+
+      // if (isRefresh || page === 1) {
+      //   setFeaturedProviders(result.providers);
+      // } else {
+      //   setFeaturedProviders((prev) => [...prev, ...result.providers]);
+      // }
 
       setFeaturedRatio(result.featuredRatio || 0);
       setPageInfo({
@@ -307,31 +325,6 @@ export default function FeaturedCompanies() {
       });
     } catch (error) {
       console.error("Error loading featured providers:", error);
-      // Fallback to search endpoint if location endpoint fails
-      try {
-        const fallbackResult = await globalSearch({
-          model: "providers",
-          page,
-          limit: 10,
-          engine: true,
-          featured: true,
-          lat: currentLocation?.coords.latitude?.toString(),
-          long: currentLocation?.coords.longitude?.toString(),
-          state: currentLocation?.region || "",
-          country: currentLocation?.country || "",
-        });
-
-        if (isRefresh || page === 1) {
-          setFeaturedProviders(fallbackResult.providers);
-        } else {
-          setFeaturedProviders((prev) => [
-            ...prev,
-            ...fallbackResult.providers,
-          ]);
-        }
-      } catch (fallbackError) {
-        console.error("Fallback search also failed:", fallbackError);
-      }
     } finally {
       setLoading(false);
       setRefreshing(false);

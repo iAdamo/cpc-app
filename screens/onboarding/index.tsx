@@ -2,6 +2,7 @@ import { useState } from "react";
 import useGlobalStore from "@/store/globalStore";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
+import { ScrollView } from "@/components/ui/scroll-view";
 import {
   EmailVerificationPage,
   FirstOnboardingPage,
@@ -19,6 +20,9 @@ import {
 import { Button, ButtonIcon } from "@/components/ui/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "@/components/ui/icon";
 import { useLocalSearchParams, router, usePathname } from "expo-router";
+import {
+  KeyboardAwareScrollView,
+} from "react-native-keyboard-controller";
 
 export function OnboardingFlow() {
   const [backPressed, setBackPressed] = useState(false);
@@ -78,11 +82,22 @@ export function OnboardingFlow() {
     setCurrentStep(currentStep + 1);
   };
   return (
-    <VStack
-      className={`flex-1 bg-white ${
-        currentStep === 5 && !showForwardButton ? "pt-16" : ""
-      }`}
+    <KeyboardAwareScrollView
+      bottomOffset={0}
+      stickyHeaderIndices={[0]}
+      style={{
+        backgroundColor: "#fff",
+        flex: 1,
+        paddingTop: currentStep === 5 && !showForwardButton ? 64 : 0,
+      }}
+      contentContainerClassName="flex-1 bg-blue-500"
     >
+      {/* <ScrollView
+        className={`flex-1 bg-red-500 ${
+          currentStep === 5 && !showForwardButton ? "pt-16" : ""
+        }`}
+        contentContainerClassName="flex-1 bg-blue-500"
+      > */}
       {(showBackButton || showForwardButton) && (
         <HStack className="w-full items-center mt-16 px-6">
           {showBackButton && (
@@ -114,7 +129,10 @@ export function OnboardingFlow() {
         </HStack>
       )}
       {/* Render the current step component */}
-      <StepComponent />
-    </VStack>
+      <VStack className="bg-red-500 flex-1">
+        <StepComponent />
+      </VStack>
+      {/* </ScrollView> */}
+    </KeyboardAwareScrollView>
   );
 }

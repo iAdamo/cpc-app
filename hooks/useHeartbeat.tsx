@@ -1,19 +1,15 @@
 import { useEffect } from "react";
 import useGlobalStore from "@/store/globalStore";
 import "../global.css";
-import {
-  socketService,
-  PRESENCE_STATUS,
-} from "@/services/socketService";
+import { socketService, PRESENCE_STATUS } from "@/services/socketService";
 import { PresenceEvents } from "@/services/socketService";
 import { AppState } from "react-native";
 export { ErrorBoundary } from "expo-router";
 
 export const useHeartbeat = () => {
   const { currentView, switchRole } = useGlobalStore();
-
   useEffect(() => {
-    console.log("from layout");
+    // console.log("from layout");
     const socketConnect = async () => {
       const socket = socketService;
       await socket.connect();

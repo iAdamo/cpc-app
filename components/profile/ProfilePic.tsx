@@ -22,11 +22,9 @@ import {
 import { Pressable } from "../ui/pressable";
 import { Camera, Image as Gallery } from "lucide-react-native";
 import { Spinner } from "../ui/spinner";
-import { Switch } from "../ui/switch";
 import MediaService from "@/services/mediaService";
 import useGlobalStore from "@/store/globalStore";
 import { FileType, ResEventEnvelope } from "@/types";
-import { normalizePresence } from "@/utils/presence";
 import {
   Radio,
   RadioGroup,
@@ -40,7 +38,6 @@ import {
   SocketEvents,
   PresenceEvents,
 } from "@/services/socketService";
-import { PresenceResponse } from "@/types";
 
 interface ProfilePicProps {
   imageUri?: string | FileType | null;

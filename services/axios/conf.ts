@@ -29,7 +29,7 @@ const createClient = () => {
           config.headers["x-device-id"] = deviceId;
           config.headers["x-session-id"] = sessionId;
         }
-        // console.log(config.headers);
+        // console.log("url", config);
       } catch (err) {
         console.error("Error reading token", err);
       }

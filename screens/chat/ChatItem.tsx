@@ -52,7 +52,7 @@ function ChatItem({ chat, switchRole }: { chat: Chat; switchRole: string }) {
         <AvatarImage source={{ uri: avatarUri }} />
       </Avatar>
 
-      <HStack className="flex-1 justify-between items-center">
+      <HStack className="flex-1 justify-between items-start">
         <VStack space="sm" className="flex-1">
           <Heading size="lg" className="font-medium">
             {displayName}

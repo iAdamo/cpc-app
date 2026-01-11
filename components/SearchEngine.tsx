@@ -17,9 +17,6 @@ import { debounce } from "lodash";
 import { usePathname } from "expo-router";
 import { useLocalSearchParams } from "expo-router";
 
-// Small helper to match names
-const participantName = (u: any) => `${u.firstName || ""} ${u.lastName || ""}`;
-
 const SearchBar = ({
   providers,
   isSearchFocus,
@@ -50,6 +47,7 @@ const SearchBar = ({
     isLoading,
     setError,
     currentView,
+    user,
   } = useGlobalStore();
 
   const isSavedCompaniesView =
@@ -84,6 +82,7 @@ const SearchBar = ({
           searchInput: searchQuery,
           lat: 0,
           long: 0,
+          country: currentLocation?.country || "",
           address: query,
         });
       } catch (err: any) {
@@ -96,12 +95,8 @@ const SearchBar = ({
   useEffect(() => {
     const q = filterQuery.trim().toLowerCase();
 
+    /* ---------- PROVIDERS FILTER ---------- */
     if (providers && providers.length > 0) {
-      console.log(
-        "Filtering providers with query:",
-        q,
-        providers[0].providerName
-      );
       if (q.length > 0) {
         setFilteredProviders(
           providers.filter((p) => p.providerName?.toLowerCase().includes(q))
@@ -110,15 +105,26 @@ const SearchBar = ({
         setFilteredProviders([]);
       }
     }
-    if (chats) {
-      console.log("Filtering chats with query:", q);
+
+    /* ---------- CHATS FILTER (FIXED) ---------- */
+    if (chats && user?._id) {
       if (q.length > 0) {
-        const filtered = chats.filter((c) => {
-          const participantMatch = c.participants?.some((u) =>
-            participantName(u).toLowerCase().includes(q)
+        const filtered = chats.filter((chat) => {
+          const isClient = chat.clientUserId._id === user._id;
+
+          // determine who to match against
+          const nameToMatch = isClient
+            ? chat.providerUserId.activeRoleId?.providerName
+            : `${chat.clientUserId.firstName ?? ""} ${
+                chat.clientUserId.lastName ?? ""
+              }`;
+
+          const lastMessageText = chat.lastMessage?.text?.toLowerCase() ?? "";
+
+          return (
+            nameToMatch?.toLowerCase().includes(q) ||
+            lastMessageText.includes(q)
           );
-          const lastMessageText = c.lastMessage?.text?.toLowerCase() || "";
-          return participantMatch || lastMessageText.includes(q);
         });
         setFilteredChats(filtered);
       } else {
@@ -177,6 +183,7 @@ const SearchBar = ({
         searchInput: searchQuery,
         lat: selectedPlace.geometry.location.lat,
         long: selectedPlace.geometry.location.lng,
+        country: currentLocation?.country || "",
         address: selectedPlace.formatted_address,
       });
     }
@@ -210,6 +217,7 @@ const SearchBar = ({
         searchInput: searchQuery,
         lat: searchLat,
         long: searchLong,
+        country: currentLocation?.country || "",
         address: searchAddress,
       });
     }
@@ -242,6 +250,7 @@ const SearchBar = ({
           searchInput: searchQuery,
           lat: details.geometry.location.lat,
           long: details.geometry.location.lng,
+          country: currentLocation?.country || "",
           address: details.formatted_address,
         });
       } catch (err: any) {

@@ -47,7 +47,7 @@ const SignInScreen = () => {
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
 
   const router = useRouter();
-  const { login, isLoading, isAuthenticated, switchRole } = useGlobalStore();
+  const { login, isLoading } = useGlobalStore();
 
   // if (
   //   useGlobalStore.getState().isAuthenticated &&

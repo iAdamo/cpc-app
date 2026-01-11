@@ -24,6 +24,7 @@ const HomeView = () => {
     categories,
     setCurrentView,
     isSearching,
+    selectedSubcategories,
   } = useGlobalStore();
   const [providers, setProviders] = useState<ProviderData[]>([]);
   const [isSearchFocus, setIsSearchFocus] = useState(false);
@@ -41,10 +42,14 @@ const HomeView = () => {
       page: 1,
       limit: 30,
       engine: false,
+      featured: true,
       sortBy: sortBy,
       lat: currentLocation?.coords.latitude,
       long: currentLocation?.coords.longitude,
-      categories: categories,
+      city: currentLocation?.subregion || "",
+      state: currentLocation?.region || "",
+      country: currentLocation?.country || "",
+      categories: selectedSubcategories.map((s) => s._id),
     });
   };
 
@@ -52,7 +57,7 @@ const HomeView = () => {
     // console.log(sortBy, currentLocation, categories);
     if (!currentLocation) return;
     handleProvidersSearch();
-  }, [sortBy, currentLocation, categories]);
+  }, [sortBy, currentLocation, selectedSubcategories]);
 
   useEffect(() => {
     if (searchResults && searchResults.providers) {

@@ -24,7 +24,6 @@ const FinalPage = () => {
   }, []);
 
   return (
-    <Center className="h-full bg-white px-6">
       <VStack className="w-full h-full justify-center items-center gap-6">
         <Center className="gap-6">
           <Image
@@ -40,7 +39,6 @@ const FinalPage = () => {
           </Text>
         </Center>
       </VStack>
-    </Center>
   );
 };
 

@@ -96,20 +96,25 @@ export function useMessageEvents(userId: string | undefined) {
   }, [selectedChat, userId]);
 
   useEffect(() => {
-    const unreadMessages = messages.filter(
-      (message) => !message.status.read.includes(user?._id!)
-    );
-    const messageIds = unreadMessages.map((unreadMessage) => unreadMessage._id);
-    if (messageIds.length > 0)
-      socketService.emitEvent(ChatEvents.MARK_AS_READ, {
-        chatId: selectedChat?._id,
-        messageIds,
-      });
+    console.log("I ran");
+    if (messages && messages.length > 0) {
+      console.log("dddddddddddddddddddd", messages[0].status);
+      const unreadMessages = messages.filter(
+        (message) => !message.status.read.includes(user?._id!)
+      );
+      const messageIds = unreadMessages.map(
+        (unreadMessage) => unreadMessage._id
+      );
+      if (messageIds.length > 0)
+        socketService.emitEvent(ChatEvents.MARK_AS_READ, {
+          chatId: selectedChat?._id,
+          messageIds,
+        });
+    }
     const subscription = AppState.addEventListener(
       "change",
       handleAppStateChange
     );
-
     return () => subscription.remove();
   }, [messages]);
 

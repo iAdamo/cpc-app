@@ -73,11 +73,16 @@ export const chatSlice: StateCreator<GlobalStore, [], [], ChatState> = (
       if (!senderId) throw new Error("User not authenticated");
 
       // Create optimistic message
-      const optimisticMessage: any = {
+      const optimisticMessage: Message = {
         _id: tempId,
         content: { text },
-        senderId: get().user?._id,
+        senderId: get().user?._id || "",
         chatId: selectedChat._id,
+        status: {
+          sent: true,
+          delivered: [],
+          read: [],
+        },
         createdAt: new Date().toISOString(),
         type: "text",
         isOptimistic: true,

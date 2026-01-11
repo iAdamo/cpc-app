@@ -1,50 +1,54 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
-import { Card } from "@/components/ui/card";
 import { ScrollView } from "@/components/ui/scroll-view";
 import { View, Dimensions } from "react-native";
 import { Pressable } from "@/components/ui/pressable";
 import useGlobalStore from "@/store/globalStore";
+import { getAllCategoriesWithSubcategories } from "@/services/axios/service";
+import { Subcategory } from "@/types";
 
-const CATEGORIES_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 5;
 
 const Categories = () => {
-  const { categories: selectedCategories, setCategories } = useGlobalStore();
-  const categories = [
-    { name: "Plumbing", icon: "🚰" },
-    { name: "Electrical", icon: "💡" },
-    { name: "Cleaning", icon: "🧹" },
-    { name: "Carpentry", icon: "🪚" },
-    { name: "Painting", icon: "🎨" },
-    { name: "Landscaping", icon: "🌳" },
-    { name: "Moving", icon: "🚛" },
-    { name: "Pest Control", icon: "🐜" },
-    { name: "HVAC", icon: "❄️" },
-    { name: "Appliance Repair", icon: "🔧" },
-    { name: "Roofing", icon: "🏠" },
-    { name: "Flooring", icon: "🪵" },
-    { name: "Locksmith", icon: "🔐" },
-    { name: "Window Cleaning", icon: "🪟" },
-    { name: "Gutter Cleaning", icon: "🌧️" },
-  ];
-
   const [page, setPage] = useState(0);
-  const totalPages = Math.ceil(categories.length / CATEGORIES_PER_PAGE);
+
+  const {
+    categories,
+    selectedSubcategories,
+    toggleSubcategory,
+    setCategories,
+  } = useGlobalStore();
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const data = await getAllCategoriesWithSubcategories();
+      setCategories(data);
+    };
+    fetchCategories();
+  }, []);
+
+  /** 🔹 Flatten all subcategories */
+  const subcategories: Subcategory[] = useMemo(
+    () => categories.flatMap((c) => c.subcategories || []),
+    [categories]
+  );
+
+  const totalPages = Math.ceil(subcategories.length / ITEMS_PER_PAGE);
+  const { width } = Dimensions.get("window");
 
   const handleScroll = (event: any) => {
-    const { width } = event.nativeEvent.layoutMeasurement;
     const offsetX = event.nativeEvent.contentOffset.x;
-    const newPage = Math.round(offsetX / width);
-    setPage(newPage);
+    setPage(Math.round(offsetX / width));
   };
 
-  const { width } = Dimensions.get("window");
+  const isSelected = (id: string) =>
+    selectedSubcategories.some((s) => s._id === id);
 
   return (
     <VStack className="mx-2 mt-2 gap-2">
-      {/* Progress Indicator */}
+      {/* Pagination indicator */}
       <HStack className="justify-center mb-2">
         {Array.from({ length: totalPages }).map((_, i) => (
           <View
@@ -59,6 +63,7 @@ const Categories = () => {
           />
         ))}
       </HStack>
+
       <ScrollView
         horizontal
         pagingEnabled
@@ -66,41 +71,29 @@ const Categories = () => {
         onScroll={handleScroll}
         scrollEventThrottle={16}
         style={{ width }}
-        className=""
-        contentContainerClassName=""
       >
         {Array.from({ length: totalPages }).map((_, pageIndex) => (
           <HStack key={pageIndex} style={{ width }} className="justify-around">
-            {categories
+            {subcategories
               .slice(
-                pageIndex * CATEGORIES_PER_PAGE,
-                (pageIndex + 1) * CATEGORIES_PER_PAGE
+                pageIndex * ITEMS_PER_PAGE,
+                (pageIndex + 1) * ITEMS_PER_PAGE
               )
-              .map((category, index) => (
+              .map((sub) => (
                 <Pressable
-                  key={category.name}
-                  className={`w-[4.5rem] h-[4.5rem] p-2 bg-gray-100 rounded-xl items-center justify-center ${
-                    selectedCategories.includes(category.name)
+                  key={sub._id}
+                  className={`w-[4.5rem] h-[4.5rem] p-2 rounded-xl items-center justify-center ${
+                    isSelected(sub._id)
                       ? "bg-brand-primary/20 border-2 border-brand-primary/80"
-                      : ""
+                      : "bg-gray-100"
                   }`}
-                  onPress={() => {
-                    if (selectedCategories.includes(category.name)) {
-                      setCategories(
-                        selectedCategories.filter(
-                          (cat) => cat !== category.name
-                        )
-                      );
-                    } else {
-                      setCategories([...selectedCategories, category.name]);
-                    }
-                  }}
+                  onPress={() => toggleSubcategory(sub)}
                 >
-                  <Text size="2xl" className="mb-2">
-                    {category.icon}
-                  </Text>
-                  <Text size="xs" className="font-medium line-clamp-1">
-                    {category.name}
+                  <Text
+                    size="xs"
+                    className="font-medium text-center line-clamp-2"
+                  >
+                    {sub.name}
                   </Text>
                 </Pressable>
               ))}

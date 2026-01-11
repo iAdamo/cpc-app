@@ -6,7 +6,7 @@ import { Heading } from "@/components/ui/heading";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Link, LinkText } from "@/components/ui/link";
 import { MessageSquareTextIcon, PhoneIcon } from "lucide-react-native";
-import { ProviderData, EditableFields } from "@/types";
+import { ProviderData, EditableFields, PresenceResponse } from "@/types";
 import useGlobalStore from "@/store/globalStore";
 import { Badge, BadgeText } from "@/components/ui/badge";
 import { router } from "expo-router";
@@ -27,7 +27,10 @@ const ProfileInfo = ({
   handleCancelEdit: () => void;
   onLayout: any;
 }) => {
-  const { user, switchRole, createChat, setCurrentView } = useGlobalStore();
+  const { user, switchRole, createChat, setCurrentView, availability } =
+    useGlobalStore();
+
+  const isCurrentUser = user?._id === provider.owner;
 
   // console.log({ provider });
   const handleJoinChat = async () => {
@@ -82,11 +85,20 @@ const ProfileInfo = ({
           <VStack className="gap-2 items-end flex-1 ">
             {/** Presence badge */}
             <PresenceBadge
-              presence={otherAvailability}
+              presence={
+                isCurrentUser
+                  ? ({
+                      customStatus: "online",
+                      isOnline: true,
+                      status: "online",
+                    } as PresenceResponse)
+                  : otherAvailability
+              }
               className=""
               iconSize={12}
             />
-            {switchRole === "Client" && user?._id !== provider.owner && (
+
+            {switchRole === "Client" && !isCurrentUser && (
               <VStack className="items-end gap-2">
                 <HStack className="gap-2">
                   <Button

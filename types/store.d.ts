@@ -11,7 +11,7 @@ import {
   LocationGeocodedAddress,
 } from "expo-location";
 import { ProviderData } from "./provider";
-import { ServiceCategory, Subcategory, ServiceData, JobData } from "./service";
+import { ServiceCategory, Subcategory, ServiceData, JobData, Category } from "./service";
 import { FileType, MediaSource, MediaPickerOptions } from "./media";
 import { Chat, Message, LastMessage, ChatItem } from "./chat";
 import { InternalAxiosRequestConfig } from "axios";
@@ -135,8 +135,12 @@ export interface ProviderState {
   displayStyle: DisplayStyle;
   setDisplayStyle: (style: DisplayStyle) => void;
   sortBy: sortByType;
-  categories: string[];
-  setCategories: (categories: string[]) => void;
+  categories: Category[];
+  setCategories: (categories: Category[]) => void;
+  selectedSubcategories: Subcategory[];
+  setSelectedSubcategories: (subs: Subcategory[]) => void;
+  toggleSubcategory: (sub: Subcategory) => void;
+  clearSelectedSubcategories: () => void;
   setSortBy: (sortBy: SortBy) => void;
   searchResults: SearchResultData;
   filteredProviders: ProviderData[];
@@ -151,9 +155,13 @@ export interface ProviderState {
     page: number;
     limit: number;
     engine: boolean;
+    featured: boolean;
     searchInput?: string;
     lat?: number;
     long?: number;
+    city?: string;
+    state?: string;
+    country?: string;
     address?: string;
     sortBy?: string;
     categories?: string[];

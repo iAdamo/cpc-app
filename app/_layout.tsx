@@ -128,7 +128,7 @@ function RootLayoutNav() {
         style={{ flex: 1, backgroundColor: "white", paddingTop: -50 }}
       >
         <Slot />
-        <LocationPermission />
+        {locationError && <LocationPermission />}
         {!isConnected && <NetworkErrorModal />}
         <Toast position="bottom" />
       </SafeAreaView>

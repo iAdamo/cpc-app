@@ -1,4 +1,4 @@
-import { ProviderData } from "@/types";
+import { ProviderData, Category } from "@/types";
 import { StateCreator } from "zustand";
 import {
   GlobalStore,
@@ -21,10 +21,34 @@ export const providerViewSlice: StateCreator<
   displayStyle: "Grid",
   sortBy: "Relevance",
   categories: [],
-  setCategories: (categories: string[]) => set({ categories }),
+  setCategories: (categories: Category[]) => set({ categories }),
   setSortBy: (sortBy: SortBy) => set({ sortBy }),
   setDisplayStyle: (style: DisplayStyle) => set({ displayStyle: style }),
   savedJobs: [],
+
+  selectedSubcategories: [],
+  setSelectedSubcategories: (subs) => {
+    set({ selectedSubcategories: subs });
+  },
+
+  toggleSubcategory: (sub) => {
+    const current = get().selectedSubcategories;
+
+    const exists = current.some((s) => s._id === sub._id);
+
+    if (exists) {
+      set({
+        selectedSubcategories: current.filter((s) => s._id !== sub._id),
+      });
+    } else {
+      set({
+        selectedSubcategories: [...current, sub],
+      });
+    }
+  },
+  clearSelectedSubcategories: () => {
+    set({ selectedSubcategories: [] });
+  },
 
   // Search-related state and actions
   searchResults: { providers: [], services: [], jobs: [] },
@@ -78,9 +102,13 @@ export const providerViewSlice: StateCreator<
     page: number;
     limit: number;
     engine: boolean;
+    featured: boolean;
     searchInput?: string;
     lat?: number;
     long?: number;
+    city?: string;
+    state?: string;
+    country?: string;
     address?: string;
     sortBy?: string;
     categories?: string[];
@@ -92,22 +120,29 @@ export const providerViewSlice: StateCreator<
         page,
         limit,
         engine,
+        featured,
         searchInput,
         lat,
         long,
+        city,
+        state,
+        country,
         address,
         sortBy,
         categories,
       } = params;
-      console.log("Executing search with params:", params);
       const response = await globalSearch({
         model,
         page,
         limit,
         engine,
+        featured,
         searchInput,
         lat: lat?.toString(),
         long: long?.toString(),
+        city,
+        state,
+        country,
         address,
         sortBy,
         categories,

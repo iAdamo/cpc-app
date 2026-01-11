@@ -15,6 +15,7 @@ export const globalSearch = async ({
   sortBy,
   categories,
   featured,
+  city,
   state,
   country,
   radius,
@@ -30,6 +31,7 @@ export const globalSearch = async ({
   sortBy?: string;
   categories?: string[];
   featured?: boolean;
+  city?: string;
   state?: string;
   country?: string;
   radius?: string;
@@ -37,10 +39,12 @@ export const globalSearch = async ({
   providers: ProviderData[];
   services?: ServiceData[];
   jobs?: JobData[];
+  page: number;
   totalPages: number;
   featuredRatio?: number;
 }> => {
   const params: Record<string, any> = {};
+  if (model) params.model = model;
   if (page) params.page = page;
   if (limit) params.limit = limit;
   if (engine) params.engine = engine;
@@ -49,104 +53,17 @@ export const globalSearch = async ({
   if (long) params.long = long;
   if (address) params.address = address;
   if (sortBy) params.sortBy = sortBy;
-  if (categories) params.categories = categories;
+  if (categories && categories.length > 0) {
+    params.subcategories = categories.join(",");
+  }
   if (featured !== undefined) params.featured = featured;
+  if (city) params.city = city;
   if (state) params.state = state;
   if (country) params.country = country;
   if (radius) params.radius = radius;
 
-  const response = await axiosInstance.get(`search/${model}`, { params });
-  return response.data;
-};
+  console.log("Executing search with params:", params);
 
-// New function to get featured providers with location hierarchy
-export const getFeaturedProviders = async ({
-  page = 1,
-  limit = 10,
-  lat,
-  long,
-  radius = "10000", // Default 10km radius
-  state,
-  country,
-}: {
-  page?: number;
-  limit?: number;
-  lat?: string;
-  long?: string;
-  radius?: string;
-  state?: string;
-  country?: string;
-}): Promise<{
-  providers: ProviderData[];
-  totalPages: number;
-  page: number;
-  hasExactResults: boolean;
-  featuredRatio: number;
-}> => {
-  const params: Record<string, any> = {
-    page,
-    limit,
-    featured: true,
-  };
-
-  if (lat) params.lat = lat;
-  if (long) params.long = long;
-  if (radius) params.radius = radius;
-  if (state) params.state = state;
-  if (country) params.country = country;
-
-  const response = await axiosInstance.get(`search/providers/location`, {
-    params,
-  });
-  return response.data;
-};
-
-// Alternative: Use the main search endpoint with featured=true
-export const searchFeaturedProviders = async ({
-  page = 1,
-  limit = 10,
-  lat,
-  long,
-  radius = "10000",
-  state,
-  country,
-  searchInput,
-  sortBy,
-  categories,
-}: {
-  page?: number;
-  limit?: number;
-  lat?: string;
-  long?: string;
-  radius?: string;
-  state?: string;
-  country?: string;
-  searchInput?: string;
-  sortBy?: string;
-  categories?: string[];
-}): Promise<{
-  providers: ProviderData[];
-  services?: ServiceData[];
-  totalPages: number;
-  featuredRatio?: number;
-}> => {
-  const params: Record<string, any> = {
-    model: "providers",
-    page,
-    limit,
-    featured: true,
-    engine: true,
-  };
-
-  if (lat) params.lat = lat;
-  if (long) params.long = long;
-  if (radius) params.radius = radius;
-  if (state) params.state = state;
-  if (country) params.country = country;
-  if (searchInput) params.searchInput = searchInput;
-  if (sortBy) params.sortBy = sortBy;
-  if (categories) params.categories = categories;
-
-  const response = await axiosInstance.get(`search/providers`, { params });
+  const response = await axiosInstance.get("search", { params });
   return response.data;
 };

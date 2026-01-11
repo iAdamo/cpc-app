@@ -105,7 +105,8 @@ const SignUpScreen = () => {
       if (referrerId) {
         data = { ...data, referrerId };
       }
-
+      // const { confirmPassword, ...signUpData } = data;
+      // await signUp(signUpData);
       await signUp(data);
       reset();
       setCurrentStep(3);
